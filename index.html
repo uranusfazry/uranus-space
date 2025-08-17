@@ -283,6 +283,34 @@
             transform: translateY(15px);
             pointer-events: none;
         }
+
+        /* Gaya untuk tombol rentang waktu chart */
+        .range-btn {
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+        .range-btn:hover {
+            background-color: var(--hover-nav-bg);
+            color: var(--text-primary);
+        }
+        .range-btn.active {
+            background-color: var(--primary-brand);
+            color: white;
+            box-shadow: 0 2px 10px rgba(192, 132, 252, 0.4);
+        }
+        body.light-mode .range-btn.active {
+            color: white;
+        }
+
+        /* Gaya untuk wadah chart baru */
+        .chart-container {
+            height: 350px;
+            position: relative;
+        }
     </style>
 </head>
 <body class="gradient-bg">
@@ -303,7 +331,6 @@
         <div id="sidebar" class="sidebar">
             <div class="p-6">
                 <div class="flex items-center justify-between mb-8">
-                    <!-- PERUBAHAN: Memindahkan cursor-pointer ke ikon saja -->
                     <div class="flex items-center space-x-3">
                         <div id="logo-icon" class="w-10 h-10 bg-gradient-to-br from-purple-700 to-purple-900 rounded-full flex items-center justify-center cursor-pointer" title="Masuk Mode Pratinjau">
                             <i class="fas fa-rocket text-lg text-purple-200"></i>
@@ -339,7 +366,17 @@
             <div class="p-6 relative z-10">
                 <!-- Dashboard Section -->
                 <div id="dashboard-section" class="section">
-                    <h2 class="text-3xl font-bold mb-6 text-purple-300">Dashboard</h2>
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <h2 class="text-3xl font-bold text-purple-300">Dashboard</h2>
+                        <div id="master-range-selector" class="flex items-center gap-1 bg-purple-900/30 p-1 rounded-md glass-effect">
+                            <button data-range="7d" class="range-btn active" title="7 Hari">7H</button>
+                            <button data-range="1m" class="range-btn" title="1 Bulan">1B</button>
+                            <button data-range="3m" class="range-btn" title="3 Bulan">3B</button>
+                            <button data-range="1y" class="range-btn" title="1 Tahun">1T</button>
+                            <button data-range="all" class="range-btn" title="Selamanya">∞</button>
+                            <button data-range="custom" class="range-btn" title="Pilih Rentang"><i class="fas fa-calendar-alt"></i></button>
+                        </div>
+                    </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div class="glass-effect p-6 text-center"><h3 class="text-lg font-semibold mb-2 text-pink-400">Saldo Total</h3><p class="text-2xl font-bold" id="totalBalance">Rp 0</p></div>
@@ -349,13 +386,96 @@
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                        <div class="glass-effect p-6"><h3 class="text-xl font-semibold mb-4 text-blue-400">Arus Kas (7 Hari)</h3><canvas id="cashFlowChart"></canvas></div>
-                        <div class="glass-effect p-6"><h3 class="text-xl font-semibold mb-4 text-pink-400">Produktivitas Mingguan</h3><canvas id="productivityChart"></canvas></div>
+                        <div class="glass-effect p-6">
+                            <h3 class="text-xl font-semibold text-blue-400 mb-4">Arus Kas</h3>
+                            <canvas id="cashFlowChart"></canvas>
+                        </div>
+                        <div class="glass-effect p-6">
+                             <h3 class="text-xl font-semibold text-pink-400 mb-4">Produktivitas</h3>
+                            <canvas id="productivityChart"></canvas>
+                        </div>
                     </div>
 
-                    <div class="glass-effect p-6">
+                    <div class="glass-effect p-6 mb-8">
                         <h3 class="text-xl font-semibold mb-4 text-blue-400">Aktivitas Terkini</h3>
                         <div id="recentActivities" class="space-y-2"></div>
+                    </div>
+
+                    <h2 class="text-3xl font-bold mb-6 mt-10 text-purple-300">Analisis Mendalam</h2>
+                    <div class="grid grid-cols-1 gap-6">
+                        <!-- Analisis Gabungan -->
+                        <div class="glass-effect p-6">
+                            <h3 class="text-xl font-semibold mb-4 text-purple-400">Analisis Gabungan Fitur</h3>
+                            <div class="chart-container" style="height: 450px;">
+                                <canvas id="combinedAnalysisChart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Analisis Keuangan -->
+                        <div class="glass-effect p-6">
+                            <h3 class="text-xl font-semibold mb-4 text-blue-400">Analisis Keuangan</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="md:col-span-2">
+                                    <p class="text-md font-medium text-purple-300 mb-2">Pemasukan vs Pengeluaran</p>
+                                    <div class="chart-container h-64">
+                                        <canvas id="incomeVsExpenseChart"></canvas>
+                                    </div>
+                                </div>
+                                <div>
+                                     <p class="text-md font-medium text-purple-300 mb-2">Alokasi Pengeluaran</p>
+                                    <div class="chart-container h-64">
+                                        <canvas id="spendingByCategoryChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analisis Produktivitas -->
+                        <div class="glass-effect p-6">
+                             <h3 class="text-xl font-semibold mb-4 text-pink-400">Analisis Produktivitas</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="md:col-span-2">
+                                    <p class="text-md font-medium text-purple-300 mb-2">Tren Penyelesaian Tugas</p>
+                                    <div class="chart-container h-64">
+                                        <canvas id="taskCompletionTrendChart"></canvas>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-md font-medium text-purple-300 mb-2">Distribusi Prioritas Tugas</p>
+                                    <div class="chart-container h-64">
+                                        <canvas id="taskPriorityDistributionChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analisis Split Bill -->
+                        <div class="glass-effect p-6">
+                            <h3 class="text-xl font-semibold mb-4 text-green-400">Analisis Split Bill</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-md font-medium text-purple-300 mb-2">Total Pengeluaran per Orang</p>
+                                    <div class="chart-container h-64">
+                                        <canvas id="splitBillByUserChart"></canvas>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p class="text-md font-medium text-purple-300 mb-2">Frekuensi Split Bill</p>
+                                    <div class="chart-container h-64">
+                                        <canvas id="splitBillFrequencyChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Analisis Diary -->
+                        <div class="glass-effect p-6">
+                             <h3 class="text-xl font-semibold mb-4 text-blue-400">Analisis Diary</h3>
+                             <p class="text-md font-medium text-purple-300 mb-2">Frekuensi Entri Diary</p>
+                             <div class="chart-container h-72">
+                                <canvas id="diaryEntryFrequencyChart"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -376,11 +496,11 @@
                     </div>
 
                     <div class="glass-effect p-4 mb-6">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                             <input type="text" id="searchTransaction" placeholder="Cari transaksi..." class="custom-input">
                             <select id="categoryFilter" class="custom-input"></select>
                             <select id="typeFilter" class="custom-input"></select>
-                            <input type="month" id="monthFilter" class="custom-input">
+                            <button id="financeDateFilterBtn" class="custom-button"><i class="fas fa-calendar-alt mr-2"></i>Filter Tanggal</button>
                         </div>
                     </div>
 
@@ -433,6 +553,8 @@
                     </div>
                 </div>
 
+                <div id="market-section" class="section hidden"></div>
+
                 <!-- Split Bill Section -->
                 <div id="split-section" class="section hidden">
                     <h2 class="text-3xl font-bold mb-6 text-purple-300">Split Bill</h2>
@@ -443,6 +565,11 @@
                                 <form id="splitBillForm" class="space-y-4">
                                     <div><label class="block text-sm font-medium mb-1">Total Tagihan</label><input type="number" id="totalBill" class="custom-input" required></div>
                                     <div><label class="block text-sm font-medium mb-1">Nama (pisahkan koma)</label><input type="text" id="peopleNames" class="custom-input" placeholder="Zedd, Jett, Omen" required></div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Persentase (opsional, pisahkan koma)</label>
+                                        <input type="text" id="splitPercentages" class="custom-input" placeholder="25, 75">
+                                        <p class="text-xs text-gray-400 mt-1">Kosongkan untuk membagi rata.</p>
+                                    </div>
                                     <button type="submit" class="custom-button w-full">Hitung</button>
                                 </form>
                             </div>
@@ -510,8 +637,8 @@
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Informasi Aplikasi</h3>
                                 <div class="space-y-2 text-sm">
                                     <p><strong>Nama:</strong> LifeHub v3</p>
-                                    <p><strong>Versi:</strong> 3.2.5-logofix</p>
-                                    <p><strong>Fitur:</strong> Keuangan, Rencana, Tugas, Pomodoro, Split Bill, Diary, Custom BG, Preview Mode, Suara Video</p>
+                                    <p><strong>Versi:</strong> 3.15.0-splitbill-percentage</p>
+                                    <p><strong>Fitur:</strong> Split Bill Persentase, Prioritas Warna Kalender, Filter Dasbor Utama, Analisis Gabungan & Individual, Keuangan, Tugas, Pomodoro, Diary, Custom BG, Preview Mode</p>
                                     <p><strong>Storage:</strong> LocalStorage (Data terenkripsi di terminal Anda)</p>
                                 </div>
                             </div>
@@ -534,6 +661,25 @@
             </div>
         </div>
     </div>
+    <div id="dateRangeModal" class="modal">
+        <div class="modal-content glass-effect p-8 w-full max-w-md">
+            <h3 class="text-xl font-semibold mb-6 text-purple-400">Pilih Rentang Tanggal</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="startDate" class="block text-sm font-medium mb-1">Tanggal Mulai</label>
+                    <input type="date" id="startDate" class="custom-input">
+                </div>
+                <div>
+                    <label for="endDate" class="block text-sm font-medium mb-1">Tanggal Selesai</label>
+                    <input type="date" id="endDate" class="custom-input">
+                </div>
+            </div>
+            <div class="flex gap-4 mt-8">
+                <button id="applyDateRange" class="custom-button flex-1">Terapkan</button>
+                <button id="cancelDateRange" class="custom-button custom-button-danger flex-1">Batal</button>
+            </div>
+        </div>
+    </div>
 
 
     <script>
@@ -548,6 +694,11 @@
         let touchStartX = 0;
         let touchEndX = 0;
         let isDragging = false;
+        
+        // State untuk rentang waktu
+        let masterDateRange = '7d';
+
+        let customDateRange = { start: null, end: null };
         
         // --- DATA STORAGE ---
         const storage = {
@@ -594,9 +745,6 @@
 
             document.getElementById('bg-video').muted = appData.isVideoMuted;
             updateVideoSoundUI();
-
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('monthFilter').value = today.substring(0, 7);
             
             switchSection('dashboard');
         }
@@ -608,8 +756,6 @@
             document.getElementById('overlay').addEventListener('click', closeMobileMenu);
             document.getElementById('themeToggle').addEventListener('click', toggleTheme);
             document.getElementById('modeSelect').addEventListener('change', switchMode);
-
-            // PERUBAHAN: Event listener sekarang hanya pada ikon
             document.getElementById('logo-icon').addEventListener('click', enterPreviewMode);
 
             // Finance
@@ -618,7 +764,7 @@
             document.getElementById('searchTransaction').addEventListener('input', filterAndRenderTransactions);
             document.getElementById('categoryFilter').addEventListener('change', filterAndRenderTransactions);
             document.getElementById('typeFilter').addEventListener('change', filterAndRenderTransactions);
-            document.getElementById('monthFilter').addEventListener('change', filterAndRenderTransactions);
+            document.getElementById('financeDateFilterBtn').addEventListener('click', () => showDateRangeModal('finance'));
 
             // Tasks & Plans
             document.getElementById('taskForm').addEventListener('submit', saveTask);
@@ -648,51 +794,43 @@
             document.getElementById('resetBgMediaBtn').addEventListener('click', resetBackgroundMedia);
             document.getElementById('toggleVideoSoundBtn').addEventListener('click', toggleVideoSound);
 
-            // Swipe/Drag Listeners for Exiting Preview Mode
+            // Swipe/Drag Listeners
             document.body.addEventListener('touchstart', handleTouchStart, { passive: true });
             document.body.addEventListener('touchend', handleTouchEnd);
             document.body.addEventListener('mousedown', handleMouseDown);
             document.body.addEventListener('mouseup', handleMouseUp);
+            
+            // Setup untuk Master Filter
+            setupMasterRangeSelector();
+
+            // Event listeners untuk modal rentang tanggal
+            document.getElementById('applyDateRange').addEventListener('click', applyDateRange);
+            document.getElementById('cancelDateRange').addEventListener('click', () => document.getElementById('dateRangeModal').classList.remove('show'));
         }
 
         // --- PREVIEW MODE LOGIC ---
-        function enterPreviewMode() {
-            document.body.classList.add('preview-mode');
-        }
-
+        function enterPreviewMode() { document.body.classList.add('preview-mode'); }
         function handleGestureEnd() {
             const swipeThreshold = 70;
             const deltaX = touchEndX - touchStartX;
-
             if (document.querySelector('.modal.show')) return;
-
             if (deltaX < -swipeThreshold) {
                 document.body.classList.remove('preview-mode');
             }
         }
-
-        function handleTouchStart(e) {
-            touchStartX = e.changedTouches[0].screenX;
-        }
-
-        function handleTouchEnd(e) {
-            touchEndX = e.changedTouches[0].screenX;
-            handleGestureEnd();
-        }
-
+        function handleTouchStart(e) { touchStartX = e.changedTouches[0].screenX; }
+        function handleTouchEnd(e) { touchEndX = e.changedTouches[0].screenX; handleGestureEnd(); }
         function handleMouseDown(e) {
             if (e.button !== 0 || e.target.closest('button, input, select, textarea, a, .modal')) return;
             isDragging = true;
             touchStartX = e.screenX;
         }
-
         function handleMouseUp(e) {
             if (!isDragging) return;
             isDragging = false;
             touchEndX = e.screenX;
             handleGestureEnd();
         }
-
 
         // --- UI, THEME & NAVIGATION ---
         function switchSection(section) {
@@ -731,15 +869,11 @@
 
         function updateThemeUI(isLight) {
             const icon = document.querySelector('#themeToggle i');
-            if (isLight) {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            } else {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            }
+            icon.classList.toggle('fa-sun', !isLight);
+            icon.classList.toggle('fa-moon', isLight);
+            
             if (currentSection === 'dashboard') {
-                updateDashboardCharts();
+                refreshDashboardData();
             }
         }
 
@@ -761,8 +895,13 @@
             document.getElementById('pendingTasks').textContent = pendingTasks;
             document.getElementById('activeMode').textContent = currentMode === 'personal' ? 'Pribadi' : 'Bisnis';
             
-            loadRecentActivities();
+            refreshDashboardData();
+        }
+        
+        function refreshDashboardData() {
             updateDashboardCharts();
+            loadAnalysisCharts();
+            loadRecentActivities();
         }
 
         function loadRecentActivities() {
@@ -770,13 +909,19 @@
             const modeData = appData[currentMode];
             const activities = [];
 
-            [...modeData.transactions].reverse().slice(0, 5).forEach(t => activities.push({ type: 'transaction', icon: t.type === 'income' ? 'fa-arrow-up text-green-500' : 'fa-arrow-down text-pink-500', text: `${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: ${formatCurrency(t.amount)}`, time: t.date }));
-            [...modeData.tasks].reverse().slice(0, 3).forEach(p => activities.push({ type: 'task', icon: 'fa-calendar-check text-blue-500', text: `Tugas: ${p.title}`, time: p.datetime.split('T')[0] }));
-            [...modeData.diaryEntries].reverse().slice(0, 2).forEach(d => activities.push({ type: 'diary', icon: 'fa-book text-purple-500', text: `Diary: ${d.title}`, time: d.date }));
+            const filteredTransactions = filterDataByRange(modeData.transactions, masterDateRange, 'date');
+            const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime');
+            const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date');
+            const filteredDiary = filterDataByRange(modeData.diaryEntries, masterDateRange, 'date');
+
+            filteredTransactions.forEach(t => activities.push({ type: 'transaction', icon: t.type === 'income' ? 'fa-arrow-up text-green-500' : 'fa-arrow-down text-pink-500', text: `${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: ${formatCurrency(t.amount)}`, time: t.date }));
+            filteredTasks.forEach(p => activities.push({ type: 'task', icon: 'fa-calendar-check text-blue-500', text: `Tugas: ${p.title}`, time: p.datetime }));
+            filteredSplits.forEach(s => activities.push({ type: 'split', icon: 'fa-receipt text-green-500', text: `Split Bill: ${formatCurrency(s.totalBill)}`, time: s.date }));
+            filteredDiary.forEach(d => activities.push({ type: 'diary', icon: 'fa-book text-purple-500', text: `Diary: ${d.title}`, time: d.date }));
 
             activities.sort((a, b) => new Date(b.time) - new Date(a.time));
             const container = document.getElementById('recentActivities');
-            container.innerHTML = activities.length > 0 ? activities.slice(0, 10).map(activity => `<div class="flex items-center justify-between p-2 hover:bg-purple-500/10 rounded"><div class="flex items-center"><i class="fas ${activity.icon} mr-3"></i><span>${activity.text}</span></div><span class="text-sm text-gray-400">${formatDate(activity.time)}</span></div>`).join('') : '<p class="text-gray-500">Tidak ada aktivitas terkini.</p>';
+            container.innerHTML = activities.length > 0 ? activities.slice(0, 15).map(activity => `<div class="flex items-center justify-between p-2 hover:bg-purple-500/10 rounded"><div class="flex items-center"><i class="fas ${activity.icon} mr-3"></i><span>${activity.text}</span></div><span class="text-sm text-gray-400">${formatDate(activity.time)}</span></div>`).join('') : '<p class="text-gray-500">Tidak ada aktivitas dalam rentang waktu ini.</p>';
         }
 
         // --- FINANCE ---
@@ -803,12 +948,17 @@
             const search = document.getElementById('searchTransaction').value.toLowerCase();
             const category = document.getElementById('categoryFilter').value;
             const type = document.getElementById('typeFilter').value;
-            const month = document.getElementById('monthFilter').value;
             
             if (search) transactions = transactions.filter(t => t.description.toLowerCase().includes(search));
             if (category) transactions = transactions.filter(t => t.category === category);
             if (type) transactions = transactions.filter(t => t.type === type);
-            if (month) transactions = transactions.filter(t => t.date.startsWith(month));
+            
+            if (customDateRange.start && customDateRange.end) {
+                transactions = transactions.filter(t => {
+                    const tDate = new Date(t.date);
+                    return tDate >= new Date(customDateRange.start) && tDate <= new Date(customDateRange.end);
+                });
+            }
             
             displayTransactions(transactions);
         }
@@ -1005,11 +1155,26 @@
                 const dayTasks = tasks.filter(t => t.datetime && t.datetime.startsWith(dateStr));
                 const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
                 
-                let dayClass = 'text-center p-2 border border-transparent rounded-md transition-colors duration-300';
+                let dayClass = 'text-center p-2 border border-transparent rounded-md transition-colors duration-300 relative';
                 if (isToday) dayClass += ' border-purple-400 bg-purple-500/10';
-                if (dayTasks.length > 0) dayClass += ' relative';
 
-                calendar.innerHTML += `<div class="${dayClass}">${day}${dayTasks.length > 0 ? `<span class="absolute top-1 right-1 h-2 w-2 rounded-full bg-pink-500"></span>` : ''}</div>`;
+                let priorityIndicator = '';
+                if (dayTasks.length > 0) {
+                    const hasHigh = dayTasks.some(t => t.priority === 'high' && !t.completed);
+                    const hasMedium = dayTasks.some(t => t.priority === 'medium' && !t.completed);
+                    const hasLow = dayTasks.some(t => t.priority === 'low' && !t.completed);
+
+                    let indicatorColor = '';
+                    if (hasHigh) indicatorColor = '#f472b6';
+                    else if (hasMedium) indicatorColor = '#fbbf24';
+                    else if (hasLow) indicatorColor = '#4ade80';
+                    
+                    if (indicatorColor) {
+                        priorityIndicator = `<span class="absolute top-1 right-1 h-2 w-2 rounded-full" style="background-color: ${indicatorColor};"></span>`;
+                    }
+                }
+
+                calendar.innerHTML += `<div class="${dayClass}">${day}${priorityIndicator}</div>`;
             }
         }
         
@@ -1038,36 +1203,57 @@
             }, 1000);
         }
 
-        function pauseTimer() {
-            isTimerRunning = false;
-            clearInterval(timerInterval);
-        }
-
-        function resetTimer() {
-            pauseTimer();
-            timerMinutes = 25;
-            timerSeconds = 0;
-            updateTimerDisplay();
-        }
-
-        function updateTimerDisplay() {
-            document.getElementById('timerDisplay').textContent = `${String(timerMinutes).padStart(2, '0')}:${String(timerSeconds).padStart(2, '0')}`;
-        }
+        function pauseTimer() { isTimerRunning = false; clearInterval(timerInterval); }
+        function resetTimer() { pauseTimer(); timerMinutes = 25; timerSeconds = 0; updateTimerDisplay(); }
+        function updateTimerDisplay() { document.getElementById('timerDisplay').textContent = `${String(timerMinutes).padStart(2, '0')}:${String(timerSeconds).padStart(2, '0')}`; }
 
         // --- SPLIT BILL ---
-        function loadSplitPage() {
-            renderSplitHistory();
-        }
+        function loadSplitPage() { renderSplitHistory(); }
 
         function calculateSplitBill(e) {
             e.preventDefault();
             const totalBill = parseFloat(document.getElementById('totalBill').value);
-            const peopleNames = document.getElementById('peopleNames').value.split(',').map(name => name.trim());
+            const peopleNames = document.getElementById('peopleNames').value.split(',').map(name => name.trim()).filter(name => name);
+            const percentagesStr = document.getElementById('splitPercentages').value;
+            const percentages = percentagesStr ? percentagesStr.split(',').map(p => parseFloat(p.trim())) : [];
+
+            if (peopleNames.length === 0) {
+                showMessage('Harap masukkan setidaknya satu nama.', 'error');
+                return;
+            }
+
+            let results;
+
+            if (percentages.length > 0) {
+                if (percentages.length !== peopleNames.length) {
+                    showMessage('Jumlah nama dan persentase harus sama.', 'error');
+                    return;
+                }
+                const totalPercentage = percentages.reduce((sum, p) => sum + p, 0);
+                if (Math.round(totalPercentage) !== 100) {
+                    showMessage(`Total persentase harus 100%, bukan ${totalPercentage}%.`, 'error');
+                    return;
+                }
+                if (percentages.some(isNaN)) {
+                    showMessage('Mohon masukkan persentase yang valid.', 'error');
+                    return;
+                }
+
+                results = peopleNames.map((name, index) => ({
+                    name,
+                    amount: (totalBill * percentages[index]) / 100,
+                    percentage: percentages[index]
+                }));
+
+            } else {
+                const amountPerPerson = totalBill / peopleNames.length;
+                results = peopleNames.map(name => ({
+                    name,
+                    amount: amountPerPerson
+                }));
+            }
             
-            const amountPerPerson = totalBill / peopleNames.length;
-            const results = peopleNames.map(name => ({ name, amount: amountPerPerson }));
-            
-            const splitBill = { id: generateId(), totalBill, results, date: new Date().toISOString().split('T')[0] };
+            const splitBill = { id: generateId(), totalBill, results, date: new Date().toISOString().split('T')[0], type: percentages.length > 0 ? 'custom' : 'equal' };
             let appData = storage.getAppData();
             appData[currentMode].splitBills.push(splitBill);
             storage.saveAppData(appData);
@@ -1079,7 +1265,12 @@
 
         function displaySplitResults(results, totalBill) {
             const resultDiv = document.getElementById('splitResult');
-            resultDiv.innerHTML = `<h4 class="font-bold mb-2">Total: ${formatCurrency(totalBill)}</h4>` + results.map(r => `<div class="flex justify-between p-2 border-b border-purple-900/50"><span>${r.name}</span><strong>${formatCurrency(r.amount)}</strong></div>`).join('');
+            resultDiv.innerHTML = `<h4 class="font-bold mb-2">Total: ${formatCurrency(totalBill)}</h4>` + results.map(r => `
+                <div class="flex justify-between p-2 border-b border-purple-900/50">
+                    <span>${r.name} ${r.percentage ? `(${r.percentage}%)` : ''}</span>
+                    <strong>${formatCurrency(r.amount)}</strong>
+                </div>
+            `).join('');
             document.getElementById('splitResultCard').classList.remove('hidden');
             document.getElementById('exportSplitBtn').onclick = () => exportSplitBillPDF(results, totalBill);
         }
@@ -1093,7 +1284,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <strong class="block text-blue-400">${formatCurrency(split.totalBill)}</strong>
-                            <small class="text-gray-400">${formatDate(split.date)} | ${split.results.length} orang</small>
+                            <small class="text-gray-400">${formatDate(split.date)} | ${split.results.length} orang | <span class="font-semibold ${split.type === 'custom' ? 'text-pink-400' : 'text-green-400'}">${split.type === 'custom' ? 'Kustom' : 'Merata'}</span></small>
                         </div>
                         <button onclick="confirmDeleteSplit('${split.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
                     </div>
@@ -1306,7 +1497,6 @@
             bgImageLayer.style.display = 'none';
         }
 
-        // --- KONTROL SUARA VIDEO ---
         function toggleVideoSound() {
             const video = document.getElementById('bg-video');
             video.muted = !video.muted;
@@ -1432,24 +1622,51 @@
             const ctx = document.getElementById('cashFlowChart')?.getContext('2d');
             if (!ctx) return;
             if (window.cashFlowChartInstance) window.cashFlowChartInstance.destroy();
-            
+
             const colors = getChartColors();
             const appData = storage.getAppData();
-            const transactions = appData[currentMode].transactions;
-            const labels = []; const income = []; const expense = [];
+            let transactions = filterDataByRange(appData[currentMode].transactions, masterDateRange, 'date');
             
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(); date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                labels.push(date.toLocaleDateString('id-ID', { weekday: 'short' }));
-                const dayTx = transactions.filter(t => t.date === dateStr);
-                income.push(dayTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0));
-                expense.push(dayTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0));
-            }
-            
+            const { labels, dataPoints } = getDateRangeAndLabels(masterDateRange, customDateRange, transactions.map(t => ({date: t.date})));
+            const incomeData = new Array(labels.length).fill(0);
+            const expenseData = new Array(labels.length).fill(0);
+
+            transactions.forEach(t => {
+                const tDate = new Date(t.date + 'T00:00:00'); 
+                const dateStr = t.date;
+                const index = dataPoints.findIndex(dp => {
+                    if (dp instanceof Date) { 
+                        const dpEnd = new Date(dp);
+                        if (getGroupingUnit(masterDateRange, customDateRange) === 'week') dpEnd.setDate(dp.getDate() + 7);
+                        else if (getGroupingUnit(masterDateRange, customDateRange) === 'month') dpEnd.setMonth(dp.getMonth() + 1);
+                        return tDate >= dp && tDate < dpEnd;
+                    }
+                    return dp === dateStr; 
+                });
+
+                if (index !== -1) {
+                    if (t.type === 'income') incomeData[index] += t.amount;
+                    else expenseData[index] += t.amount;
+                }
+            });
+
             window.cashFlowChartInstance = new Chart(ctx, {
-                type: 'line', data: { labels, datasets: [{ label: 'Pemasukan', data: income, borderColor: colors.incomeColor, backgroundColor: colors.incomeBg, tension: 0.3, fill: true }, { label: 'Pengeluaran', data: expense, borderColor: colors.expenseColor, backgroundColor: colors.expenseBg, tension: 0.3, fill: true }] },
-                options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } } }, plugins: { legend: { labels: { color: colors.legendColor } } } }
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        { label: 'Pemasukan', data: incomeData, borderColor: colors.incomeColor, backgroundColor: colors.incomeBg, tension: 0.3, fill: true },
+                        { label: 'Pengeluaran', data: expenseData, borderColor: colors.expenseColor, backgroundColor: colors.expenseBg, tension: 0.3, fill: true }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } },
+                        x: { grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } }
+                    },
+                    plugins: { legend: { labels: { color: colors.legendColor } } }
+                }
             });
         }
 
@@ -1457,29 +1674,364 @@
             const ctx = document.getElementById('productivityChart')?.getContext('2d');
             if (!ctx) return;
             if (window.productivityChartInstance) window.productivityChartInstance.destroy();
-            
+
             const colors = getChartColors();
             const appData = storage.getAppData();
-            const tasks = appData[currentMode].tasks;
-            const labels = []; const completedCounts = [];
+            const tasks = filterDataByRange(appData[currentMode].tasks, masterDateRange, 'datetime');
+
+            const { labels, dataPoints } = getDateRangeAndLabels(masterDateRange, customDateRange, tasks.map(t => ({date: t.datetime})));
+            const completedCounts = new Array(labels.length).fill(0);
             
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(); date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                labels.push(date.toLocaleDateString('id-ID', { weekday: 'short' }));
-                completedCounts.push(tasks.filter(p => p.datetime && p.datetime.startsWith(dateStr) && p.completed).length);
-            }
-            
+            tasks.filter(t => t.completed && t.datetime).forEach(t => {
+                const tDate = new Date(t.datetime);
+                const dateStr = t.datetime.split('T')[0];
+                const index = dataPoints.findIndex(dp => {
+                     if (dp instanceof Date) {
+                        const dpEnd = new Date(dp);
+                        if (getGroupingUnit(masterDateRange, customDateRange) === 'week') dpEnd.setDate(dp.getDate() + 7);
+                        else if (getGroupingUnit(masterDateRange, customDateRange) === 'month') dpEnd.setMonth(dp.getMonth() + 1);
+                        return tDate >= dp && tDate < dpEnd;
+                    }
+                    return dp === dateStr;
+                });
+
+                if (index !== -1) completedCounts[index]++;
+            });
+
             window.productivityChartInstance = new Chart(ctx, {
-                type: 'bar', data: { labels, datasets: [{ label: 'Tugas Selesai', data: completedCounts, backgroundColor: colors.taskBg, borderColor: colors.taskColor, borderWidth: 1, borderRadius: 5 }] },
-                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: colors.tickColor }, grid: { color: colors.gridColor } }, x: { ticks: { color: colors.tickColor }, grid: { color: colors.gridColor } } }, plugins: { legend: { labels: { color: colors.legendColor } } } }
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Tugas Selesai',
+                        data: completedCounts,
+                        backgroundColor: colors.taskBg,
+                        borderColor: colors.taskColor,
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, color: colors.tickColor }, grid: { color: colors.gridColor } },
+                        x: { ticks: { color: colors.tickColor }, grid: { color: colors.gridColor } }
+                    },
+                    plugins: { legend: { labels: { color: colors.legendColor } } }
+                }
             });
         }
 
+        // --- FUNGSI UNTUK HALAMAN ANALISIS DATA ---
+        function loadAnalysisCharts() {
+            const appData = storage.getAppData();
+            const modeData = appData[currentMode];
+            const colors = getChartColors();
+
+            Chart.defaults.color = colors.legendColor;
+            Chart.defaults.font.family = "'Poppins', 'sans-serif'";
+
+            const chartIds = ['combinedAnalysisChart', 'incomeVsExpenseChart', 'spendingByCategoryChart', 'taskCompletionTrendChart', 'taskPriorityDistributionChart', 'splitBillByUserChart', 'splitBillFrequencyChart', 'diaryEntryFrequencyChart'];
+            chartIds.forEach(id => {
+                if (window[id + 'Instance']) window[id + 'Instance'].destroy();
+            });
+            
+            // 1. Analisis Gabungan
+            const filteredPersonalTransactions = filterDataByRange(appData.personal.transactions, masterDateRange, 'date');
+            const filteredPersonalTasks = filterDataByRange(appData.personal.tasks, masterDateRange, 'datetime');
+            const filteredPersonalSplits = filterDataByRange(appData.personal.splitBills, masterDateRange, 'date');
+            const filteredPersonalDiary = filterDataByRange(appData.personal.diaryEntries, masterDateRange, 'date');
+            
+            const filteredBusinessTransactions = filterDataByRange(appData.business.transactions, masterDateRange, 'date');
+            const filteredBusinessTasks = filterDataByRange(appData.business.tasks, masterDateRange, 'datetime');
+            const filteredBusinessSplits = filterDataByRange(appData.business.splitBills, masterDateRange, 'date');
+            const filteredBusinessDiary = filterDataByRange(appData.business.diaryEntries, masterDateRange, 'date');
+
+            const personalData = {
+                finance: filteredPersonalTransactions.length, tasks: filteredPersonalTasks.length,
+                splitBill: filteredPersonalSplits.length, diary: filteredPersonalDiary.length,
+            };
+            const businessData = {
+                finance: filteredBusinessTransactions.length, tasks: filteredBusinessTasks.length,
+                splitBill: filteredBusinessSplits.length, diary: filteredBusinessDiary.length,
+            };
+
+            const combinedCtx = document.getElementById('combinedAnalysisChart').getContext('2d');
+            window.combinedAnalysisChartInstance = new Chart(combinedCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Keuangan', 'Tugas', 'Split Bill', 'Diary'],
+                    datasets: [
+                        { label: 'Pribadi', data: [personalData.finance, personalData.tasks, personalData.splitBill, personalData.diary], backgroundColor: 'rgba(0, 136, 255, 0.2)', borderColor: '#0088ff', borderWidth: 2, pointBackgroundColor: '#0088ff', pointRadius: 4, },
+                        { label: 'Bisnis', data: [businessData.finance, businessData.tasks, businessData.splitBill, businessData.diary], backgroundColor: 'rgba(255, 0, 110, 0.2)', borderColor: '#ff006e', borderWidth: 2, pointBackgroundColor: '#ff006e', pointRadius: 4, }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { size: 14 } } } },
+                    scales: { r: { angleLines: { color: colors.gridColor }, grid: { color: colors.gridColor }, pointLabels: { font: { size: 14, weight: '600' }, color: colors.tickColor }, ticks: { backdropColor: 'rgba(0,0,0,0.5)', color: colors.tickColor, stepSize: 5 }, suggestedMin: 0 } }
+                }
+            });
+
+            // 2. Analisis Keuangan
+            const filteredFinance = filterDataByRange(modeData.transactions, masterDateRange, 'date');
+            const incomeVsExpenseCtx = document.getElementById('incomeVsExpenseChart').getContext('2d');
+            const { labels: monthLabels, data: financialData } = processMonthlyFinancials(filteredFinance, masterDateRange);
+            window.incomeVsExpenseChartInstance = new Chart(incomeVsExpenseCtx, {
+                type: 'bar', data: { labels: monthLabels, datasets: [ { label: 'Pemasukan', data: financialData.income, backgroundColor: 'rgba(74, 222, 128, 0.7)' }, { label: 'Pengeluaran', data: financialData.expense, backgroundColor: 'rgba(244, 114, 182, 0.7)' } ] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: { color: colors.gridColor } } } }
+            });
+
+            const spendingCtx = document.getElementById('spendingByCategoryChart').getContext('2d');
+            const { labels: categoryLabels, data: spendingData } = processSpendingByCategory(filteredFinance);
+            window.spendingByCategoryChartInstance = new Chart(spendingCtx, {
+                type: 'doughnut', data: { labels: categoryLabels, datasets: [{ data: spendingData, backgroundColor: ['#f472b6', '#60a5fa', '#fbbf24', '#4ade80', '#c084fc', '#a1a1aa', '#f87171', '#818cf8'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // 3. Analisis Produktivitas
+            const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime');
+            const taskTrendCtx = document.getElementById('taskCompletionTrendChart').getContext('2d');
+            const { labels: taskMonthLabels, data: taskData } = processMonthlyTasks(filteredTasks, masterDateRange);
+            window.taskCompletionTrendChartInstance = new Chart(taskTrendCtx, {
+                type: 'line', data: { labels: taskMonthLabels, datasets: [ { label: 'Dibuat', data: taskData.created, borderColor: '#60a5fa', tension: 0.3 }, { label: 'Selesai', data: taskData.completed, borderColor: '#4ade80', tension: 0.3 } ] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } }
+            });
+
+            const taskPriorityCtx = document.getElementById('taskPriorityDistributionChart').getContext('2d');
+            const { labels: priorityLabels, data: priorityData } = processTaskPriorities(filteredTasks);
+            window.taskPriorityDistributionChartInstance = new Chart(taskPriorityCtx, {
+                type: 'pie', data: { labels: priorityLabels, datasets: [{ data: priorityData, backgroundColor: ['#f472b6', '#fbbf24', '#4ade80'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // 4. Analisis Split Bill
+            const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date');
+            const splitByUserCtx = document.getElementById('splitBillByUserChart').getContext('2d');
+            const { labels: userLabels, data: userSpendingData } = processSplitBillByUser(filteredSplits);
+            window.splitBillByUserChartInstance = new Chart(splitByUserCtx, {
+                type: 'bar', data: { labels: userLabels, datasets: [{ label: 'Total Pengeluaran', data: userSpendingData, backgroundColor: 'rgba(74, 222, 128, 0.7)', borderRadius: 5 }] },
+                options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { grid: { color: colors.gridColor } }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } }
+            });
+
+            const splitFreqCtx = document.getElementById('splitBillFrequencyChart').getContext('2d');
+            const { labels: splitMonthLabels, data: splitFreqData } = processSplitBillFrequency(filteredSplits, masterDateRange);
+            window.splitBillFrequencyChartInstance = new Chart(splitFreqCtx, {
+                type: 'line', data: { labels: splitMonthLabels, datasets: [{ label: 'Jumlah Split Bill', data: splitFreqData, borderColor: '#22d3ee', tension: 0.3, fill: true, backgroundColor: 'rgba(34, 211, 238, 0.2)' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } }
+            });
+
+            // 5. Analisis Diary
+            const filteredDiary = filterDataByRange(modeData.diaryEntries, masterDateRange, 'date');
+            const diaryCtx = document.getElementById('diaryEntryFrequencyChart').getContext('2d');
+            const { labels: diaryMonthLabels, data: diaryData } = processMonthlyDiaryEntries(filteredDiary, masterDateRange);
+            window.diaryEntryFrequencyChartInstance = new Chart(diaryCtx, {
+                type: 'bar', data: { labels: diaryMonthLabels, datasets: [{ label: 'Jumlah Entri', data: diaryData, backgroundColor: 'rgba(192, 132, 252, 0.7)', borderRadius: 5 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } }
+            });
+        }
+
+        // --- FUNGSI PEMROSESAN DATA UNTUK ANALISIS ---
+        function processMonthlyFinancials(transactions, range) {
+            const { labels, dataPoints } = getDateRangeAndLabels(range, customDateRange, transactions.map(t => ({date: t.date})));
+            const income = new Array(labels.length).fill(0);
+            const expense = new Array(labels.length).fill(0);
+            
+            transactions.forEach(t => {
+                const tDate = new Date(t.date);
+                const index = dataPoints.findIndex(dp => tDate >= dp && tDate < new Date(dp).setMonth(dp.getMonth()+1));
+                if(index > -1) {
+                    if (t.type === 'income') income[index] += t.amount;
+                    else expense[index] += t.amount;
+                }
+            });
+            return { labels, data: { income, expense } };
+        }
+
+        function processSpendingByCategory(transactions) {
+            const spending = {};
+            transactions.filter(t => t.type === 'expense').forEach(t => {
+                const categoryName = getCategoryName(t.category);
+                spending[categoryName] = (spending[categoryName] || 0) + t.amount;
+            });
+            const sortedSpending = Object.entries(spending).sort(([,a],[,b]) => b-a);
+            return {
+                labels: sortedSpending.map(([label]) => label),
+                data: sortedSpending.map(([,data]) => data)
+            };
+        }
+
+        function processMonthlyTasks(tasks, range) {
+            const { labels, dataPoints } = getDateRangeAndLabels(range, customDateRange, tasks.map(t => ({date: t.datetime})));
+            const created = new Array(labels.length).fill(0);
+            const completed = new Array(labels.length).fill(0);
+
+            tasks.forEach(t => {
+                if(!t.datetime) return;
+                const tDate = new Date(t.datetime);
+                const index = dataPoints.findIndex(dp => tDate >= dp && tDate < new Date(dp).setMonth(dp.getMonth()+1));
+                if (index > -1) {
+                    created[index]++;
+                    if (t.completed) completed[index]++;
+                }
+            });
+            return { labels, data: { created, completed } };
+        }
+
+        function processTaskPriorities(tasks) {
+            const priorities = { high: 0, medium: 0, low: 0 };
+            tasks.filter(t => !t.completed).forEach(t => {
+                priorities[t.priority]++;
+            });
+            return {
+                labels: ['Tinggi', 'Sedang', 'Rendah'],
+                data: [priorities.high, priorities.medium, priorities.low]
+            };
+        }
+        
+        function processMonthlyDiaryEntries(entries, range) {
+             const { labels, dataPoints } = getDateRangeAndLabels(range, customDateRange, entries.map(e => ({date: e.date})));
+            const data = new Array(labels.length).fill(0);
+            entries.forEach(e => {
+                const eDate = new Date(e.date);
+                const index = dataPoints.findIndex(dp => eDate >= dp && eDate < new Date(dp).setMonth(dp.getMonth()+1));
+                if (index > -1) data[index]++;
+            });
+            return { labels, data };
+        }
+
+        function processSplitBillByUser(splitBills) {
+            const userTotals = {};
+            splitBills.forEach(bill => {
+                bill.results.forEach(person => {
+                    userTotals[person.name] = (userTotals[person.name] || 0) + person.amount;
+                });
+            });
+            const sortedUsers = Object.entries(userTotals).sort(([,a],[,b]) => b-a);
+            return {
+                labels: sortedUsers.map(([label]) => label),
+                data: sortedUsers.map(([,data]) => data)
+            };
+        }
+
+        function processSplitBillFrequency(splitBills, range) {
+            const { labels, dataPoints } = getDateRangeAndLabels(range, customDateRange, splitBills.map(s => ({date: s.date})));
+            const data = new Array(labels.length).fill(0);
+
+            splitBills.forEach(bill => {
+                const billDate = new Date(bill.date);
+                const index = dataPoints.findIndex(dp => billDate >= dp && billDate < new Date(dp).setMonth(dp.getMonth()+1));
+                if (index > -1) data[index]++;
+            });
+            return { labels, data };
+        }
+
+
         // --- UTILITY & HELPER FUNCTIONS ---
+        function getGroupingUnit(range, customRange) {
+            const currentRange = (typeof range === 'object' && range.type === 'custom') ? range : { type: 'preset', value: range };
+            
+            if (currentRange.type === 'custom') {
+                const diffTime = Math.abs(new Date(currentRange.end) - new Date(currentRange.start));
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays > 90) return 'month';
+                if (diffDays > 30) return 'week';
+                return 'day';
+            }
+            if (['7d', '1m'].includes(currentRange.value)) return 'day';
+            if (currentRange.value === '3m') return 'week';
+            if (['1y', 'all', '6m'].includes(currentRange.value)) return 'month';
+        }
+
+        function getDateRangeAndLabels(range, customRange, data) {
+            const labels = [];
+            const dataPoints = [];
+            const now = new Date();
+            now.setHours(23, 59, 59, 999);
+            
+            const currentRange = (typeof range === 'object' && range.type === 'custom') ? range : { type: 'preset', value: range };
+
+            if (currentRange.type === 'custom') {
+                const start = new Date(currentRange.start);
+                const end = new Date(currentRange.end);
+                const unit = getGroupingUnit(range, customRange);
+                let current = new Date(start);
+
+                if (unit === 'day') {
+                    while (current <= end) {
+                        labels.push(current.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }));
+                        dataPoints.push(current.toISOString().split('T')[0]);
+                        current.setDate(current.getDate() + 1);
+                    }
+                } else if (unit === 'week') {
+                     while (current <= end) {
+                        labels.push(`W${getWeekNumber(current)}`);
+                        dataPoints.push(new Date(current));
+                        current.setDate(current.getDate() + 7);
+                    }
+                } else if (unit === 'month') {
+                    current = new Date(start.getFullYear(), start.getMonth(), 1);
+                    while (current <= end) {
+                        labels.push(current.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }));
+                        dataPoints.push(new Date(current));
+                        current.setMonth(current.getMonth() + 1);
+                    }
+                }
+                return { labels, dataPoints };
+            }
+
+            switch (currentRange.value) {
+                case '7d':
+                    for (let i = 6; i >= 0; i--) {
+                        const date = new Date(); date.setDate(now.getDate() - i);
+                        labels.push(date.toLocaleDateString('id-ID', { weekday: 'short' }));
+                        dataPoints.push(date.toISOString().split('T')[0]);
+                    }
+                    return { labels, dataPoints };
+
+                case '1m':
+                    for (let i = 29; i >= 0; i--) {
+                        const date = new Date(); date.setDate(now.getDate() - i);
+                        labels.push(date.toLocaleDateString('id-ID', { day: 'numeric' }));
+                        dataPoints.push(date.toISOString().split('T')[0]);
+                    }
+                    return { labels, dataPoints };
+
+                case '3m':
+                case '6m':
+                case '1y':
+                case 'all':
+                    const months = {'3m': 3, '6m': 6, '1y': 12};
+                    let firstDate = new Date();
+                    if(currentRange.value === 'all') {
+                        const validData = data.filter(d => d.date);
+                        if(validData.length === 0) firstDate = new Date();
+                        else firstDate = new Date(validData.reduce((min, p) => (p.date && p.date < min) ? p.date : min, validData[0].date));
+                    } else {
+                        firstDate.setMonth(now.getMonth() - (months[currentRange.value]));
+                    }
+                    
+                    let currentDateIter = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+                    while (currentDateIter <= now) {
+                        labels.push(currentDateIter.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }));
+                        dataPoints.push(new Date(currentDateIter));
+                        currentDateIter.setMonth(currentDateIter.getMonth() + 1);
+                    }
+                    return { labels, dataPoints };
+            }
+        }
+
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return weekNo;
+        }
+
         function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
         function formatCurrency(amount) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount); }
-        function formatDate(dateString) { return dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : ''; }
+        function formatDate(dateString) { return dateString ? new Date(dateString + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : ''; }
         function formatDateTime(dateString) { return dateString ? new Date(dateString).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : ''; }
         function getTransactionIcon(category) { const icons = { food: 'fa-utensils', transport: 'fa-car', entertainment: 'fa-gamepad', shopping: 'fa-shopping-bag', bills: 'fa-file-invoice', salary: 'fa-money-bill-wave', business: 'fa-briefcase', investment: 'fa-chart-line', other: 'fa-question' }; return icons[category] || 'fa-question'; }
         function getCategoryName(category = null) { const names = { food: 'Makanan', transport: 'Transport', entertainment: 'Hiburan', shopping: 'Belanja', bills: 'Tagihan', salary: 'Gaji', business: 'Bisnis', investment: 'Investasi', other: 'Lainnya' }; return category ? names[category] : names; }
@@ -1504,15 +2056,8 @@
             const yesBtn = document.getElementById('confirmYes');
             const noBtn = document.getElementById('confirmNo');
 
-            const yesHandler = () => {
-                onConfirm();
-                closeModal();
-                cleanup();
-            };
-            const noHandler = () => {
-                closeModal();
-                cleanup();
-            };
+            const yesHandler = () => { onConfirm(); closeModal(); cleanup(); };
+            const noHandler = () => { closeModal(); cleanup(); };
             const cleanup = () => {
                 yesBtn.removeEventListener('click', yesHandler);
                 noBtn.removeEventListener('click', noHandler);
@@ -1524,30 +2069,94 @@
 
         function showMessage(message, type = 'info') {
             const isLight = document.body.classList.contains('light-mode');
-            const colors = {
-                info: '#60a5fa',
-                success: '#4ade80',
-                error: '#f472b6'
-            };
+            const colors = { info: '#60a5fa', success: '#4ade80', error: '#f472b6' };
             const msgDiv = document.createElement('div');
-            msgDiv.style.position = 'fixed';
-            msgDiv.style.bottom = '20px';
-            msgDiv.style.right = '20px';
-            msgDiv.style.padding = '15px';
-            msgDiv.style.backgroundColor = isLight ? '#ffffff' : 'rgba(15, 10, 32, 0.8)';
-            msgDiv.style.backdropFilter = 'blur(10px)';
-            msgDiv.style.color = colors[type];
-            msgDiv.style.border = `1px solid ${colors[type]}`;
-            msgDiv.style.borderRadius = '8px';
-            msgDiv.style.boxShadow = `0 4px 15px rgba(0,0,0,0.1)`;
-            msgDiv.style.zIndex = '9999';
-            msgDiv.style.transition = 'opacity 0.5s';
+            Object.assign(msgDiv.style, {
+                position: 'fixed', bottom: '20px', right: '20px', padding: '15px',
+                backgroundColor: isLight ? '#ffffff' : 'rgba(15, 10, 32, 0.8)',
+                backdropFilter: 'blur(10px)', color: colors[type], border: `1px solid ${colors[type]}`,
+                borderRadius: '8px', boxShadow: `0 4px 15px rgba(0,0,0,0.1)`, zIndex: '9999',
+                transition: 'opacity 0.5s'
+            });
             msgDiv.textContent = message;
             document.body.appendChild(msgDiv);
             setTimeout(() => {
                 msgDiv.style.opacity = '0';
                 setTimeout(() => msgDiv.remove(), 500);
             }, 3000);
+        }
+
+        function showDateRangeModal() {
+            document.getElementById('dateRangeModal').classList.add('show');
+        }
+
+        function applyDateRange() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                showMessage('Harap pilih tanggal mulai dan selesai.', 'error');
+                return;
+            }
+            if (new Date(startDate) > new Date(endDate)) {
+                showMessage('Tanggal mulai tidak boleh setelah tanggal selesai.', 'error');
+                return;
+            }
+
+            const rangeObject = { type: 'custom', start: startDate, end: endDate };
+            masterDateRange = rangeObject;
+            updateActiveButton('master-range-selector', 'custom');
+            refreshDashboardData();
+            
+            document.getElementById('dateRangeModal').classList.remove('show');
+        }
+
+        function setupMasterRangeSelector() {
+            document.querySelectorAll('#master-range-selector .range-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const range = e.currentTarget.dataset.range;
+                    if (range === 'custom') {
+                        showDateRangeModal();
+                    } else {
+                        updateActiveButton('master-range-selector', range);
+                        masterDateRange = range;
+                        customDateRange = {}; 
+                        refreshDashboardData();
+                    }
+                });
+            });
+        }
+
+        function updateActiveButton(selectorId, activeRange) {
+            document.querySelectorAll(`#${selectorId} .range-btn`).forEach(b => b.classList.remove('active'));
+            document.querySelector(`#${selectorId} .range-btn[data-range="${activeRange}"]`).classList.add('active');
+        }
+
+        function filterDataByRange(data, range, dateKey) {
+            const currentRange = (typeof range === 'object' && range.type === 'custom') ? range : { type: 'preset', value: range };
+
+            if (currentRange.value === 'all') return data;
+            
+            let startDate;
+            if(currentRange.type === 'custom') {
+                startDate = new Date(currentRange.start);
+            } else {
+                const now = new Date();
+                startDate = new Date();
+                if (currentRange.value === '7d') startDate.setDate(now.getDate() - 7);
+                else if (currentRange.value === '1m') startDate.setMonth(now.getMonth() - 1);
+                else if (currentRange.value === '3m') startDate.setMonth(now.getMonth() - 3);
+                else if (currentRange.value === '6m') startDate.setMonth(now.getMonth() - 6);
+                else if (currentRange.value === '1y') startDate.setFullYear(now.getFullYear() - 1);
+            }
+            
+            const endDate = (currentRange.type === 'custom') ? new Date(currentRange.end) : new Date();
+
+            return data.filter(item => {
+                if (!item[dateKey]) return false;
+                const itemDate = new Date(item[dateKey]);
+                return itemDate >= startDate && itemDate <= endDate;
+            });
         }
 
     </script>
