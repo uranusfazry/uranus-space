@@ -806,7 +806,7 @@
                     </div>
                 </div>
                 
-                      <!-- Settings Section -->
+                         <!-- Settings Section -->
                 <div id="settings-section" class="section hidden">
                     <h2 class="text-3xl font-bold mb-6 text-purple-300">Pengaturan</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -824,7 +824,15 @@
                                 <!-- ================================== -->
                                 <!-- BAGIAN INTEGRASI GOOGLE DRIVE      -->
                                 <!-- ================================== -->
-                                <h4 class="text-lg font-semibold text-purple-300 pt-2">Sinkronisasi Google Drive</h4>
+                                <h4 class="text-lg font-semibold text-purple-300 pt-2">Profil & Sinkronisasi Google Drive</h4>
+                                
+                                <!-- User Profile Section (Initially Hidden) -->
+                                <div id="user-profile" class="hidden mb-6 text-center border-b border-purple-500/20 pb-6">
+                                    <img id="user-picture" class="w-20 h-20 rounded-full mx-auto mb-3 border-2 border-purple-400" alt="Foto Profil">
+                                    <p class="text-lg font-semibold text-purple-200" id="user-name"></p>
+                                    <p class="text-sm text-gray-400" id="user-email"></p>
+                                </div>
+
                                 <div id="google-drive-ui" class="space-y-3">
                                     <button id="auth-button" class="custom-button w-full" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"><i class="fab fa-google mr-2"></i><span>Hubungkan ke Google</span></button>
                                     <button id="backup-button" class="custom-button w-full" disabled><i class="fab fa-google-drive mr-2"></i>Backup Data ke Drive</button>
@@ -2030,8 +2038,8 @@
             document.getElementById('splitBillForm').reset();
             document.getElementById('splitBillDate').value = new Date().toISOString().split('T')[0];
         }
-
-        function displaySplitResults(results, totalBill, date) {
+        
+                function displaySplitResults(results, totalBill, date) {
             const resultDiv = document.getElementById('splitResult');
             resultDiv.innerHTML = `<h4 class="font-bold mb-2">Total: ${formatCurrency(totalBill)}</h4>` + results.map(r => `
                 <div class="flex justify-between p-2 border-b border-purple-900/50">
@@ -3007,3 +3015,4 @@
     </script>
 </body>
 </html>
+
