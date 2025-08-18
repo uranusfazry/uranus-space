@@ -19,6 +19,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <!-- Memuat html2canvas untuk konversi HTML ke gambar (diperlukan untuk PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Memuat Google API Client Library -->
+    <script src="https://apis.google.com/js/api.js"></script>
 
 
     <!-- Gaya Kustom -->
@@ -138,15 +141,6 @@
         }
         .custom-button-danger:hover {
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
-        }
-        .google-button {
-            background: #ffffff;
-            color: #1f2937;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        .google-button:hover {
-            background: #f9fafb;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
 
         .nav-item {
@@ -810,38 +804,10 @@
                     </div>
                 </div>
                 
-                <!-- Settings Section -->
+                      <!-- Settings Section -->
                 <div id="settings-section" class="section hidden">
                     <h2 class="text-3xl font-bold mb-6 text-purple-300">Pengaturan</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        
-                        <div class="glass-effect p-6">
-                            <h3 class="text-xl font-semibold mb-4 text-green-400">Integrasi Akun Google</h3>
-                            <div id="auth-container" class="space-y-4">
-                                <!-- Konten ini akan diisi oleh JavaScript berdasarkan status login -->
-                                <div id="user-info" class="hidden items-center space-x-4">
-                                    <img id="user-avatar" src="" alt="User Avatar" class="w-16 h-16 rounded-full">
-                                    <div>
-                                        <p id="user-name" class="font-semibold text-lg"></p>
-                                        <p id="user-email" class="text-sm text-gray-400"></p>
-                                    </div>
-                                </div>
-                                
-                                <div id="logged-in-actions" class="hidden space-y-2">
-                                    <button id="fetch-drive-btn" class="custom-button w-full" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"><i class="fab fa-google-drive mr-2"></i>Lihat File Drive</button>
-                                    <button id="logout-btn" class="custom-button custom-button-danger w-full">Logout</button>
-                                </div>
-                                
-                                <div id="logged-out-view">
-                                    <p class="text-gray-400 mb-4">Hubungkan akun Google Anda untuk backup data dan mengakses Google Drive.</p>
-                                    <button id="login-btn" class="custom-button google-button w-full flex items-center justify-center">
-                                        <svg class="w-5 h-5 mr-3" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.99,36.62,44,30.638,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
-                                        Login dengan Google
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="glass-effect p-6">
                             <h3 class="text-xl font-semibold mb-4 text-blue-400">Backup & Restore</h3>
                             <div class="space-y-4">
@@ -851,7 +817,16 @@
                                     <input type="file" id="restoreFile" accept=".txt" class="custom-input">
                                     <button id="restoreData" class="custom-button custom-button-danger w-full mt-2"><i class="fas fa-upload mr-2"></i>Restore Data</button>
                                 </div>
-                                <button id="clearAllData" class="custom-button custom-button-danger w-full"><i class="fas fa-trash mr-2"></i>Hapus Semua Data</button>
+                                <hr class="border-purple-500/20">
+                                <!-- Google Drive Integration -->
+                                <h4 class="text-lg font-semibold text-purple-300 pt-2">Google Drive</h4>
+                                <button id="loginBtn" class="custom-button w-full" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"><i class="fab fa-google mr-2"></i>Login with Google</button>
+                                <button id="backupBtn" class="custom-button w-full" disabled><i class="fab fa-google-drive mr-2"></i>Backup Data to Drive</button>
+                                <div id="status" class="text-center text-sm text-gray-400">Not logged in</div>
+                                <div id="fileList" class="text-xs text-gray-500"></div>
+                                <!-- End Google Drive Integration -->
+                                <hr class="border-purple-500/20">
+                                <button id="clearAllData" class="custom-button custom-button-danger w-full mt-4"><i class="fas fa-trash mr-2"></i>Hapus Semua Data</button>
                             </div>
                         </div>
                         
@@ -874,8 +849,8 @@
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Informasi Aplikasi</h3>
                                 <div class="space-y-2 text-sm">
                                     <p><strong>Nama:</strong> LifeHub v4</p>
-                                    <p><strong>Versi:</strong> 4.7.0-TikTok-Embed</p>
-                                    <p><strong>Fitur:</strong> Editor Teks Modern, TikTok & YouTube Embed, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Custom BG, Preview Mode</p>
+                                    <p><strong>Versi:</strong> 4.8.0-Google-Drive</p>
+                                    <p><strong>Fitur:</strong> Editor Teks Modern, TikTok & YouTube Embed, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Custom BG, Preview Mode, Google Drive Backup</p>
                                     <p><strong>Storage:</strong> LocalStorage (Data terenkripsi di terminal Anda)</p>
                                 </div>
                             </div>
@@ -974,6 +949,7 @@
                     editorToolbar: document.querySelector('#diaryEditorSection .editor-toolbar'),
                     editorContent: document.getElementById('editorContent'),
                     embedYouTubeBtn: document.getElementById('diaryEmbedYouTubeBtn'),
+                    // PERUBAHAN: Cache elemen tombol TikTok
                     embedTikTokBtn: document.getElementById('diaryEmbedTikTokBtn'),
                     uploadFileBtn: document.getElementById('diaryUploadFileBtn'),
                     fileUpload: document.getElementById('diaryFileUpload'),
@@ -1014,6 +990,7 @@
                 this.dom.formatBlockSelect.addEventListener('change', (e) => this.formatText('formatBlock', e.target.value));
 
                 this.dom.embedYouTubeBtn.addEventListener('click', () => this.embedYouTube());
+                // PERUBAHAN: Tambahkan event listener untuk tombol TikTok
                 this.dom.embedTikTokBtn.addEventListener('click', () => this.embedTikTok());
 
                 this.dom.uploadFileBtn.addEventListener('click', () => this.dom.fileUpload.click());
@@ -1147,15 +1124,18 @@
                 }
             }
 
+            // PERUBAHAN: Fungsi baru untuk menyematkan video TikTok
             embedTikTok() {
                 const url = prompt("Masukkan URL video TikTok:");
                 if (!url) return;
 
+                // Regex untuk mengekstrak ID video dari berbagai format URL TikTok
                 const regex = /tiktok\.com\/.*\/video\/(\d+)/;
                 const match = url.match(regex);
                 const videoId = match && match[1] ? match[1] : null;
 
                 if (videoId) {
+                    // Membuat iframe yang responsif
                     const embedHTML = `
                         <div style="position: relative; padding-bottom: 177.78%; /* Aspect Ratio 9:16 untuk video vertikal */ height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                             <iframe 
@@ -1190,6 +1170,7 @@
                     } else if (file.type === 'application/pdf') {
                         elementHTML = `<embed src="${result}" type="application/pdf" width="100%" height="500px" style="border-radius: 8px; margin: 1rem 0;" />`;
                     } else if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) {
+                        // Untuk file teks, kita sisipkan sebagai blok kode yang bisa diedit
                         const escapedText = result.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                         elementHTML = `<pre style="background: rgba(0,0,0,0.2); border: 1px solid var(--input-border); padding: 1rem; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"><code>${escapedText}</code></pre>`;
                     } else {
@@ -1509,6 +1490,18 @@
         };
 
         // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            
+            // Inisialisasi DiaryApp
+            const diaryApp = new DiaryApp();
+            diaryApp.init();
+
+            // Inisialisasi Google API Client
+            initGoogleClient();
+        });
+
         function initializeApp() {
             const appData = storage.getAppData();
             currentMode = appData.currentMode || 'personal';
@@ -1528,6 +1521,47 @@
             }
             
             switchSection('dashboard');
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchSection(item.dataset.section)));
+            document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+            document.getElementById('overlay').addEventListener('click', closeMobileMenu);
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.getElementById('modeSelect').addEventListener('change', switchMode);
+            document.getElementById('logo-icon').addEventListener('click', enterPreviewMode);
+            document.getElementById('addTransactionBtn').addEventListener('click', () => showTransactionModal());
+            document.getElementById('exportFinanceBtn').addEventListener('click', exportFinancePDF);
+            document.getElementById('searchTransaction').addEventListener('input', filterAndRenderTransactions);
+            document.getElementById('categoryFilter').addEventListener('change', filterAndRenderTransactions);
+            document.getElementById('typeFilter').addEventListener('change', filterAndRenderTransactions);
+            document.getElementById('financeDateFilterBtn').addEventListener('click', () => showDateRangeModal('finance'));
+            document.getElementById('taskForm').addEventListener('submit', saveTask);
+            document.getElementById('startTimerBtn').addEventListener('click', startTimer);
+            document.getElementById('pauseTimerBtn').addEventListener('click', pauseTimer);
+            document.getElementById('resetTimerBtn').addEventListener('click', resetTimer);
+            document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+            document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+            document.getElementById('splitBillForm').addEventListener('submit', calculateSplitBill);
+            document.getElementById('backupData').addEventListener('click', backupData);
+            document.getElementById('restoreData').addEventListener('click', restoreData);
+            document.getElementById('clearAllData').addEventListener('click', () => {
+                showConfirm('Hapus Semua Data?', 'Operasi ini tidak dapat diurungkan. Anda yakin ingin menghapus semua data personal dan bisnis?', clearAllDataConfirmed);
+            });
+            document.getElementById('applyBgMediaBtn').addEventListener('click', applyUploadedMedia);
+            document.getElementById('resetBgMediaBtn').addEventListener('click', resetBackgroundMedia);
+            document.getElementById('toggleVideoSoundBtn').addEventListener('click', toggleVideoSound);
+            document.body.addEventListener('touchstart', handleTouchStart, { passive: true });
+            document.body.addEventListener('touchend', handleTouchEnd);
+            document.body.addEventListener('mousedown', handleMouseDown);
+            document.body.addEventListener('mouseup', handleMouseUp);
+            setupMasterRangeSelector();
+            document.getElementById('applyDateRange').addEventListener('click', applyDateRange);
+            document.getElementById('cancelDateRange').addEventListener('click', () => document.getElementById('dateRangeModal').classList.remove('show'));
+
+            // Google Drive Listeners
+            document.getElementById('loginBtn').addEventListener('click', handleAuthClick);
+            document.getElementById('backupBtn').addEventListener('click', handleBackupClick);
         }
 
         // --- PREVIEW MODE LOGIC ---
@@ -1807,8 +1841,8 @@
                 list.appendChild(item);
             });
         }
-
-        function saveTask(e) {
+        
+                function saveTask(e) {
             e.preventDefault();
             const task = {
                 id: generateId(),
@@ -2683,192 +2717,120 @@
             });
         }
 
-        /**
-         * ===================================================================
-         * BAGIAN UNTUK AUTENTIKASI GOOGLE
-         * Logika ini akan berinteraksi dengan backend Node.js Anda.
-         * ===================================================================
-         */
-        
-        // Fungsi untuk mengecek status login saat aplikasi pertama kali dimuat
-        async function checkAuthStatus() {
-            try {
-                // Panggil endpoint /api/me di backend
-                const response = await fetch('/api/me');
-                const data = await response.json();
+        // --- GOOGLE DRIVE INTEGRATION ---
+        const CLIENT_ID = "175269804015-7agb1gr0nd6ah66co5qen34dd2mvtm68.apps.googleusercontent.com";
+        const SCOPE = "https://www.googleapis.com/auth/drive.file";
+        let GoogleAuth;
 
-                if (response.ok && data.isAuthenticated) {
-                    // Jika berhasil dan terautentikasi, update UI
-                    updateUIForAuth(data.user);
-                } else {
-                    // Jika tidak, tampilkan UI untuk login
-                    updateUIForGuest();
+        function initGoogleClient() {
+            gapi.load('client:auth2', async () => {
+                try {
+                    await gapi.client.init({
+                        clientId: CLIENT_ID,
+                        scope: SCOPE
+                    });
+                    GoogleAuth = gapi.auth2.getAuthInstance();
+                    GoogleAuth.isSignedIn.listen(updateSigninStatus);
+                    updateSigninStatus(GoogleAuth.isSignedIn.get());
+                } catch (error) {
+                    console.error("Error initializing Google Client:", error);
+                    document.getElementById('status').innerText = "Gagal memuat Google API.";
                 }
-            } catch (error) {
-                console.error('Error saat memeriksa status autentikasi:', error);
-                // Jika ada error (misal backend mati), tampilkan UI untuk login
-                updateUIForGuest();
+            });
+        }
+
+        function updateSigninStatus(isSignedIn) {
+            document.getElementById('loginBtn').disabled = isSignedIn;
+            document.getElementById('backupBtn').disabled = !isSignedIn;
+            document.getElementById('status').innerText = isSignedIn ? "Terhubung ke Google Drive" : "Belum terhubung";
+            if(isSignedIn) {
+                listFiles();
             }
         }
 
-        // Fungsi untuk mengupdate UI jika pengguna sudah login
-        function updateUIForAuth(user) {
-            // Sembunyikan tampilan untuk tamu (tombol login)
-            document.getElementById('logged-out-view').classList.add('hidden');
-            
-            // Tampilkan informasi pengguna dan tombol aksi
-            const userInfo = document.getElementById('user-info');
-            const loggedInActions = document.getElementById('logged-in-actions');
-            
-            document.getElementById('user-avatar').src = user.picture || 'https://placehold.co/64x64/7e22ce/ffffff?text=U';
-            document.getElementById('user-name').textContent = user.name || 'Pengguna';
-            document.getElementById('user-email').textContent = user.email || 'Tidak ada email';
-
-            userInfo.classList.remove('hidden');
-            userInfo.classList.add('flex'); // gunakan flex untuk layout avatar dan nama
-            loggedInActions.classList.remove('hidden');
-        }
-
-        // Fungsi untuk mengupdate UI jika pengguna belum login
-        function updateUIForGuest() {
-            // Tampilkan tampilan untuk tamu (tombol login)
-            document.getElementById('logged-out-view').classList.remove('hidden');
-
-            // Sembunyikan informasi pengguna dan tombol aksi
-            const userInfo = document.getElementById('user-info');
-            const loggedInActions = document.getElementById('logged-in-actions');
-
-            userInfo.classList.add('hidden');
-            userInfo.classList.remove('flex');
-            loggedInActions.classList.add('hidden');
-        }
-
-        // Fungsi untuk menangani proses login
-        function handleLogin() {
-            // Cukup arahkan browser ke endpoint login di backend.
-            // Backend akan mengurus redirect ke Google.
-            window.location.href = '/api/login';
-        }
-
-        // Fungsi untuk menangani proses logout
-        async function handleLogout() {
-            try {
-                await fetch('/api/logout');
-                // Setelah berhasil logout di backend, update UI
-                updateUIForGuest();
-                showMessage('Anda berhasil logout.', 'success');
-            } catch (error) {
-                console.error('Gagal saat logout:', error);
-                showMessage('Gagal untuk logout.', 'error');
+        function handleAuthClick() {
+            if (GoogleAuth) {
+                GoogleAuth.signIn();
             }
         }
 
-        // Fungsi untuk mengambil dan menampilkan file dari Google Drive
-        async function fetchDriveFiles() {
+        function handleBackupClick() {
+            const lifeHubData = storage.get('lifeHubData_v4.6');
+            const diaryData = storage.get('diaryNotes_v4.6');
+            const allData = {
+                lifeHubData,
+                diaryData
+            };
+            
+            if (!lifeHubData && !diaryData) {
+                showMessage("Tidak ada data untuk di-backup.", "error");
+                return;
+            }
+            
+            backupDataToDrive(allData);
+        }
+
+        async function backupDataToDrive(data) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = "Memulai backup...";
+            
+            const fileContent = JSON.stringify(data, null, 2);
+            const file = new Blob([fileContent], { type: 'application/json' });
+            const metadata = {
+                'name': `uranuspace_backup_${new Date().toISOString().split('T')[0]}.json`,
+                'mimeType': 'application/json'
+            };
+
+            const accessToken = GoogleAuth.currentUser.get().getAuthResponse().access_token;
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', file);
+
             try {
-                const response = await fetch('/api/drive-files');
-                
-                if (response.status === 401) {
-                    showMessage('Sesi Anda telah berakhir. Silakan login kembali.', 'error');
-                    updateUIForGuest();
-                    return;
-                }
+                const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+                    method: 'POST',
+                    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+                    body: form
+                });
 
                 if (!response.ok) {
-                    throw new Error('Gagal mengambil data dari server.');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const files = await response.json();
-                
-                // Buat konten HTML untuk ditampilkan di modal
-                let filesHtml = '<h3 class="text-xl font-semibold text-purple-400 mb-4">10 File Teratas di Google Drive</h3>';
-                if (files.length > 0 && !files.message) {
-                    filesHtml += '<div class="space-y-3">';
-                    files.forEach(file => {
-                        filesHtml += `
-                            <a href="${file.webViewLink}" target="_blank" class="block p-3 rounded-lg hover:bg-purple-500/20 transition-colors">
-                                <div class="flex items-center space-x-3">
-                                    <i class="fas fa-file-alt text-xl text-blue-400"></i>
-                                    <div>
-                                        <p class="font-medium">${file.name}</p>
-                                        <p class="text-xs text-gray-400">${file.mimeType}</p>
-                                    </div>
-                                </div>
-                            </a>
-                        `;
-                    });
-                    filesHtml += '</div>';
-                } else {
-                    filesHtml += '<p class="text-gray-400">Tidak ada file yang ditemukan atau Anda belum memberikan akses.</p>';
-                }
-                filesHtml += '<button class="closeModal custom-button custom-button-danger mt-6">Tutup</button>';
-                
-                // Tampilkan hasilnya di modal
-                showModal(filesHtml);
-
+                const result = await response.json();
+                statusDiv.innerText = `Backup berhasil! File: ${result.name}`;
+                showMessage("Backup ke Google Drive berhasil!", "success");
+                listFiles();
             } catch (error) {
-                console.error('Error saat mengambil file Drive:', error);
-                showMessage('Gagal mengambil file dari Google Drive.', 'error');
+                console.error("Error backing up to Drive:", error);
+                statusDiv.innerText = "Backup gagal.";
+                showMessage("Backup ke Google Drive gagal.", "error");
             }
         }
 
-        // --- MODIFIKASI FUNGSI INISIALISASI ---
-        
-        // Kita modifikasi event listener utama untuk menyertakan fungsi-fungsi baru
-        function setupEventListeners() {
-            document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchSection(item.dataset.section)));
-            document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
-            document.getElementById('overlay').addEventListener('click', closeMobileMenu);
-            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-            document.getElementById('modeSelect').addEventListener('change', switchMode);
-            document.getElementById('logo-icon').addEventListener('click', enterPreviewMode);
-            document.getElementById('addTransactionBtn').addEventListener('click', () => showTransactionModal());
-            document.getElementById('exportFinanceBtn').addEventListener('click', exportFinancePDF);
-            document.getElementById('searchTransaction').addEventListener('input', filterAndRenderTransactions);
-            document.getElementById('categoryFilter').addEventListener('change', filterAndRenderTransactions);
-            document.getElementById('typeFilter').addEventListener('change', filterAndRenderTransactions);
-            document.getElementById('financeDateFilterBtn').addEventListener('click', () => showDateRangeModal('finance'));
-            document.getElementById('taskForm').addEventListener('submit', saveTask);
-            document.getElementById('startTimerBtn').addEventListener('click', startTimer);
-            document.getElementById('pauseTimerBtn').addEventListener('click', pauseTimer);
-            document.getElementById('resetTimerBtn').addEventListener('click', resetTimer);
-            document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
-            document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
-            document.getElementById('splitBillForm').addEventListener('submit', calculateSplitBill);
-            document.getElementById('backupData').addEventListener('click', backupData);
-            document.getElementById('restoreData').addEventListener('click', restoreData);
-            document.getElementById('clearAllData').addEventListener('click', () => {
-                showConfirm('Hapus Semua Data?', 'Operasi ini tidak dapat diurungkan. Anda yakin ingin menghapus semua data personal dan bisnis?', clearAllDataConfirmed);
-            });
-            document.getElementById('applyBgMediaBtn').addEventListener('click', applyUploadedMedia);
-            document.getElementById('resetBgMediaBtn').addEventListener('click', resetBackgroundMedia);
-            document.getElementById('toggleVideoSoundBtn').addEventListener('click', toggleVideoSound);
-            document.body.addEventListener('touchstart', handleTouchStart, { passive: true });
-            document.body.addEventListener('touchend', handleTouchEnd);
-            document.body.addEventListener('mousedown', handleMouseDown);
-            document.body.addEventListener('mouseup', handleMouseUp);
-            setupMasterRangeSelector();
-            document.getElementById('applyDateRange').addEventListener('click', applyDateRange);
-            document.getElementById('cancelDateRange').addEventListener('click', () => document.getElementById('dateRangeModal').classList.remove('show'));
-
-            // Event listener untuk tombol-tombol autentikasi
-            document.getElementById('login-btn').addEventListener('click', handleLogin);
-            document.getElementById('logout-btn').addEventListener('click', handleLogout);
-            document.getElementById('fetch-drive-btn').addEventListener('click', fetchDriveFiles);
+        async function listFiles() {
+            try {
+                const accessToken = GoogleAuth.currentUser.get().getAuthResponse().access_token;
+                const response = await fetch('https://www.googleapis.com/drive/v3/files?q=name+contains+%27uranuspace_backup%27&orderBy=createdTime+desc&pageSize=5&fields=files(id,name,createdTime)', {
+                    headers: { 'Authorization': 'Bearer ' + accessToken }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                const listDiv = document.getElementById('fileList');
+                if (result.files && result.files.length > 0) {
+                    listDiv.innerHTML = "<h4 class='font-semibold mt-2'>Backup Terbaru:</h4>" + result.files.map(f => `<p>${f.name} <br><span class='text-gray-500'>(${new Date(f.createdTime).toLocaleDateString('id-ID')})</span></p>`).join('');
+                } else {
+                    listDiv.innerHTML = "<p class='text-gray-500'>Belum ada backup.</p>";
+                }
+            } catch (error) {
+                console.error("Error listing files:", error);
+                document.getElementById('fileList').innerHTML = "<p class='text-red-500'>Gagal memuat daftar file.</p>";
+            }
         }
-
-        // Modifikasi fungsi inisialisasi utama untuk memanggil checkAuthStatus
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-            setupEventListeners();
-            
-            // Inisialisasi DiaryApp
-            const diaryApp = new DiaryApp();
-            diaryApp.init();
-
-            // Cek status login saat halaman dimuat
-            checkAuthStatus();
-        });
 
     </script>
 </body>
