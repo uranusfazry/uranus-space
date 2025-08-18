@@ -19,10 +19,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <!-- Memuat html2canvas untuk konversi HTML ke gambar (diperlukan untuk PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- Memuat Google API Client Library -->
-    <script src="https://apis.google.com/js/api.js"></script>
 
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <!-- Gaya Kustom -->
     <style>
@@ -687,8 +686,7 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Diary Section (MERGED) -->
+                                <!-- Diary Section (MERGED) -->
                 <div id="diary-section" class="section hidden">
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                          <h2 class="text-3xl font-bold text-purple-300">My Diary Elite</h2>
@@ -804,7 +802,7 @@
                     </div>
                 </div>
                 
-                      <!-- Settings Section -->
+                         <!-- Settings Section -->
                 <div id="settings-section" class="section hidden">
                     <h2 class="text-3xl font-bold mb-6 text-purple-300">Pengaturan</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -817,16 +815,14 @@
                                     <input type="file" id="restoreFile" accept=".txt" class="custom-input">
                                     <button id="restoreData" class="custom-button custom-button-danger w-full mt-2"><i class="fas fa-upload mr-2"></i>Restore Data</button>
                                 </div>
-                                <hr class="border-purple-500/20">
-                                <!-- Google Drive Integration -->
-                                <h4 class="text-lg font-semibold text-purple-300 pt-2">Google Drive</h4>
-                                <button id="loginBtn" class="custom-button w-full" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"><i class="fab fa-google mr-2"></i>Login with Google</button>
-                                <button id="backupBtn" class="custom-button w-full" disabled><i class="fab fa-google-drive mr-2"></i>Backup Data to Drive</button>
-                                <div id="status" class="text-center text-sm text-gray-400">Not logged in</div>
-                                <div id="fileList" class="text-xs text-gray-500"></div>
-                                <!-- End Google Drive Integration -->
-                                <hr class="border-purple-500/20">
-                                <button id="clearAllData" class="custom-button custom-button-danger w-full mt-4"><i class="fas fa-trash mr-2"></i>Hapus Semua Data</button>
+                                <button id="clearAllData" class="custom-button custom-button-danger w-full"><i class="fas fa-trash mr-2"></i>Hapus Semua Data</button>
+                                
+                                <div class="border-t border-purple-800 pt-4 mt-4">
+                                     <h4 class="text-lg font-semibold mb-2 text-blue-400">Google Drive Backup</h4>
+                                     <div id="loginBtnContainer"></div>
+                                     <button id="backupBtn" class="custom-button w-full mt-2" disabled><i class="fab fa-google-drive mr-2"></i>Backup ke Drive</button>
+                                     <div id="status" class="text-sm text-gray-400 mt-2"></div>
+                                </div>
                             </div>
                         </div>
                         
@@ -849,7 +845,7 @@
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Informasi Aplikasi</h3>
                                 <div class="space-y-2 text-sm">
                                     <p><strong>Nama:</strong> LifeHub v4</p>
-                                    <p><strong>Versi:</strong> 4.8.0-Google-Drive</p>
+                                    <p><strong>Versi:</strong> 4.8.0-Drive-Backup</p>
                                     <p><strong>Fitur:</strong> Editor Teks Modern, TikTok & YouTube Embed, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Custom BG, Preview Mode, Google Drive Backup</p>
                                     <p><strong>Storage:</strong> LocalStorage (Data terenkripsi di terminal Anda)</p>
                                 </div>
@@ -912,12 +908,25 @@
         </div>
     </div>
 
-
     <script>
         /**
+         * LifeHub v4.8.0 - Integrated Terminal with Google Drive Backup
+         * Author: Uranuspace
+         * Description: A comprehensive life management tool with finance, tasks, split bill,
+         * and a rich-text diary, now featuring Google Drive backup functionality.
+         */
+
+        // ====== GOOGLE DRIVE API CONFIG ======
+        const CLIENT_ID = "175269804015-7agb1gr0nd6ah66co5qen34dd2mvtm68.apps.googleusercontent.com";
+        const SCOPES = "https://www.googleapis.com/auth/drive.file";
+        let tokenClient;
+        let gapiInited = false;
+        let gisInited = false;
+
+        /**
          * DiaryApp Class
-         * Berisi semua logika, status, dan fungsi untuk aplikasi diary.
-         * Editor telah di-upgrade dengan fungsionalitas yang lebih kaya.
+         * Contains all logic, state, and functions for the diary application.
+         * The editor has been upgraded with richer functionality.
          */
         class DiaryApp {
             constructor() {
@@ -931,7 +940,7 @@
                 this.bindEvents();
                 this.checkAuthentication();
                 this.loadNotes();
-                setInterval(() => this.autoSave(), 30000); // Autosave setiap 30 detik
+                setInterval(() => this.autoSave(), 30000); // Autosave every 30 seconds
             }
 
             cacheDOMElements() {
@@ -949,7 +958,6 @@
                     editorToolbar: document.querySelector('#diaryEditorSection .editor-toolbar'),
                     editorContent: document.getElementById('editorContent'),
                     embedYouTubeBtn: document.getElementById('diaryEmbedYouTubeBtn'),
-                    // PERUBAHAN: Cache elemen tombol TikTok
                     embedTikTokBtn: document.getElementById('diaryEmbedTikTokBtn'),
                     uploadFileBtn: document.getElementById('diaryUploadFileBtn'),
                     fileUpload: document.getElementById('diaryFileUpload'),
@@ -977,7 +985,7 @@
                 this.dom.moodFilter.addEventListener('change', () => this.filterNotes());
                 this.dom.dateFilter.addEventListener('change', () => this.saveNote());
 
-                // Event listener untuk seluruh toolbar
+                // Event listener for the entire toolbar
                 this.dom.editorToolbar.addEventListener('click', (e) => {
                     const button = e.target.closest('button');
                     if (button && button.dataset.command) {
@@ -986,11 +994,10 @@
                     }
                 });
                 
-                // Event listener khusus untuk elemen non-button di toolbar
+                // Specific event listener for non-button elements in the toolbar
                 this.dom.formatBlockSelect.addEventListener('change', (e) => this.formatText('formatBlock', e.target.value));
 
                 this.dom.embedYouTubeBtn.addEventListener('click', () => this.embedYouTube());
-                // PERUBAHAN: Tambahkan event listener untuk tombol TikTok
                 this.dom.embedTikTokBtn.addEventListener('click', () => this.embedTikTok());
 
                 this.dom.uploadFileBtn.addEventListener('click', () => this.dom.fileUpload.click());
@@ -1124,20 +1131,17 @@
                 }
             }
 
-            // PERUBAHAN: Fungsi baru untuk menyematkan video TikTok
             embedTikTok() {
                 const url = prompt("Masukkan URL video TikTok:");
                 if (!url) return;
 
-                // Regex untuk mengekstrak ID video dari berbagai format URL TikTok
                 const regex = /tiktok\.com\/.*\/video\/(\d+)/;
                 const match = url.match(regex);
                 const videoId = match && match[1] ? match[1] : null;
 
                 if (videoId) {
-                    // Membuat iframe yang responsif
                     const embedHTML = `
-                        <div style="position: relative; padding-bottom: 177.78%; /* Aspect Ratio 9:16 untuk video vertikal */ height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                        <div style="position: relative; padding-bottom: 177.78%; /* Aspect Ratio 9:16 */ height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
                             <iframe 
                                 src="https://www.tiktok.com/embed/v2/${videoId}" 
                                 frameborder="0" 
@@ -1170,7 +1174,6 @@
                     } else if (file.type === 'application/pdf') {
                         elementHTML = `<embed src="${result}" type="application/pdf" width="100%" height="500px" style="border-radius: 8px; margin: 1rem 0;" />`;
                     } else if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) {
-                        // Untuk file teks, kita sisipkan sebagai blok kode yang bisa diedit
                         const escapedText = result.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                         elementHTML = `<pre style="background: rgba(0,0,0,0.2); border: 1px solid var(--input-border); padding: 1rem; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"><code>${escapedText}</code></pre>`;
                     } else {
@@ -1238,7 +1241,7 @@
             }
 
             loadNotes() {
-                const saved = localStorage.getItem('diaryNotes_v4.6'); // Versi baru
+                const saved = localStorage.getItem('diaryNotes_v4.8');
                 if (saved) {
                     this.notes = JSON.parse(saved);
                     this.displayNotes();
@@ -1246,7 +1249,7 @@
             }
 
             saveToStorage() {
-                localStorage.setItem('diaryNotes_v4.6', JSON.stringify(this.notes));
+                localStorage.setItem('diaryNotes_v4.8', JSON.stringify(this.notes));
             }
 
             displayNotes(filteredNotes = null) {
@@ -1380,15 +1383,14 @@
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     
-                    // Buat elemen sementara untuk rendering
                     const tempContainer = document.createElement('div');
                     tempContainer.innerHTML = `<h1>${title}</h1>${content}`;
                     Object.assign(tempContainer.style, {
                         position: 'absolute',
                         left: '-9999px',
-                        width: '700px', // Lebar konten PDF
+                        width: '700px',
                         padding: '20px',
-                        color: '#000', // Pastikan teks terlihat
+                        color: '#000',
                         background: '#fff'
                     });
                     document.body.appendChild(tempContainer);
@@ -1476,7 +1478,7 @@
                 localStorage.setItem(key, JSON.stringify(value));
             },
             getAppData: () => {
-                return storage.get('lifeHubData_v4.6', {
+                return storage.get('lifeHubData_v4.8', {
                     currentMode: 'personal',
                     isLightMode: false,
                     isVideoMuted: true,
@@ -1485,7 +1487,7 @@
                 });
             },
             saveAppData: (data) => {
-                storage.set('lifeHubData_v4.6', data);
+                storage.set('lifeHubData_v4.8', data);
             }
         };
 
@@ -1494,12 +1496,11 @@
             initializeApp();
             setupEventListeners();
             
-            // Inisialisasi DiaryApp
             const diaryApp = new DiaryApp();
             diaryApp.init();
 
-            // Inisialisasi Google API Client
-            initGoogleClient();
+            // Initialize Google Sign-In
+            initializeGoogleSignIn();
         });
 
         function initializeApp() {
@@ -1558,10 +1559,91 @@
             setupMasterRangeSelector();
             document.getElementById('applyDateRange').addEventListener('click', applyDateRange);
             document.getElementById('cancelDateRange').addEventListener('click', () => document.getElementById('dateRangeModal').classList.remove('show'));
+            document.getElementById('backupBtn').addEventListener('click', backupToDrive);
+        }
 
-            // Google Drive Listeners
-            document.getElementById('loginBtn').addEventListener('click', handleAuthClick);
-            document.getElementById('backupBtn').addEventListener('click', handleBackupClick);
+        // --- GOOGLE DRIVE INTEGRATION ---
+        function initializeGoogleSignIn() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: '', // defined later
+            });
+            gisInited = true;
+            
+            // Render the login button
+            google.accounts.id.initialize({
+                client_id: CLIENT_ID,
+                callback: handleCredentialResponse
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("loginBtnContainer"),
+                { theme: "outline", size: "large", type: "standard" }
+            );
+        }
+
+        function handleCredentialResponse(response) {
+            // This is for Sign In with Google, which gives an ID token.
+            // For Drive API, we need an access token. We will request it when needed.
+            document.getElementById("status").innerText = "Login berhasil. Siap untuk backup.";
+            document.getElementById("backupBtn").disabled = false;
+        }
+
+        function backupToDrive() {
+            tokenClient.callback = async (resp) => {
+                if (resp.error !== undefined) {
+                    throw (resp);
+                }
+                document.getElementById('status').innerText = 'Token diterima, memulai backup...';
+                await performBackup(resp.access_token);
+            };
+        
+            if (gapi.client.getToken() === null) {
+                tokenClient.requestAccessToken({prompt: 'consent'});
+            } else {
+                tokenClient.requestAccessToken({prompt: ''});
+            }
+        }
+
+        async function performBackup(accessToken) {
+            const allData = {
+                lifeHub: storage.get('lifeHubData_v4.8'),
+                diary: storage.get('diaryNotes_v4.8')
+            };
+
+            if (!allData.lifeHub && !allData.diary) {
+                showMessage("Tidak ada data untuk di-backup.", "error");
+                return;
+            }
+
+            const fileContent = JSON.stringify(allData, null, 2);
+            const file = new Blob([fileContent], { type: "application/json" });
+            const metadata = {
+                'name': `Uranuspace_Backup_${new Date().toISOString().slice(0,10)}.json`,
+                'mimeType': 'application/json'
+            };
+
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', file);
+
+            try {
+                const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+                    method: 'POST',
+                    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+                    body: form
+                });
+                const result = await response.json();
+                if (result.error) {
+                    throw new Error(result.error.message);
+                }
+                document.getElementById("status").innerText = `Backup berhasil! File: ${result.name}`;
+                showMessage("Backup ke Google Drive berhasil!", "success");
+            } catch (error) {
+                console.error("Error backing up to Drive:", error);
+                document.getElementById("status").innerText = `Error: ${error.message}`;
+                showMessage("Gagal backup ke Google Drive.", "error");
+            }
         }
 
         // --- PREVIEW MODE LOGIC ---
@@ -1841,8 +1923,8 @@
                 list.appendChild(item);
             });
         }
-        
-                function saveTask(e) {
+
+        function saveTask(e) {
             e.preventDefault();
             const task = {
                 id: generateId(),
@@ -2058,7 +2140,7 @@
 
         // --- SETTINGS & DATA MANAGEMENT ---
         function backupData() {
-            const data = storage.get('lifeHubData_v4.6');
+            const data = storage.get('lifeHubData_v4.8');
             if (!data) {
                 showMessage("Tidak ada data untuk di-backup.", "error");
                 return;
@@ -2099,8 +2181,8 @@
         }
 
         function clearAllDataConfirmed() {
-            localStorage.removeItem('lifeHubData_v4.6');
-            localStorage.removeItem('diaryNotes_v4.6'); // Also clear diary data
+            localStorage.removeItem('lifeHubData_v4.8');
+            localStorage.removeItem('diaryNotes_v4.8'); // Also clear diary data
             initializeApp();
             showMessage("Semua data telah dihapus.", "success");
         }
@@ -2357,7 +2439,7 @@
             const appData = storage.getAppData();
             const modeData = appData[currentMode];
             const colors = getChartColors();
-            const diaryNotes = JSON.parse(localStorage.getItem('diaryNotes_v4.6') || '[]');
+            const diaryNotes = JSON.parse(localStorage.getItem('diaryNotes_v4.8') || '[]');
 
             Chart.defaults.color = colors.legendColor;
             Chart.defaults.font.family = "'Poppins', 'sans-serif'";
@@ -2716,122 +2798,7 @@
                 return itemDate >= startDate && itemDate <= endDate;
             });
         }
-
-        // --- GOOGLE DRIVE INTEGRATION ---
-        const CLIENT_ID = "175269804015-7agb1gr0nd6ah66co5qen34dd2mvtm68.apps.googleusercontent.com";
-        const SCOPE = "https://www.googleapis.com/auth/drive.file";
-        let GoogleAuth;
-
-        function initGoogleClient() {
-            gapi.load('client:auth2', async () => {
-                try {
-                    await gapi.client.init({
-                        clientId: CLIENT_ID,
-                        scope: SCOPE
-                    });
-                    GoogleAuth = gapi.auth2.getAuthInstance();
-                    GoogleAuth.isSignedIn.listen(updateSigninStatus);
-                    updateSigninStatus(GoogleAuth.isSignedIn.get());
-                } catch (error) {
-                    console.error("Error initializing Google Client:", error);
-                    document.getElementById('status').innerText = "Gagal memuat Google API.";
-                }
-            });
-        }
-
-        function updateSigninStatus(isSignedIn) {
-            document.getElementById('loginBtn').disabled = isSignedIn;
-            document.getElementById('backupBtn').disabled = !isSignedIn;
-            document.getElementById('status').innerText = isSignedIn ? "Terhubung ke Google Drive" : "Belum terhubung";
-            if(isSignedIn) {
-                listFiles();
-            }
-        }
-
-        function handleAuthClick() {
-            if (GoogleAuth) {
-                GoogleAuth.signIn();
-            }
-        }
-
-        function handleBackupClick() {
-            const lifeHubData = storage.get('lifeHubData_v4.6');
-            const diaryData = storage.get('diaryNotes_v4.6');
-            const allData = {
-                lifeHubData,
-                diaryData
-            };
-            
-            if (!lifeHubData && !diaryData) {
-                showMessage("Tidak ada data untuk di-backup.", "error");
-                return;
-            }
-            
-            backupDataToDrive(allData);
-        }
-
-        async function backupDataToDrive(data) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerText = "Memulai backup...";
-            
-            const fileContent = JSON.stringify(data, null, 2);
-            const file = new Blob([fileContent], { type: 'application/json' });
-            const metadata = {
-                'name': `uranuspace_backup_${new Date().toISOString().split('T')[0]}.json`,
-                'mimeType': 'application/json'
-            };
-
-            const accessToken = GoogleAuth.currentUser.get().getAuthResponse().access_token;
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', file);
-
-            try {
-                const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
-                    method: 'POST',
-                    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
-                    body: form
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const result = await response.json();
-                statusDiv.innerText = `Backup berhasil! File: ${result.name}`;
-                showMessage("Backup ke Google Drive berhasil!", "success");
-                listFiles();
-            } catch (error) {
-                console.error("Error backing up to Drive:", error);
-                statusDiv.innerText = "Backup gagal.";
-                showMessage("Backup ke Google Drive gagal.", "error");
-            }
-        }
-
-        async function listFiles() {
-            try {
-                const accessToken = GoogleAuth.currentUser.get().getAuthResponse().access_token;
-                const response = await fetch('https://www.googleapis.com/drive/v3/files?q=name+contains+%27uranuspace_backup%27&orderBy=createdTime+desc&pageSize=5&fields=files(id,name,createdTime)', {
-                    headers: { 'Authorization': 'Bearer ' + accessToken }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                const listDiv = document.getElementById('fileList');
-                if (result.files && result.files.length > 0) {
-                    listDiv.innerHTML = "<h4 class='font-semibold mt-2'>Backup Terbaru:</h4>" + result.files.map(f => `<p>${f.name} <br><span class='text-gray-500'>(${new Date(f.createdTime).toLocaleDateString('id-ID')})</span></p>`).join('');
-                } else {
-                    listDiv.innerHTML = "<p class='text-gray-500'>Belum ada backup.</p>";
-                }
-            } catch (error) {
-                console.error("Error listing files:", error);
-                document.getElementById('fileList').innerHTML = "<p class='text-red-500'>Gagal memuat daftar file.</p>";
-            }
-        }
-
     </script>
 </body>
 </html>
+
