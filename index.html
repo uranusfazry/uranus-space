@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeHub v3 - Management Terminal</title>
+    <title>LifeHub v4 - Integrated Terminal</title>
     
     <!-- Memuat Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,6 +17,9 @@
     <!-- Memuat jsPDF & AutoTable untuk ekspor PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <!-- Memuat html2canvas untuk konversi HTML ke gambar (diperlukan untuk PDF) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 
     <!-- Gaya Kustom -->
     <style>
@@ -122,6 +125,8 @@
             font-weight: 500;
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px rgba(147, 51, 234, 0.3);
+            border: none;
+            cursor: pointer;
         }
         .custom-button:hover {
             transform: translateY(-2px);
@@ -133,6 +138,15 @@
         }
         .custom-button-danger:hover {
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
+        }
+        .google-button {
+            background: #ffffff;
+            color: #1f2937;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .google-button:hover {
+            background: #f9fafb;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
 
         .nav-item {
@@ -311,6 +325,98 @@
             height: 350px;
             position: relative;
         }
+
+        /* --- GAYA KHUSUS UNTUK DIARYAPP (MERGED & REFINED) --- */
+        #diary-section .diary-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .editor-toolbar {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-bottom: none;
+            border-radius: 0.5rem 0.5rem 0 0;
+            padding: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .editor-toolbar button, .editor-toolbar select {
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            min-width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0.5rem;
+        }
+        .editor-toolbar button:hover, .editor-toolbar select:hover {
+            background: var(--hover-nav-bg);
+            color: var(--text-primary);
+        }
+        .editor-toolbar select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            padding-right: 1.5rem;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+        }
+        .toolbar-separator {
+            width: 1px;
+            height: 24px;
+            background-color: var(--input-border);
+            margin: 0 0.5rem;
+        }
+        
+        #editorContent {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            min-height: 300px;
+            padding: 1rem;
+            border-radius: 0 0 0.5rem 0.5rem;
+            color: var(--text-primary);
+            outline: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #editorContent:focus {
+            border-color: var(--input-focus-border);
+        }
+        #editorContent.dragover {
+            border-color: var(--primary-brand);
+            box-shadow: 0 0 10px var(--primary-brand);
+        }
+        #editorContent[contenteditable="true"]:empty:before {
+            content: attr(placeholder);
+            color: var(--text-secondary);
+            pointer-events: none;
+            display: block;
+        }
+        .note-item {
+            border: 1px solid var(--card-border);
+            transition: background-color 0.3s ease;
+        }
+        .note-item:hover {
+            background-color: var(--hover-nav-bg);
+        }
+        .tag {
+            background-color: var(--primary-brand);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+        }
     </style>
 </head>
 <body class="gradient-bg">
@@ -473,7 +579,7 @@
                              <h3 class="text-xl font-semibold mb-4 text-blue-400">Analisis Diary</h3>
                              <p class="text-md font-medium text-purple-300 mb-2">Frekuensi Entri Diary</p>
                              <div class="chart-container h-72">
-                                <canvas id="diaryEntryFrequencyChart"></canvas>
+                                 <canvas id="diaryEntryFrequencyChart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -553,8 +659,6 @@
                     </div>
                 </div>
 
-                <div id="market-section" class="section hidden"></div>
-
                 <!-- Split Bill Section -->
                 <div id="split-section" class="section hidden">
                     <h2 class="text-3xl font-bold mb-6 text-purple-300">Split Bill</h2>
@@ -564,6 +668,10 @@
                                 <h3 class="text-xl font-semibold mb-4 text-blue-400">Kalkulator Bill</h3>
                                 <form id="splitBillForm" class="space-y-4">
                                     <div><label class="block text-sm font-medium mb-1">Total Tagihan</label><input type="number" id="totalBill" class="custom-input" required></div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-1">Tanggal</label>
+                                        <input type="date" id="splitBillDate" class="custom-input" required>
+                                    </div>
                                     <div><label class="block text-sm font-medium mb-1">Nama (pisahkan koma)</label><input type="text" id="peopleNames" class="custom-input" placeholder="Zedd, Jett, Omen" required></div>
                                     <div>
                                         <label class="block text-sm font-medium mb-1">Persentase (opsional, pisahkan koma)</label>
@@ -586,25 +694,154 @@
                     </div>
                 </div>
 
-                <!-- Diary Section -->
+                <!-- Diary Section (MERGED) -->
                 <div id="diary-section" class="section hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-3xl font-bold text-purple-300">My Diary Elite</h2>
-                        <div class="flex gap-2">
-                            <button id="newEntryBtn" class="custom-button"><i class="fas fa-plus mr-2"></i>Entri Baru</button>
-                            <button id="exportDiaryBtn" class="custom-button custom-button-danger"><i class="fas fa-download mr-2"></i>Export PDF</button>
-                        </div>
+                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+                         <h2 class="text-3xl font-bold text-purple-300">My Diary Elite</h2>
+                         <button id="diaryAddNewNoteBtn" class="custom-button"><i class="fas fa-plus mr-2"></i>Catatan Baru</button>
                     </div>
-                    <div class="glass-effect p-4 mb-6">
-                        <input type="text" id="searchDiary" placeholder="Cari catatan..." class="custom-input">
-                    </div>
-                    <div id="diaryEntries" class="space-y-4"></div>
-                </div>
+                    <!-- Container utama untuk diary dengan layout vertikal -->
+                    <div class="diary-container">
+                        
+                        <!-- 1. Editor & Actions -->
+                        <div id="diaryEditorSection" class="glass-effect p-4">
+                            <!-- Input Judul Baru -->
+                            <input type="text" id="diaryTitleInput" class="custom-input mb-4" placeholder="Judul Catatan...">
+                            
+                            <!-- Modern Editor Toolbar -->
+                            <div class="editor-toolbar">
+                                <!-- Undo/Redo -->
+                                <button data-command="undo" title="Undo"><i class="fas fa-undo"></i></button>
+                                <button data-command="redo" title="Redo"><i class="fas fa-redo"></i></button>
+                                <div class="toolbar-separator"></div>
 
+                                <!-- Clipboard -->
+                                <button data-command="copy" title="Copy"><i class="fas fa-copy"></i></button>
+                                <button data-command="cut" title="Cut"><i class="fas fa-cut"></i></button>
+                                <div class="toolbar-separator"></div>
+
+                                <!-- Style Dropdown -->
+                                <select id="formatBlock" class="toolbar-select" title="Gaya Teks">
+                                    <option value="p">Normal</option>
+                                    <option value="h1">Heading 1</option>
+                                    <option value="h2">Heading 2</option>
+                                    <option value="h3">Heading 3</option>
+                                    <option value="blockquote">Quote</option>
+                                </select>
+                                <div class="toolbar-separator"></div>
+
+                                <!-- Basic Formatting -->
+                                <button data-command="bold" title="Bold"><i class="fas fa-bold"></i></button>
+                                <button data-command="italic" title="Italic"><i class="fas fa-italic"></i></button>
+                                <button data-command="underline" title="Underline"><i class="fas fa-underline"></i></button>
+                                <button data-command="strikeThrough" title="Strikethrough"><i class="fas fa-strikethrough"></i></button>
+                                
+                                <div class="toolbar-separator"></div>
+
+                                <!-- Alignment -->
+                                <button data-command="justifyLeft" title="Rata Kiri"><i class="fas fa-align-left"></i></button>
+                                <button data-command="justifyCenter" title="Rata Tengah"><i class="fas fa-align-center"></i></button>
+                                <button data-command="justifyRight" title="Rata Kanan"><i class="fas fa-align-right"></i></button>
+                                <button data-command="justifyFull" title="Rata Kanan Kiri"><i class="fas fa-align-justify"></i></button>
+                                <div class="toolbar-separator"></div>
+
+                                <!-- Lists & Indentation -->
+                                <button data-command="insertOrderedList" title="Numbered List"><i class="fas fa-list-ol"></i></button>
+                                <button data-command="insertUnorderedList" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+                                <div class="toolbar-separator"></div>
+
+                                <!-- Insertions -->
+                                <button data-command="createLink" title="Sisipkan Tautan"><i class="fas fa-link"></i></button>
+                                <button id="diaryEmbedYouTubeBtn" title="Sematkan Video YouTube"><i class="fab fa-youtube"></i></button>
+                                <!-- PERUBAHAN: Tombol TikTok ditambahkan di sini -->
+                                <button id="diaryEmbedTikTokBtn" title="Sematkan Video TikTok"><i class="fab fa-tiktok"></i></button>
+                                <button id="diaryUploadFileBtn" title="Unggah File"><i class="fas fa-upload"></i></button>
+                                <input type="file" id="diaryFileUpload" class="hidden" accept=".txt,.json,.md,.pdf,image/*,video/*">
+                                <div class="toolbar-separator"></div>
+                                
+                                <button data-command="removeFormat" title="Clear Formatting"><i class="fas fa-eraser"></i></button>
+                            </div>
+                            <div id="editorContent" contenteditable="true" class="prose max-w-none" placeholder="Mulai menulis atau jatuhkan file di sini..."></div>
+                            
+                            <!-- Kontrol Tanggal, Mood, dan Tags -->
+                            <div class="flex flex-wrap gap-4 mt-4">
+                                <input type="date" id="diaryDateFilter" class="custom-input flex-1">
+                                <select id="diaryMoodSelector" class="custom-input flex-1">
+                                    <option value="neutral">Netral</option>
+                                    <option value="happy">Senang</option>
+                                    <option value="sad">Sedih</option>
+                                    <option value="excited">Bersemangat</option>
+                                    <option value="angry">Marah</option>
+                                </select>
+                                <input type="text" id="diaryTagsInput" class="custom-input flex-1" placeholder="Tags, pisahkan koma">
+                            </div>
+
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <button id="diarySaveNoteBtn" class="custom-button flex-grow"><i class="fas fa-save mr-2"></i>Simpan</button>
+                                <button id="exportHTMLBtn" class="custom-button flex-grow" style="background: linear-gradient(90deg, #f97316, #ea580c);"><i class="fab fa-html5 mr-2"></i>HTML</button>
+                                <button id="exportPDFBtn" class="custom-button flex-grow" style="background: linear-gradient(90deg, #ef4444, #dc2626);"><i class="fas fa-file-pdf mr-2"></i>PDF</button>
+                                <button id="exportJSONBtn" class="custom-button flex-grow" style="background: linear-gradient(90deg, #22c55e, #16a34a);"><i class="fas fa-file-code mr-2"></i>JSON</button>
+                                <button id="diaryClearEditorBtn" class="custom-button custom-button-danger"><i class="fas fa-eraser mr-2"></i>Bersihkan</button>
+                            </div>
+                        </div>
+
+                        <!-- 2. Kontrol & Filter -->
+                        <div class="glass-effect p-4 space-y-4">
+                            <h3 class="font-semibold text-lg text-pink-400">Kontrol & Filter</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <input type="search" id="diarySearchInput" class="custom-input" placeholder="Cari berdasarkan judul, isi, atau tag...">
+                                <select id="diaryMoodFilter" class="custom-input">
+                                    <option value="">Semua Mood</option>
+                                    <option value="happy">Senang</option>
+                                    <option value="sad">Sedih</option>
+                                    <option value="neutral">Netral</option>
+                                    <option value="excited">Bersemangat</option>
+                                    <option value="angry">Marah</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- 3. Daftar Catatan -->
+                        <div class="glass-effect p-4">
+                            <h3 class="font-semibold text-lg text-pink-400 mb-2">Daftar Catatan</h3>
+                            <div id="diaryNotesList" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                        </div>
+
+                    </div>
+                </div>
+                
                 <!-- Settings Section -->
                 <div id="settings-section" class="section hidden">
                     <h2 class="text-3xl font-bold mb-6 text-purple-300">Pengaturan</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <div class="glass-effect p-6">
+                            <h3 class="text-xl font-semibold mb-4 text-green-400">Integrasi Akun Google</h3>
+                            <div id="auth-container" class="space-y-4">
+                                <!-- Konten ini akan diisi oleh JavaScript berdasarkan status login -->
+                                <div id="user-info" class="hidden items-center space-x-4">
+                                    <img id="user-avatar" src="" alt="User Avatar" class="w-16 h-16 rounded-full">
+                                    <div>
+                                        <p id="user-name" class="font-semibold text-lg"></p>
+                                        <p id="user-email" class="text-sm text-gray-400"></p>
+                                    </div>
+                                </div>
+                                
+                                <div id="logged-in-actions" class="hidden space-y-2">
+                                    <button id="fetch-drive-btn" class="custom-button w-full" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"><i class="fab fa-google-drive mr-2"></i>Lihat File Drive</button>
+                                    <button id="logout-btn" class="custom-button custom-button-danger w-full">Logout</button>
+                                </div>
+                                
+                                <div id="logged-out-view">
+                                    <p class="text-gray-400 mb-4">Hubungkan akun Google Anda untuk backup data dan mengakses Google Drive.</p>
+                                    <button id="login-btn" class="custom-button google-button w-full flex items-center justify-center">
+                                        <svg class="w-5 h-5 mr-3" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.99,36.62,44,30.638,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+                                        Login dengan Google
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="glass-effect p-6">
                             <h3 class="text-xl font-semibold mb-4 text-blue-400">Backup & Restore</h3>
                             <div class="space-y-4">
@@ -636,9 +873,9 @@
                             <div class="glass-effect p-6">
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Informasi Aplikasi</h3>
                                 <div class="space-y-2 text-sm">
-                                    <p><strong>Nama:</strong> LifeHub v3</p>
-                                    <p><strong>Versi:</strong> 3.15.0-splitbill-percentage</p>
-                                    <p><strong>Fitur:</strong> Split Bill Persentase, Prioritas Warna Kalender, Filter Dasbor Utama, Analisis Gabungan & Individual, Keuangan, Tugas, Pomodoro, Diary, Custom BG, Preview Mode</p>
+                                    <p><strong>Nama:</strong> LifeHub v4</p>
+                                    <p><strong>Versi:</strong> 4.7.0-TikTok-Embed</p>
+                                    <p><strong>Fitur:</strong> Editor Teks Modern, TikTok & YouTube Embed, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Custom BG, Preview Mode</p>
                                     <p><strong>Storage:</strong> LocalStorage (Data terenkripsi di terminal Anda)</p>
                                 </div>
                             </div>
@@ -680,9 +917,555 @@
             </div>
         </div>
     </div>
+    
+    <!-- DiaryApp Modals -->
+    <div id="diaryPasswordModal" class="modal show">
+        <div class="modal-content glass-effect p-8 w-full max-w-sm text-center">
+            <h3 class="text-xl font-semibold mb-4 text-pink-400">Diary Terkunci</h3>
+            <p class="mb-4">Masukkan kata sandi untuk membuka.</p>
+            <input type="password" id="diaryPasswordInput" class="custom-input mb-4">
+            <div class="flex gap-2">
+                <button id="diaryCheckPasswordBtn" class="custom-button flex-1">Buka</button>
+                <button id="diarySetPasswordBtn" class="custom-button custom-button-danger">Atur Sandi Baru</button>
+            </div>
+        </div>
+    </div>
+    <div id="diaryPreviewModal" class="modal">
+        <div class="modal-content glass-effect p-8 w-full max-w-3xl">
+            <div id="diaryPreviewContent" class="prose max-w-none"></div>
+            <button id="diaryClosePreviewBtn" class="custom-button mt-6">Tutup</button>
+        </div>
+    </div>
 
 
     <script>
+        /**
+         * DiaryApp Class
+         * Berisi semua logika, status, dan fungsi untuk aplikasi diary.
+         * Editor telah di-upgrade dengan fungsionalitas yang lebih kaya.
+         */
+        class DiaryApp {
+            constructor() {
+                this.notes = [];
+                this.currentNoteId = null;
+                this.isAuthenticated = false;
+            }
+
+            init() {
+                this.cacheDOMElements();
+                this.bindEvents();
+                this.checkAuthentication();
+                this.loadNotes();
+                setInterval(() => this.autoSave(), 30000); // Autosave setiap 30 detik
+            }
+
+            cacheDOMElements() {
+                this.dom = {
+                    passwordModal: document.getElementById('diaryPasswordModal'),
+                    passwordInput: document.getElementById('diaryPasswordInput'),
+                    checkPasswordBtn: document.getElementById('diaryCheckPasswordBtn'),
+                    setPasswordBtn: document.getElementById('diarySetPasswordBtn'),
+                    addNewNoteBtn: document.getElementById('diaryAddNewNoteBtn'),
+                    searchInput: document.getElementById('diarySearchInput'),
+                    moodFilter: document.getElementById('diaryMoodFilter'),
+                    dateFilter: document.getElementById('diaryDateFilter'),
+                    editorSection: document.getElementById('diaryEditorSection'),
+                    titleInput: document.getElementById('diaryTitleInput'),
+                    editorToolbar: document.querySelector('#diaryEditorSection .editor-toolbar'),
+                    editorContent: document.getElementById('editorContent'),
+                    embedYouTubeBtn: document.getElementById('diaryEmbedYouTubeBtn'),
+                    embedTikTokBtn: document.getElementById('diaryEmbedTikTokBtn'),
+                    uploadFileBtn: document.getElementById('diaryUploadFileBtn'),
+                    fileUpload: document.getElementById('diaryFileUpload'),
+                    moodSelector: document.getElementById('diaryMoodSelector'),
+                    tagsInput: document.getElementById('diaryTagsInput'),
+                    saveNoteBtn: document.getElementById('diarySaveNoteBtn'),
+                    clearEditorBtn: document.getElementById('diaryClearEditorBtn'),
+                    notesList: document.getElementById('diaryNotesList'),
+                    previewModal: document.getElementById('diaryPreviewModal'),
+                    previewContent: document.getElementById('diaryPreviewContent'),
+                    closePreviewBtn: document.getElementById('diaryClosePreviewBtn'),
+                    formatBlockSelect: document.getElementById('formatBlock'),
+                    exportHTMLBtn: document.getElementById('exportHTMLBtn'),
+                    exportPDFBtn: document.getElementById('exportPDFBtn'),
+                    exportJSONBtn: document.getElementById('exportJSONBtn'),
+                };
+            }
+
+            bindEvents() {
+                this.dom.checkPasswordBtn.addEventListener('click', () => this.checkPassword());
+                this.dom.setPasswordBtn.addEventListener('click', () => this.setPassword());
+                this.dom.addNewNoteBtn.addEventListener('click', () => this.addNewNote());
+                
+                this.dom.searchInput.addEventListener('input', () => this.filterNotes());
+                this.dom.moodFilter.addEventListener('change', () => this.filterNotes());
+                this.dom.dateFilter.addEventListener('change', () => this.saveNote());
+
+                // Event listener untuk seluruh toolbar
+                this.dom.editorToolbar.addEventListener('click', (e) => {
+                    const button = e.target.closest('button');
+                    if (button && button.dataset.command) {
+                        e.preventDefault();
+                        this.handleCommand(button.dataset.command);
+                    }
+                });
+                
+                // Event listener khusus untuk elemen non-button di toolbar
+                this.dom.formatBlockSelect.addEventListener('change', (e) => this.formatText('formatBlock', e.target.value));
+
+                this.dom.embedYouTubeBtn.addEventListener('click', () => this.embedYouTube());
+                this.dom.embedTikTokBtn.addEventListener('click', () => this.embedTikTok());
+
+                this.dom.uploadFileBtn.addEventListener('click', () => this.dom.fileUpload.click());
+                this.dom.fileUpload.addEventListener('change', (e) => this.handleFileUpload(e.target.files));
+
+                // Drag and Drop Events
+                this.dom.editorContent.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.dom.editorContent.classList.add('dragover');
+                });
+                this.dom.editorContent.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.dom.editorContent.classList.remove('dragover');
+                });
+                this.dom.editorContent.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.dom.editorContent.classList.remove('dragover');
+                    this.handleFileUpload(e.dataTransfer.files);
+                });
+
+                this.dom.saveNoteBtn.addEventListener('click', () => this.saveNote(true)); // Manual save
+                this.dom.clearEditorBtn.addEventListener('click', () => this.clearEditor());
+                this.dom.exportHTMLBtn.addEventListener('click', () => this.exportContent('html'));
+                this.dom.exportPDFBtn.addEventListener('click', () => this.exportContent('pdf'));
+                this.dom.exportJSONBtn.addEventListener('click', () => this.exportContent('json'));
+
+                this.dom.notesList.addEventListener('click', (e) => {
+                    const target = e.target.closest('button, .note-item-clickable');
+                    if (!target) return;
+                    
+                    const noteId = parseInt(target.dataset.id);
+                    const action = target.dataset.action;
+
+                    if (action === 'edit' || action === 'click-to-edit') {
+                        e.stopPropagation();
+                        this.editNote(noteId);
+                    }
+                    if (action === 'delete') {
+                        e.stopPropagation();
+                        this.deleteNote(noteId);
+                    }
+                    if (action === 'preview') {
+                        e.stopPropagation();
+                        this.previewNote(noteId);
+                    }
+                });
+                this.dom.closePreviewBtn.addEventListener('click', () => this.closePreview());
+            }
+
+            checkAuthentication() {
+                if (localStorage.getItem('diaryPassword')) {
+                    this.dom.passwordModal.classList.add('show');
+                } else {
+                    this.isAuthenticated = true;
+                    this.dom.passwordModal.classList.remove('show');
+                }
+            }
+
+            checkPassword() {
+                const savedPassword = localStorage.getItem('diaryPassword');
+                if (this.dom.passwordInput.value === savedPassword) {
+                    this.isAuthenticated = true;
+                    this.dom.passwordModal.classList.remove('show');
+                    showMessage('Diary terbuka!', 'success');
+                } else {
+                    showMessage('Kata sandi salah!', 'error');
+                }
+            }
+
+            setPassword() {
+                const password = prompt('Atur kata sandi baru:');
+                if (password) {
+                    localStorage.setItem('diaryPassword', password);
+                    this.isAuthenticated = true;
+                    this.dom.passwordModal.classList.remove('show');
+                    showMessage('Kata sandi berhasil diatur!', 'success');
+                }
+            }
+            
+            handleCommand(command) {
+                const simpleCommands = ['bold', 'italic', 'underline', 'strikeThrough', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'undo', 'redo', 'removeFormat', 'copy', 'cut'];
+
+                if (simpleCommands.includes(command)) {
+                    this.formatText(command);
+                } else if (command === 'createLink') {
+                    const url = prompt('Masukkan URL:', 'https://');
+                    if (url) this.formatText(command, url);
+                }
+            }
+
+            formatText(command, value = null) {
+                document.execCommand(command, false, value);
+                this.dom.editorContent.focus();
+            }
+
+            embedYouTube() {
+                const url = prompt("Masukkan URL video YouTube:");
+                if (!url) return;
+
+                let videoId = null;
+                const regexes = [
+                    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/,
+                    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/,
+                    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/
+                ];
+
+                for (const regex of regexes) {
+                    const match = url.match(regex);
+                    if (match && match[1]) {
+                        videoId = match[1];
+                        break;
+                    }
+                }
+
+                if (videoId) {
+                    const embedHTML = `<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 1rem 0;">
+                        <iframe 
+                            src="https://www.youtube.com/embed/${videoId}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;">
+                        </iframe>
+                    </div><p><br></p>`;
+                    this.formatText('insertHTML', embedHTML);
+                } else {
+                    showMessage("URL YouTube tidak valid.", "error");
+                }
+            }
+
+            embedTikTok() {
+                const url = prompt("Masukkan URL video TikTok:");
+                if (!url) return;
+
+                const regex = /tiktok\.com\/.*\/video\/(\d+)/;
+                const match = url.match(regex);
+                const videoId = match && match[1] ? match[1] : null;
+
+                if (videoId) {
+                    const embedHTML = `
+                        <div style="position: relative; padding-bottom: 177.78%; /* Aspect Ratio 9:16 untuk video vertikal */ height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <iframe 
+                                src="https://www.tiktok.com/embed/v2/${videoId}" 
+                                frameborder="0" 
+                                allow="autoplay; encrypted-media" 
+                                allowfullscreen 
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                            </iframe>
+                        </div><p><br></p>`;
+                    
+                    this.formatText('insertHTML', embedHTML);
+                    showMessage("Video TikTok berhasil disematkan!", "success");
+                } else {
+                    showMessage("URL TikTok tidak valid. Pastikan URL berisi '/video/...' dan ID video.", "error");
+                }
+            }
+
+            handleFileUpload(files) {
+                if (!files || files.length === 0) return;
+                const file = files[0];
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    const result = e.target.result;
+                    let elementHTML = '';
+
+                    if (file.type.startsWith('image/')) {
+                        elementHTML = `<img src="${result}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;" />`;
+                    } else if (file.type.startsWith('video/')) {
+                        elementHTML = `<video controls src="${result}" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;"></video>`;
+                    } else if (file.type === 'application/pdf') {
+                        elementHTML = `<embed src="${result}" type="application/pdf" width="100%" height="500px" style="border-radius: 8px; margin: 1rem 0;" />`;
+                    } else if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) {
+                        const escapedText = result.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        elementHTML = `<pre style="background: rgba(0,0,0,0.2); border: 1px solid var(--input-border); padding: 1rem; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"><code>${escapedText}</code></pre>`;
+                    } else {
+                        showMessage(`Tipe file ${file.type} tidak didukung untuk pratinjau.`, 'error');
+                        return;
+                    }
+                    
+                    this.formatText('insertHTML', elementHTML + "<p><br></p>");
+                };
+                
+                if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) {
+                    reader.readAsText(file);
+                } else {
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            saveNote(isManual = false) {
+                if (!this.isAuthenticated) {
+                    if (isManual) showMessage('Silakan buka diary terlebih dahulu!', 'error');
+                    return;
+                }
+                const title = this.dom.titleInput.value.trim();
+                const content = this.dom.editorContent.innerHTML;
+                const tags = this.dom.tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+                const mood = this.dom.moodSelector.value;
+                const date = this.dom.dateFilter.value || new Date().toISOString().split('T')[0];
+
+                if (!title && !content.trim()) {
+                    if (isManual) showMessage('Judul atau isi tidak boleh kosong.', 'error');
+                    return;
+                }
+                
+                const note = {
+                    id: this.currentNoteId || Date.now(),
+                    title: title,
+                    content: content,
+                    tags: tags,
+                    mood: mood,
+                    date: new Date(date).toISOString(),
+                    lastModified: new Date().toISOString(),
+                    wordCount: this.countWords(content)
+                };
+
+                if (this.currentNoteId) {
+                    const index = this.notes.findIndex(n => n.id === this.currentNoteId);
+                    this.notes[index] = note;
+                } else {
+                    this.notes.unshift(note);
+                    this.currentNoteId = note.id;
+                }
+                
+                this.saveToStorage();
+                this.displayNotes();
+                if (isManual) showMessage('Catatan disimpan!', 'success');
+            }
+            
+            autoSave() {
+                const title = this.dom.titleInput.value.trim();
+                const content = this.dom.editorContent.innerHTML;
+                if ((title || content.trim()) && this.currentNoteId) {
+                    this.saveNote();
+                    showMessage('Tersimpan otomatis', 'info');
+                }
+            }
+
+            loadNotes() {
+                const saved = localStorage.getItem('diaryNotes_v4.6'); // Versi baru
+                if (saved) {
+                    this.notes = JSON.parse(saved);
+                    this.displayNotes();
+                }
+            }
+
+            saveToStorage() {
+                localStorage.setItem('diaryNotes_v4.6', JSON.stringify(this.notes));
+            }
+
+            displayNotes(filteredNotes = null) {
+                const notesToShow = (filteredNotes || this.notes).sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                if (notesToShow.length === 0) {
+                    this.dom.notesList.innerHTML = '<div class="text-center text-gray-500 py-4">Tidak ada catatan.</div>';
+                    return;
+                }
+                
+                this.dom.notesList.innerHTML = notesToShow.map(note => `
+                    <div class="note-item p-3 rounded-lg mb-2 cursor-pointer note-item-clickable" data-action="click-to-edit" data-id="${note.id}">
+                        <div class="flex items-start justify-between mb-1">
+                            <div>
+                                <strong class="text-md text-purple-300">${note.title || 'Tanpa Judul'}</strong>
+                                <span class="block text-xs text-gray-400">${this.formatDate(note.date)}</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button data-action="preview" data-id="${note.id}" class="text-green-400 hover:text-green-300"><i class="fas fa-eye"></i></button>
+                                <button data-action="delete" data-id="${note.id}" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-400">${this.truncateContent(note.content, 80)}</div>
+                    </div>
+                `).join('');
+            }
+
+            editNote(id) {
+                const note = this.notes.find(n => n.id === id);
+                if (note) {
+                    this.currentNoteId = id;
+                    this.dom.titleInput.value = note.title;
+                    this.dom.editorContent.innerHTML = note.content;
+                    this.dom.tagsInput.value = note.tags.join(', ');
+                    this.dom.moodSelector.value = note.mood;
+                    this.dom.dateFilter.value = note.date.split('T')[0];
+                    this.dom.titleInput.focus();
+                    showMessage('Catatan dimuat untuk diedit', 'info');
+                }
+            }
+
+            deleteNote(id) {
+                showConfirm('Hapus Catatan?', 'Yakin ingin menghapus catatan ini secara permanen?', () => {
+                    this.notes = this.notes.filter(n => n.id !== id);
+                    this.saveToStorage();
+                    this.displayNotes();
+                    if (this.currentNoteId === id) {
+                        this.clearEditor();
+                    }
+                    showMessage('Catatan dihapus!', 'success');
+                });
+            }
+
+            previewNote(id) {
+                const note = this.notes.find(n => n.id === id);
+                if (note) {
+                    this.dom.previewContent.innerHTML = `
+                        <h2 class="font-bold text-2xl mb-2 text-purple-300">${note.title || 'Tanpa Judul'}</h2>
+                        <p class="text-sm text-gray-400 mb-4">${this.formatDate(note.date)}</p>
+                        <div class="prose max-w-none">${note.content}</div>
+                    `;
+                    this.dom.previewModal.classList.add('show');
+                }
+            }
+
+            closePreview() {
+                this.dom.previewModal.classList.remove('show');
+            }
+
+            clearEditor() {
+                this.dom.titleInput.value = '';
+                this.dom.editorContent.innerHTML = '';
+                this.dom.tagsInput.value = '';
+                this.dom.moodSelector.value = 'neutral';
+                this.dom.dateFilter.value = new Date().toISOString().split('T')[0];
+                this.currentNoteId = null;
+            }
+
+            addNewNote() {
+                this.clearEditor();
+                this.dom.titleInput.focus();
+                showMessage('Editor siap untuk catatan baru.', 'info');
+            }
+
+            filterNotes() {
+                const query = this.dom.searchInput.value.toLowerCase();
+                const mood = this.dom.moodFilter.value;
+                
+                let filtered = this.notes;
+
+                if (query) {
+                    filtered = filtered.filter(note =>
+                        (note.title && note.title.toLowerCase().includes(query)) ||
+                        note.content.toLowerCase().includes(query) ||
+                        note.tags.some(tag => tag.toLowerCase().includes(query))
+                    );
+                }
+                if (mood) {
+                    filtered = filtered.filter(note => note.mood === mood);
+                }
+                
+                this.displayNotes(filtered);
+            }
+
+            exportContent(format) {
+                const title = this.dom.titleInput.value.trim() || "Catatan Tanpa Judul";
+                const content = this.dom.editorContent.innerHTML;
+                const note = this.notes.find(n => n.id === this.currentNoteId);
+
+                if (!content.trim()) {
+                    showMessage("Tidak ada konten untuk diekspor.", "error");
+                    return;
+                }
+
+                const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${format === 'json' ? 'txt' : format}`;
+
+                if (format === 'html') {
+                    const htmlContent = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family: sans-serif; line-height: 1.6; padding: 2rem;} img, video {max-width: 100%; height: auto;}</style></head><body><h1>${title}</h1>${content}</body></html>`;
+                    this.downloadFile(filename, htmlContent, 'text/html');
+                } else if (format === 'json') {
+                    const jsonContent = JSON.stringify({
+                        title: title,
+                        content: content,
+                        tags: note ? note.tags : [],
+                        mood: note ? note.mood : 'neutral',
+                        date: note ? note.date : new Date().toISOString()
+                    }, null, 2);
+                    this.downloadFile(filename, jsonContent, 'application/json');
+                } else if (format === 'pdf') {
+                    showMessage("Membuat PDF...", "info");
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Buat elemen sementara untuk rendering
+                    const tempContainer = document.createElement('div');
+                    tempContainer.innerHTML = `<h1>${title}</h1>${content}`;
+                    Object.assign(tempContainer.style, {
+                        position: 'absolute',
+                        left: '-9999px',
+                        width: '700px', // Lebar konten PDF
+                        padding: '20px',
+                        color: '#000', // Pastikan teks terlihat
+                        background: '#fff'
+                    });
+                    document.body.appendChild(tempContainer);
+                    
+                    html2canvas(tempContainer, { scale: 2 }).then(canvas => {
+                        document.body.removeChild(tempContainer);
+                        const imgData = canvas.toDataURL('image/png');
+                        const imgProps = doc.getImageProperties(imgData);
+                        const pdfWidth = doc.internal.pageSize.getWidth();
+                        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                        let heightLeft = pdfHeight;
+                        let position = 0;
+                        
+                        doc.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                        heightLeft -= doc.internal.pageSize.getHeight();
+
+                        while (heightLeft >= 0) {
+                            position = heightLeft - pdfHeight;
+                            doc.addPage();
+                            doc.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+                            heightLeft -= doc.internal.pageSize.getHeight();
+                        }
+                        doc.save(filename);
+                    }).catch(err => {
+                        console.error("Gagal membuat PDF:", err);
+                        showMessage("Gagal membuat PDF.", "error");
+                        document.body.removeChild(tempContainer);
+                    });
+                }
+            }
+
+            downloadFile(filename, content, mimeType) {
+                const blob = new Blob([content], { type: mimeType });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }
+
+            countWords(html) {
+                const text = html.replace(/<[^>]*>/g, '');
+                return text.trim().split(/\s+/).filter(Boolean).length;
+            }
+
+            formatDate(dateString) {
+                return new Date(dateString).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
+            }
+
+            truncateContent(html, length) {
+                const text = html.replace(/<[^>]*>/g, '');
+                if (text.length <= length) return text;
+                return text.substring(0, length) + '...';
+            }
+        }
+
+
         // --- GLOBAL VARIABLES & STATE MANAGEMENT ---
         let currentSection = 'dashboard';
         let currentDate = new Date();
@@ -695,9 +1478,7 @@
         let touchEndX = 0;
         let isDragging = false;
         
-        // State untuk rentang waktu
         let masterDateRange = '7d';
-
         let customDateRange = { start: null, end: null };
         
         // --- DATA STORAGE ---
@@ -714,25 +1495,20 @@
                 localStorage.setItem(key, JSON.stringify(value));
             },
             getAppData: () => {
-                return storage.get('lifeHubData_v3', {
+                return storage.get('lifeHubData_v4.6', {
                     currentMode: 'personal',
                     isLightMode: false,
                     isVideoMuted: true,
-                    personal: { transactions: [], tasks: [], splitBills: [], diaryEntries: [] },
-                    business: { transactions: [], tasks: [], splitBills: [], diaryEntries: [] }
+                    personal: { transactions: [], tasks: [], splitBills: [] },
+                    business: { transactions: [], tasks: [], splitBills: [] }
                 });
             },
             saveAppData: (data) => {
-                storage.set('lifeHubData_v3', data);
+                storage.set('lifeHubData_v4.6', data);
             }
         };
 
         // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-            setupEventListeners();
-        });
-
         function initializeApp() {
             const appData = storage.getAppData();
             currentMode = appData.currentMode || 'personal';
@@ -746,66 +1522,12 @@
             document.getElementById('bg-video').muted = appData.isVideoMuted;
             updateVideoSoundUI();
             
+            const splitBillDateInput = document.getElementById('splitBillDate');
+            if (splitBillDateInput) {
+                splitBillDateInput.value = new Date().toISOString().split('T')[0];
+            }
+            
             switchSection('dashboard');
-        }
-
-        function setupEventListeners() {
-            // Navigation & Theme
-            document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchSection(item.dataset.section)));
-            document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
-            document.getElementById('overlay').addEventListener('click', closeMobileMenu);
-            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-            document.getElementById('modeSelect').addEventListener('change', switchMode);
-            document.getElementById('logo-icon').addEventListener('click', enterPreviewMode);
-
-            // Finance
-            document.getElementById('addTransactionBtn').addEventListener('click', () => showTransactionModal());
-            document.getElementById('exportFinanceBtn').addEventListener('click', exportFinancePDF);
-            document.getElementById('searchTransaction').addEventListener('input', filterAndRenderTransactions);
-            document.getElementById('categoryFilter').addEventListener('change', filterAndRenderTransactions);
-            document.getElementById('typeFilter').addEventListener('change', filterAndRenderTransactions);
-            document.getElementById('financeDateFilterBtn').addEventListener('click', () => showDateRangeModal('finance'));
-
-            // Tasks & Plans
-            document.getElementById('taskForm').addEventListener('submit', saveTask);
-            document.getElementById('startTimerBtn').addEventListener('click', startTimer);
-            document.getElementById('pauseTimerBtn').addEventListener('click', pauseTimer);
-            document.getElementById('resetTimerBtn').addEventListener('click', resetTimer);
-            document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
-            document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
-
-            // Split Bill
-            document.getElementById('splitBillForm').addEventListener('submit', calculateSplitBill);
-
-            // Diary
-            document.getElementById('newEntryBtn').addEventListener('click', () => showDiaryModal());
-            document.getElementById('searchDiary').addEventListener('input', renderDiary);
-            document.getElementById('exportDiaryBtn').addEventListener('click', exportDiaryPDF);
-
-            // Settings
-            document.getElementById('backupData').addEventListener('click', backupData);
-            document.getElementById('restoreData').addEventListener('click', restoreData);
-            document.getElementById('clearAllData').addEventListener('click', () => {
-                showConfirm('Hapus Semua Data?', 'Operasi ini tidak dapat diurungkan. Anda yakin ingin menghapus semua data personal dan bisnis?', clearAllDataConfirmed);
-            });
-            
-            // Background Media Uploader
-            document.getElementById('applyBgMediaBtn').addEventListener('click', applyUploadedMedia);
-            document.getElementById('resetBgMediaBtn').addEventListener('click', resetBackgroundMedia);
-            document.getElementById('toggleVideoSoundBtn').addEventListener('click', toggleVideoSound);
-
-            // Swipe/Drag Listeners
-            document.body.addEventListener('touchstart', handleTouchStart, { passive: true });
-            document.body.addEventListener('touchend', handleTouchEnd);
-            document.body.addEventListener('mousedown', handleMouseDown);
-            document.body.addEventListener('mouseup', handleMouseUp);
-            
-            // Setup untuk Master Filter
-            setupMasterRangeSelector();
-
-            // Event listeners untuk modal rentang tanggal
-            document.getElementById('applyDateRange').addEventListener('click', applyDateRange);
-            document.getElementById('cancelDateRange').addEventListener('click', () => document.getElementById('dateRangeModal').classList.remove('show'));
         }
 
         // --- PREVIEW MODE LOGIC ---
@@ -845,7 +1567,7 @@
                 case 'finance': loadFinancePage(); break;
                 case 'tasks': loadTasksPage(); break;
                 case 'split': loadSplitPage(); break;
-                case 'diary': renderDiary(); break;
+                case 'diary': /* DiaryApp handles its own loading */ break;
             }
             closeMobileMenu();
         }
@@ -912,12 +1634,10 @@
             const filteredTransactions = filterDataByRange(modeData.transactions, masterDateRange, 'date');
             const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime');
             const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date');
-            const filteredDiary = filterDataByRange(modeData.diaryEntries, masterDateRange, 'date');
-
+            
             filteredTransactions.forEach(t => activities.push({ type: 'transaction', icon: t.type === 'income' ? 'fa-arrow-up text-green-500' : 'fa-arrow-down text-pink-500', text: `${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: ${formatCurrency(t.amount)}`, time: t.date }));
             filteredTasks.forEach(p => activities.push({ type: 'task', icon: 'fa-calendar-check text-blue-500', text: `Tugas: ${p.title}`, time: p.datetime }));
             filteredSplits.forEach(s => activities.push({ type: 'split', icon: 'fa-receipt text-green-500', text: `Split Bill: ${formatCurrency(s.totalBill)}`, time: s.date }));
-            filteredDiary.forEach(d => activities.push({ type: 'diary', icon: 'fa-book text-purple-500', text: `Diary: ${d.title}`, time: d.date }));
 
             activities.sort((a, b) => new Date(b.time) - new Date(a.time));
             const container = document.getElementById('recentActivities');
@@ -1208,11 +1928,15 @@
         function updateTimerDisplay() { document.getElementById('timerDisplay').textContent = `${String(timerMinutes).padStart(2, '0')}:${String(timerSeconds).padStart(2, '0')}`; }
 
         // --- SPLIT BILL ---
-        function loadSplitPage() { renderSplitHistory(); }
+        function loadSplitPage() { 
+            document.getElementById('splitBillDate').value = new Date().toISOString().split('T')[0];
+            renderSplitHistory(); 
+        }
 
         function calculateSplitBill(e) {
             e.preventDefault();
             const totalBill = parseFloat(document.getElementById('totalBill').value);
+            const billDate = document.getElementById('splitBillDate').value;
             const peopleNames = document.getElementById('peopleNames').value.split(',').map(name => name.trim()).filter(name => name);
             const percentagesStr = document.getElementById('splitPercentages').value;
             const percentages = percentagesStr ? percentagesStr.split(',').map(p => parseFloat(p.trim())) : [];
@@ -1238,32 +1962,28 @@
                     showMessage('Mohon masukkan persentase yang valid.', 'error');
                     return;
                 }
-
                 results = peopleNames.map((name, index) => ({
                     name,
                     amount: (totalBill * percentages[index]) / 100,
                     percentage: percentages[index]
                 }));
-
             } else {
                 const amountPerPerson = totalBill / peopleNames.length;
-                results = peopleNames.map(name => ({
-                    name,
-                    amount: amountPerPerson
-                }));
+                results = peopleNames.map(name => ({ name, amount: amountPerPerson }));
             }
             
-            const splitBill = { id: generateId(), totalBill, results, date: new Date().toISOString().split('T')[0], type: percentages.length > 0 ? 'custom' : 'equal' };
+            const splitBill = { id: generateId(), totalBill, results, date: billDate, type: percentages.length > 0 ? 'custom' : 'equal' };
             let appData = storage.getAppData();
             appData[currentMode].splitBills.push(splitBill);
             storage.saveAppData(appData);
 
-            displaySplitResults(results, totalBill);
+            displaySplitResults(results, totalBill, billDate);
             renderSplitHistory();
             document.getElementById('splitBillForm').reset();
+            document.getElementById('splitBillDate').value = new Date().toISOString().split('T')[0];
         }
 
-        function displaySplitResults(results, totalBill) {
+        function displaySplitResults(results, totalBill, date) {
             const resultDiv = document.getElementById('splitResult');
             resultDiv.innerHTML = `<h4 class="font-bold mb-2">Total: ${formatCurrency(totalBill)}</h4>` + results.map(r => `
                 <div class="flex justify-between p-2 border-b border-purple-900/50">
@@ -1272,7 +1992,7 @@
                 </div>
             `).join('');
             document.getElementById('splitResultCard').classList.remove('hidden');
-            document.getElementById('exportSplitBtn').onclick = () => exportSplitBillPDF(results, totalBill);
+            document.getElementById('exportSplitBtn').onclick = () => exportSplitBillPDF(results, totalBill, date);
         }
 
         function renderSplitHistory() {
@@ -1302,103 +2022,9 @@
             renderSplitHistory();
         }
 
-        // --- DIARY ---
-        function renderDiary() {
-            const appData = storage.getAppData();
-            let entries = appData[currentMode].diaryEntries;
-            const query = document.getElementById('searchDiary').value.toLowerCase();
-            if (query) {
-                entries = entries.filter(e => e.title.toLowerCase().includes(query) || e.content.toLowerCase().includes(query));
-            }
-            
-            const container = document.getElementById('diaryEntries');
-            container.innerHTML = [...entries].reverse().map(entry => `
-                <div class="glass-effect p-6 cursor-pointer hover:border-pink-400/20" onclick="showDiaryModal('${entry.id}')">
-                    <h4 class="text-xl font-bold text-pink-400">${entry.title}</h4>
-                    <p class="text-sm text-gray-400 mb-2">${formatDate(entry.date)}</p>
-                    <p class="truncate">${entry.content}</p>
-                    ${entry.image ? '<i class="fas fa-image text-blue-400 mt-2"></i>' : ''}
-                </div>`).join('') || '<p class="text-gray-500 text-center">Belum ada entri diary.</p>';
-        }
-
-        function showDiaryModal(id = null) {
-            const appData = storage.getAppData();
-            const entry = id ? appData[currentMode].diaryEntries.find(e => e.id === id) : null;
-            const content = `
-                <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-purple-600">${id ? 'Edit' : 'Tambah'} Entri Diary</h3><button class="closeModal text-gray-400 hover:text-purple-600"><i class="fas fa-times"></i></button></div>
-                <form id="diaryForm" class="space-y-4">
-                    <input type="hidden" id="diaryId" value="${id || ''}">
-                    ${entry?.image ? `<img src="${entry.image}" class="max-w-full rounded-md mb-4 max-h-48">` : ''}
-                    <div><label class="block text-sm font-medium mb-1">Judul</label><input type="text" id="diaryTitle" class="custom-input" value="${entry?.title || ''}" required></div>
-                    <div><label class="block text-sm font-medium mb-1">Tanggal</label><input type="date" id="diaryDate" class="custom-input" value="${entry?.date || new Date().toISOString().split('T')[0]}" required></div>
-                    <div><label class="block text-sm font-medium mb-1">Konten</label><textarea id="diaryContent" class="custom-input" rows="6" required>${entry?.content || ''}</textarea></div>
-                    <div><label class="block text-sm font-medium mb-1">Gambar</label><input type="file" id="diaryImage" class="custom-input" accept="image/*"></div>
-                    <div class="flex gap-2 mt-6">
-                        ${id ? `<button type="button" id="deleteDiaryBtn" class="custom-button custom-button-danger">Hapus</button>` : ''}
-                        <button type="submit" class="custom-button flex-1">Simpan</button>
-                        <button type="button" class="closeModal custom-button custom-button-danger">Batal</button>
-                    </div>
-                </form>`;
-            showModal(content);
-            document.getElementById('diaryForm').addEventListener('submit', saveDiaryEntry);
-            if (id) {
-                document.getElementById('deleteDiaryBtn').addEventListener('click', () => confirmDeleteDiary(id));
-            }
-        }
-
-        function saveDiaryEntry(e) {
-            e.preventDefault();
-            const id = document.getElementById('diaryId').value || generateId();
-            const imageFile = document.getElementById('diaryImage').files[0];
-            
-            const entryData = {
-                id,
-                title: document.getElementById('diaryTitle').value,
-                date: document.getElementById('diaryDate').value,
-                content: document.getElementById('diaryContent').value,
-            };
-
-            const processSave = (imageData) => {
-                if (imageData) entryData.image = imageData;
-                let appData = storage.getAppData();
-                if (document.getElementById('diaryId').value) {
-                    const index = appData[currentMode].diaryEntries.findIndex(e => e.id === id);
-                    const existingImage = appData[currentMode].diaryEntries[index].image;
-                    entryData.image = imageData || existingImage;
-                    if (index > -1) appData[currentMode].diaryEntries[index] = entryData;
-                } else {
-                    appData[currentMode].diaryEntries.push(entryData);
-                }
-                storage.saveAppData(appData);
-                renderDiary();
-                closeModal();
-                showMessage("Entri diary disimpan!", "success");
-            };
-
-            if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = (e) => processSave(e.target.result);
-                reader.readAsDataURL(imageFile);
-            } else {
-                processSave(null);
-            }
-        }
-        
-        function confirmDeleteDiary(id) {
-            showConfirm('Hapus Entri?', 'Yakin ingin menghapus entri diary ini?', () => deleteDiaryEntry(id));
-        }
-
-        function deleteDiaryEntry(id) {
-            let appData = storage.getAppData();
-            appData[currentMode].diaryEntries = appData[currentMode].diaryEntries.filter(e => e.id !== id);
-            storage.saveAppData(appData);
-            renderDiary();
-            closeModal();
-        }
-
         // --- SETTINGS & DATA MANAGEMENT ---
         function backupData() {
-            const data = storage.get('lifeHubData_v3');
+            const data = storage.get('lifeHubData_v4.6');
             if (!data) {
                 showMessage("Tidak ada data untuk di-backup.", "error");
                 return;
@@ -1439,7 +2065,8 @@
         }
 
         function clearAllDataConfirmed() {
-            localStorage.removeItem('lifeHubData_v3');
+            localStorage.removeItem('lifeHubData_v4.6');
+            localStorage.removeItem('diaryNotes_v4.6'); // Also clear diary data
             initializeApp();
             showMessage("Semua data telah dihapus.", "success");
         }
@@ -1556,47 +2183,24 @@
             doc.save(`laporan-keuangan-${currentMode}.pdf`);
         }
         
-        function exportSplitBillPDF(results, totalBill) {
+        function exportSplitBillPDF(results, totalBill, date) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
+            doc.setFontSize(16);
             doc.text('Laporan Split Bill', 20, 20);
+            doc.setFontSize(12);
             doc.text(`Total Tagihan: ${formatCurrency(totalBill)}`, 20, 30);
+            doc.text(`Tanggal: ${formatDate(date)}`, 20, 38);
             
             const tableData = results.map(r => [r.name, formatCurrency(r.amount)]);
             doc.autoTable({
                 head: [['Nama', 'Jumlah Bayar']],
                 body: tableData,
-                startY: 40
+                startY: 45
             });
             doc.save('split-bill.pdf');
         }
         
-        function exportDiaryPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const appData = storage.getAppData();
-            const entries = appData[currentMode].diaryEntries;
-            
-            doc.text('Ekspor Diary', 20, 20);
-            let y = 30;
-            
-            entries.forEach(entry => {
-                if (y > 250) { doc.addPage(); y = 20; }
-                doc.setFontSize(14);
-                doc.text(entry.title, 20, y);
-                y += 7;
-                doc.setFontSize(10);
-                doc.text(formatDate(entry.date), 20, y);
-                y += 10;
-                doc.setFontSize(12);
-                const lines = doc.splitTextToSize(entry.content, 170);
-                doc.text(lines, 20, y);
-                y += (lines.length * 5) + 10;
-            });
-            
-            doc.save(`diary-${currentMode}.pdf`);
-        }
-
         // --- CHARTS ---
         function getChartColors() {
             const isLight = document.body.classList.contains('light-mode');
@@ -1625,28 +2229,25 @@
 
             const colors = getChartColors();
             const appData = storage.getAppData();
-            let transactions = filterDataByRange(appData[currentMode].transactions, masterDateRange, 'date');
+            const transactions = filterDataByRange(appData[currentMode].transactions, masterDateRange, 'date');
             
-            const { labels, dataPoints } = getDateRangeAndLabels(masterDateRange, customDateRange, transactions.map(t => ({date: t.date})));
+            const { labels, dataPoints } = getTimeBuckets(masterDateRange, transactions, 'date');
+            
             const incomeData = new Array(labels.length).fill(0);
             const expenseData = new Array(labels.length).fill(0);
 
             transactions.forEach(t => {
-                const tDate = new Date(t.date + 'T00:00:00'); 
-                const dateStr = t.date;
-                const index = dataPoints.findIndex(dp => {
-                    if (dp instanceof Date) { 
-                        const dpEnd = new Date(dp);
-                        if (getGroupingUnit(masterDateRange, customDateRange) === 'week') dpEnd.setDate(dp.getDate() + 7);
-                        else if (getGroupingUnit(masterDateRange, customDateRange) === 'month') dpEnd.setMonth(dp.getMonth() + 1);
-                        return tDate >= dp && tDate < dpEnd;
+                const itemDate = new Date(t.date + 'T00:00:00Z');
+                let bucketIndex = -1;
+                for (let i = dataPoints.length - 1; i >= 0; i--) {
+                    if (itemDate >= dataPoints[i]) {
+                        bucketIndex = i;
+                        break;
                     }
-                    return dp === dateStr; 
-                });
-
-                if (index !== -1) {
-                    if (t.type === 'income') incomeData[index] += t.amount;
-                    else expenseData[index] += t.amount;
+                }
+                if (bucketIndex !== -1) {
+                    if (t.type === 'income') incomeData[bucketIndex] += t.amount;
+                    else expenseData[bucketIndex] += t.amount;
                 }
             });
 
@@ -1679,23 +2280,19 @@
             const appData = storage.getAppData();
             const tasks = filterDataByRange(appData[currentMode].tasks, masterDateRange, 'datetime');
 
-            const { labels, dataPoints } = getDateRangeAndLabels(masterDateRange, customDateRange, tasks.map(t => ({date: t.datetime})));
+            const { labels, dataPoints } = getTimeBuckets(masterDateRange, tasks, 'datetime');
             const completedCounts = new Array(labels.length).fill(0);
             
             tasks.filter(t => t.completed && t.datetime).forEach(t => {
-                const tDate = new Date(t.datetime);
-                const dateStr = t.datetime.split('T')[0];
-                const index = dataPoints.findIndex(dp => {
-                     if (dp instanceof Date) {
-                        const dpEnd = new Date(dp);
-                        if (getGroupingUnit(masterDateRange, customDateRange) === 'week') dpEnd.setDate(dp.getDate() + 7);
-                        else if (getGroupingUnit(masterDateRange, customDateRange) === 'month') dpEnd.setMonth(dp.getMonth() + 1);
-                        return tDate >= dp && tDate < dpEnd;
+                const itemDate = new Date(t.datetime);
+                let bucketIndex = -1;
+                for (let i = dataPoints.length - 1; i >= 0; i--) {
+                    if (itemDate >= dataPoints[i]) {
+                        bucketIndex = i;
+                        break;
                     }
-                    return dp === dateStr;
-                });
-
-                if (index !== -1) completedCounts[index]++;
+                }
+                if (bucketIndex !== -1) completedCounts[bucketIndex]++;
             });
 
             window.productivityChartInstance = new Chart(ctx, {
@@ -1721,12 +2318,12 @@
                 }
             });
         }
-
-        // --- FUNGSI UNTUK HALAMAN ANALISIS DATA ---
+        
         function loadAnalysisCharts() {
             const appData = storage.getAppData();
             const modeData = appData[currentMode];
             const colors = getChartColors();
+            const diaryNotes = JSON.parse(localStorage.getItem('diaryNotes_v4.6') || '[]');
 
             Chart.defaults.color = colors.legendColor;
             Chart.defaults.font.family = "'Poppins', 'sans-serif'";
@@ -1736,24 +2333,23 @@
                 if (window[id + 'Instance']) window[id + 'Instance'].destroy();
             });
             
-            // 1. Analisis Gabungan
             const filteredPersonalTransactions = filterDataByRange(appData.personal.transactions, masterDateRange, 'date');
             const filteredPersonalTasks = filterDataByRange(appData.personal.tasks, masterDateRange, 'datetime');
             const filteredPersonalSplits = filterDataByRange(appData.personal.splitBills, masterDateRange, 'date');
-            const filteredPersonalDiary = filterDataByRange(appData.personal.diaryEntries, masterDateRange, 'date');
             
             const filteredBusinessTransactions = filterDataByRange(appData.business.transactions, masterDateRange, 'date');
             const filteredBusinessTasks = filterDataByRange(appData.business.tasks, masterDateRange, 'datetime');
             const filteredBusinessSplits = filterDataByRange(appData.business.splitBills, masterDateRange, 'date');
-            const filteredBusinessDiary = filterDataByRange(appData.business.diaryEntries, masterDateRange, 'date');
+            
+            const filteredDiary = filterDataByRange(diaryNotes, masterDateRange, 'date');
 
             const personalData = {
                 finance: filteredPersonalTransactions.length, tasks: filteredPersonalTasks.length,
-                splitBill: filteredPersonalSplits.length, diary: filteredPersonalDiary.length,
+                splitBill: filteredPersonalSplits.length, diary: filteredDiary.length,
             };
             const businessData = {
                 finance: filteredBusinessTransactions.length, tasks: filteredBusinessTasks.length,
-                splitBill: filteredBusinessSplits.length, diary: filteredBusinessDiary.length,
+                splitBill: filteredBusinessSplits.length, diary: 0, // Diary is not per-mode
             };
 
             const combinedCtx = document.getElementById('combinedAnalysisChart').getContext('2d');
@@ -1773,12 +2369,11 @@
                 }
             });
 
-            // 2. Analisis Keuangan
             const filteredFinance = filterDataByRange(modeData.transactions, masterDateRange, 'date');
+            const financialData = processTimeSeriesData(filteredFinance, 'date', masterDateRange);
             const incomeVsExpenseCtx = document.getElementById('incomeVsExpenseChart').getContext('2d');
-            const { labels: monthLabels, data: financialData } = processMonthlyFinancials(filteredFinance, masterDateRange);
             window.incomeVsExpenseChartInstance = new Chart(incomeVsExpenseCtx, {
-                type: 'bar', data: { labels: monthLabels, datasets: [ { label: 'Pemasukan', data: financialData.income, backgroundColor: 'rgba(74, 222, 128, 0.7)' }, { label: 'Pengeluaran', data: financialData.expense, backgroundColor: 'rgba(244, 114, 182, 0.7)' } ] },
+                type: 'bar', data: { labels: financialData.labels, datasets: [ { label: 'Pemasukan', data: financialData.income, backgroundColor: 'rgba(74, 222, 128, 0.7)' }, { label: 'Pengeluaran', data: financialData.expense, backgroundColor: 'rgba(244, 114, 182, 0.7)' } ] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: { color: colors.gridColor } } } }
             });
 
@@ -1789,12 +2384,11 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
-            // 3. Analisis Produktivitas
             const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime');
+            const taskData = processTimeSeriesData(filteredTasks, 'datetime', masterDateRange);
             const taskTrendCtx = document.getElementById('taskCompletionTrendChart').getContext('2d');
-            const { labels: taskMonthLabels, data: taskData } = processMonthlyTasks(filteredTasks, masterDateRange);
             window.taskCompletionTrendChartInstance = new Chart(taskTrendCtx, {
-                type: 'line', data: { labels: taskMonthLabels, datasets: [ { label: 'Dibuat', data: taskData.created, borderColor: '#60a5fa', tension: 0.3 }, { label: 'Selesai', data: taskData.completed, borderColor: '#4ade80', tension: 0.3 } ] },
+                type: 'line', data: { labels: taskData.labels, datasets: [ { label: 'Dibuat', data: taskData.created, borderColor: '#60a5fa', tension: 0.3 }, { label: 'Selesai', data: taskData.completed, borderColor: '#4ade80', tension: 0.3 } ] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } }
             });
 
@@ -1805,7 +2399,6 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
 
-            // 4. Analisis Split Bill
             const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date');
             const splitByUserCtx = document.getElementById('splitBillByUserChart').getContext('2d');
             const { labels: userLabels, data: userSpendingData } = processSplitBillByUser(filteredSplits);
@@ -1814,38 +2407,59 @@
                 options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { grid: { color: colors.gridColor } }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } }
             });
 
+            const splitFreqData = processTimeSeriesData(filteredSplits, 'date', masterDateRange);
             const splitFreqCtx = document.getElementById('splitBillFrequencyChart').getContext('2d');
-            const { labels: splitMonthLabels, data: splitFreqData } = processSplitBillFrequency(filteredSplits, masterDateRange);
             window.splitBillFrequencyChartInstance = new Chart(splitFreqCtx, {
-                type: 'line', data: { labels: splitMonthLabels, datasets: [{ label: 'Jumlah Split Bill', data: splitFreqData, borderColor: '#22d3ee', tension: 0.3, fill: true, backgroundColor: 'rgba(34, 211, 238, 0.2)' }] },
+                type: 'line', data: { labels: splitFreqData.labels, datasets: [{ label: 'Jumlah Split Bill', data: splitFreqData.count, borderColor: '#22d3ee', tension: 0.3, fill: true, backgroundColor: 'rgba(34, 211, 238, 0.2)' }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } }
             });
 
-            // 5. Analisis Diary
-            const filteredDiary = filterDataByRange(modeData.diaryEntries, masterDateRange, 'date');
+            const diaryData = processTimeSeriesData(filteredDiary, 'date', masterDateRange);
             const diaryCtx = document.getElementById('diaryEntryFrequencyChart').getContext('2d');
-            const { labels: diaryMonthLabels, data: diaryData } = processMonthlyDiaryEntries(filteredDiary, masterDateRange);
             window.diaryEntryFrequencyChartInstance = new Chart(diaryCtx, {
-                type: 'bar', data: { labels: diaryMonthLabels, datasets: [{ label: 'Jumlah Entri', data: diaryData, backgroundColor: 'rgba(192, 132, 252, 0.7)', borderRadius: 5 }] },
+                type: 'bar', data: { labels: diaryData.labels, datasets: [{ label: 'Jumlah Entri', data: diaryData.count, backgroundColor: 'rgba(192, 132, 252, 0.7)', borderRadius: 5 }] },
                 options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } }
             });
         }
 
-        // --- FUNGSI PEMROSESAN DATA UNTUK ANALISIS ---
-        function processMonthlyFinancials(transactions, range) {
-            const { labels, dataPoints } = getDateRangeAndLabels(range, customDateRange, transactions.map(t => ({date: t.date})));
-            const income = new Array(labels.length).fill(0);
-            const expense = new Array(labels.length).fill(0);
-            
-            transactions.forEach(t => {
-                const tDate = new Date(t.date);
-                const index = dataPoints.findIndex(dp => tDate >= dp && tDate < new Date(dp).setMonth(dp.getMonth()+1));
-                if(index > -1) {
-                    if (t.type === 'income') income[index] += t.amount;
-                    else expense[index] += t.amount;
+        // --- UTILITY & HELPER FUNCTIONS ---
+        function processTimeSeriesData(data, dateKey, range) {
+            const { labels, dataPoints } = getTimeBuckets(range, data, dateKey);
+            const isFinance = data.length > 0 && 'type' in data[0] && 'amount' in data[0];
+            const isTask = data.length > 0 && 'completed' in data[0];
+            let results = {};
+            if (isFinance) {
+                results.income = new Array(labels.length).fill(0);
+                results.expense = new Array(labels.length).fill(0);
+            } else if (isTask) {
+                results.created = new Array(labels.length).fill(0);
+                results.completed = new Array(labels.length).fill(0);
+            } else {
+                results.count = new Array(labels.length).fill(0);
+            }
+            data.forEach(item => {
+                if (!item[dateKey]) return;
+                const itemDate = new Date(item[dateKey]);
+                let bucketIndex = -1;
+                for (let i = dataPoints.length - 1; i >= 0; i--) {
+                    if (itemDate >= dataPoints[i]) {
+                        bucketIndex = i;
+                        break;
+                    }
+                }
+                if (bucketIndex !== -1) {
+                    if (isFinance) {
+                        if (item.type === 'income') results.income[bucketIndex] += item.amount;
+                        else results.expense[bucketIndex] += item.amount;
+                    } else if (isTask) {
+                        results.created[bucketIndex]++;
+                        if (item.completed) results.completed[bucketIndex]++;
+                    } else {
+                        results.count[bucketIndex]++;
+                    }
                 }
             });
-            return { labels, data: { income, expense } };
+            return { labels, ...results };
         }
 
         function processSpendingByCategory(transactions) {
@@ -1861,23 +2475,6 @@
             };
         }
 
-        function processMonthlyTasks(tasks, range) {
-            const { labels, dataPoints } = getDateRangeAndLabels(range, customDateRange, tasks.map(t => ({date: t.datetime})));
-            const created = new Array(labels.length).fill(0);
-            const completed = new Array(labels.length).fill(0);
-
-            tasks.forEach(t => {
-                if(!t.datetime) return;
-                const tDate = new Date(t.datetime);
-                const index = dataPoints.findIndex(dp => tDate >= dp && tDate < new Date(dp).setMonth(dp.getMonth()+1));
-                if (index > -1) {
-                    created[index]++;
-                    if (t.completed) completed[index]++;
-                }
-            });
-            return { labels, data: { created, completed } };
-        }
-
         function processTaskPriorities(tasks) {
             const priorities = { high: 0, medium: 0, low: 0 };
             tasks.filter(t => !t.completed).forEach(t => {
@@ -1887,17 +2484,6 @@
                 labels: ['Tinggi', 'Sedang', 'Rendah'],
                 data: [priorities.high, priorities.medium, priorities.low]
             };
-        }
-        
-        function processMonthlyDiaryEntries(entries, range) {
-             const { labels, dataPoints } = getDateRangeAndLabels(range, customDateRange, entries.map(e => ({date: e.date})));
-            const data = new Array(labels.length).fill(0);
-            entries.forEach(e => {
-                const eDate = new Date(e.date);
-                const index = dataPoints.findIndex(dp => eDate >= dp && eDate < new Date(dp).setMonth(dp.getMonth()+1));
-                if (index > -1) data[index]++;
-            });
-            return { labels, data };
         }
 
         function processSplitBillByUser(splitBills) {
@@ -1914,111 +2500,60 @@
             };
         }
 
-        function processSplitBillFrequency(splitBills, range) {
-            const { labels, dataPoints } = getDateRangeAndLabels(range, customDateRange, splitBills.map(s => ({date: s.date})));
-            const data = new Array(labels.length).fill(0);
-
-            splitBills.forEach(bill => {
-                const billDate = new Date(bill.date);
-                const index = dataPoints.findIndex(dp => billDate >= dp && billDate < new Date(dp).setMonth(dp.getMonth()+1));
-                if (index > -1) data[index]++;
-            });
-            return { labels, data };
-        }
-
-
-        // --- UTILITY & HELPER FUNCTIONS ---
-        function getGroupingUnit(range, customRange) {
-            const currentRange = (typeof range === 'object' && range.type === 'custom') ? range : { type: 'preset', value: range };
-            
-            if (currentRange.type === 'custom') {
-                const diffTime = Math.abs(new Date(currentRange.end) - new Date(currentRange.start));
+        function getGroupingUnit(range) {
+            if (typeof range === 'object' && range.type === 'custom') {
+                const diffTime = Math.abs(new Date(range.end) - new Date(range.start));
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 if (diffDays > 90) return 'month';
                 if (diffDays > 30) return 'week';
                 return 'day';
             }
-            if (['7d', '1m'].includes(currentRange.value)) return 'day';
-            if (currentRange.value === '3m') return 'week';
-            if (['1y', 'all', '6m'].includes(currentRange.value)) return 'month';
+            if (['7d', '1m'].includes(range)) return 'day';
+            if (range === '3m') return 'week';
+            if (['1y', 'all'].includes(range)) return 'month';
+            return 'day';
         }
 
-        function getDateRangeAndLabels(range, customRange, data) {
+        function getTimeBuckets(range, data, dateKey) {
             const labels = [];
             const dataPoints = [];
             const now = new Date();
-            now.setHours(23, 59, 59, 999);
-            
-            const currentRange = (typeof range === 'object' && range.type === 'custom') ? range : { type: 'preset', value: range };
-
-            if (currentRange.type === 'custom') {
-                const start = new Date(currentRange.start);
-                const end = new Date(currentRange.end);
-                const unit = getGroupingUnit(range, customRange);
-                let current = new Date(start);
-
-                if (unit === 'day') {
-                    while (current <= end) {
-                        labels.push(current.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }));
-                        dataPoints.push(current.toISOString().split('T')[0]);
-                        current.setDate(current.getDate() + 1);
-                    }
-                } else if (unit === 'week') {
-                     while (current <= end) {
-                        labels.push(`W${getWeekNumber(current)}`);
-                        dataPoints.push(new Date(current));
-                        current.setDate(current.getDate() + 7);
-                    }
-                } else if (unit === 'month') {
-                    current = new Date(start.getFullYear(), start.getMonth(), 1);
-                    while (current <= end) {
-                        labels.push(current.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }));
-                        dataPoints.push(new Date(current));
-                        current.setMonth(current.getMonth() + 1);
-                    }
+            const unit = getGroupingUnit(range);
+            let startDate, endDate = new Date(now);
+            if (typeof range === 'object' && range.type === 'custom') {
+                startDate = new Date(range.start + 'T00:00:00Z');
+                endDate = new Date(range.end + 'T23:59:59Z');
+            } else if (range === 'all') {
+                const validData = data.filter(d => d[dateKey]);
+                if (validData.length === 0) {
+                    startDate = new Date();
+                    startDate.setMonth(startDate.getMonth() - 1);
+                } else {
+                    startDate = new Date(validData.reduce((min, p) => (p[dateKey] < min) ? p[dateKey] : min, validData[0][dateKey]));
                 }
-                return { labels, dataPoints };
+            } else {
+                startDate = new Date(now);
+                if (range === '7d') startDate.setDate(now.getDate() - 6);
+                else if (range === '1m') startDate.setDate(now.getDate() - 29);
+                else if (range === '3m') startDate.setMonth(now.getMonth() - 3);
+                else if (range === '1y') startDate.setFullYear(now.getFullYear() - 1);
             }
-
-            switch (currentRange.value) {
-                case '7d':
-                    for (let i = 6; i >= 0; i--) {
-                        const date = new Date(); date.setDate(now.getDate() - i);
-                        labels.push(date.toLocaleDateString('id-ID', { weekday: 'short' }));
-                        dataPoints.push(date.toISOString().split('T')[0]);
-                    }
-                    return { labels, dataPoints };
-
-                case '1m':
-                    for (let i = 29; i >= 0; i--) {
-                        const date = new Date(); date.setDate(now.getDate() - i);
-                        labels.push(date.toLocaleDateString('id-ID', { day: 'numeric' }));
-                        dataPoints.push(date.toISOString().split('T')[0]);
-                    }
-                    return { labels, dataPoints };
-
-                case '3m':
-                case '6m':
-                case '1y':
-                case 'all':
-                    const months = {'3m': 3, '6m': 6, '1y': 12};
-                    let firstDate = new Date();
-                    if(currentRange.value === 'all') {
-                        const validData = data.filter(d => d.date);
-                        if(validData.length === 0) firstDate = new Date();
-                        else firstDate = new Date(validData.reduce((min, p) => (p.date && p.date < min) ? p.date : min, validData[0].date));
-                    } else {
-                        firstDate.setMonth(now.getMonth() - (months[currentRange.value]));
-                    }
-                    
-                    let currentDateIter = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
-                    while (currentDateIter <= now) {
-                        labels.push(currentDateIter.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }));
-                        dataPoints.push(new Date(currentDateIter));
-                        currentDateIter.setMonth(currentDateIter.getMonth() + 1);
-                    }
-                    return { labels, dataPoints };
+            startDate.setHours(0, 0, 0, 0);
+            let current = new Date(startDate);
+            while (current <= endDate) {
+                dataPoints.push(new Date(current));
+                if (unit === 'day') {
+                    labels.push(current.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }));
+                    current.setDate(current.getDate() + 1);
+                } else if (unit === 'week') {
+                    labels.push(`W${getWeekNumber(current)}`);
+                    current.setDate(current.getDate() + 7);
+                } else {
+                    labels.push(current.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }));
+                    current.setMonth(current.getMonth() + 1);
+                }
             }
+            return { labels, dataPoints };
         }
 
         function getWeekNumber(d) {
@@ -2052,17 +2587,14 @@
             document.getElementById('confirmTitle').textContent = title;
             document.getElementById('confirmMessage').textContent = message;
             modal.classList.add('show');
-            
             const yesBtn = document.getElementById('confirmYes');
             const noBtn = document.getElementById('confirmNo');
-
             const yesHandler = () => { onConfirm(); closeModal(); cleanup(); };
             const noHandler = () => { closeModal(); cleanup(); };
             const cleanup = () => {
                 yesBtn.removeEventListener('click', yesHandler);
                 noBtn.removeEventListener('click', noHandler);
             };
-
             yesBtn.addEventListener('click', yesHandler);
             noBtn.addEventListener('click', noHandler);
         }
@@ -2093,7 +2625,6 @@
         function applyDateRange() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
-
             if (!startDate || !endDate) {
                 showMessage('Harap pilih tanggal mulai dan selesai.', 'error');
                 return;
@@ -2102,12 +2633,11 @@
                 showMessage('Tanggal mulai tidak boleh setelah tanggal selesai.', 'error');
                 return;
             }
-
             const rangeObject = { type: 'custom', start: startDate, end: endDate };
             masterDateRange = rangeObject;
+            customDateRange = rangeObject;
             updateActiveButton('master-range-selector', 'custom');
             refreshDashboardData();
-            
             document.getElementById('dateRangeModal').classList.remove('show');
         }
 
@@ -2133,31 +2663,212 @@
         }
 
         function filterDataByRange(data, range, dateKey) {
-            const currentRange = (typeof range === 'object' && range.type === 'custom') ? range : { type: 'preset', value: range };
-
-            if (currentRange.value === 'all') return data;
-            
-            let startDate;
-            if(currentRange.type === 'custom') {
-                startDate = new Date(currentRange.start);
+            if (range === 'all') return data.filter(item => item[dateKey]);
+            let startDate, endDate = new Date();
+            if (typeof range === 'object' && range.type === 'custom') {
+                startDate = new Date(range.start + 'T00:00:00Z');
+                endDate = new Date(range.end + 'T23:59:59Z');
             } else {
-                const now = new Date();
                 startDate = new Date();
-                if (currentRange.value === '7d') startDate.setDate(now.getDate() - 7);
-                else if (currentRange.value === '1m') startDate.setMonth(now.getMonth() - 1);
-                else if (currentRange.value === '3m') startDate.setMonth(now.getMonth() - 3);
-                else if (currentRange.value === '6m') startDate.setMonth(now.getMonth() - 6);
-                else if (currentRange.value === '1y') startDate.setFullYear(now.getFullYear() - 1);
+                if (range === '7d') startDate.setDate(endDate.getDate() - 6);
+                else if (range === '1m') startDate.setDate(endDate.getDate() - 29);
+                else if (range === '3m') startDate.setMonth(endDate.getMonth() - 3);
+                else if (range === '1y') startDate.setFullYear(endDate.getFullYear() - 1);
+                startDate.setHours(0, 0, 0, 0);
             }
-            
-            const endDate = (currentRange.type === 'custom') ? new Date(currentRange.end) : new Date();
-
             return data.filter(item => {
                 if (!item[dateKey]) return false;
                 const itemDate = new Date(item[dateKey]);
                 return itemDate >= startDate && itemDate <= endDate;
             });
         }
+
+        /**
+         * ===================================================================
+         * BAGIAN UNTUK AUTENTIKASI GOOGLE
+         * Logika ini akan berinteraksi dengan backend Node.js Anda.
+         * ===================================================================
+         */
+        
+        // Fungsi untuk mengecek status login saat aplikasi pertama kali dimuat
+        async function checkAuthStatus() {
+            try {
+                // Panggil endpoint /api/me di backend
+                const response = await fetch('/api/me');
+                const data = await response.json();
+
+                if (response.ok && data.isAuthenticated) {
+                    // Jika berhasil dan terautentikasi, update UI
+                    updateUIForAuth(data.user);
+                } else {
+                    // Jika tidak, tampilkan UI untuk login
+                    updateUIForGuest();
+                }
+            } catch (error) {
+                console.error('Error saat memeriksa status autentikasi:', error);
+                // Jika ada error (misal backend mati), tampilkan UI untuk login
+                updateUIForGuest();
+            }
+        }
+
+        // Fungsi untuk mengupdate UI jika pengguna sudah login
+        function updateUIForAuth(user) {
+            // Sembunyikan tampilan untuk tamu (tombol login)
+            document.getElementById('logged-out-view').classList.add('hidden');
+            
+            // Tampilkan informasi pengguna dan tombol aksi
+            const userInfo = document.getElementById('user-info');
+            const loggedInActions = document.getElementById('logged-in-actions');
+            
+            document.getElementById('user-avatar').src = user.picture || 'https://placehold.co/64x64/7e22ce/ffffff?text=U';
+            document.getElementById('user-name').textContent = user.name || 'Pengguna';
+            document.getElementById('user-email').textContent = user.email || 'Tidak ada email';
+
+            userInfo.classList.remove('hidden');
+            userInfo.classList.add('flex'); // gunakan flex untuk layout avatar dan nama
+            loggedInActions.classList.remove('hidden');
+        }
+
+        // Fungsi untuk mengupdate UI jika pengguna belum login
+        function updateUIForGuest() {
+            // Tampilkan tampilan untuk tamu (tombol login)
+            document.getElementById('logged-out-view').classList.remove('hidden');
+
+            // Sembunyikan informasi pengguna dan tombol aksi
+            const userInfo = document.getElementById('user-info');
+            const loggedInActions = document.getElementById('logged-in-actions');
+
+            userInfo.classList.add('hidden');
+            userInfo.classList.remove('flex');
+            loggedInActions.classList.add('hidden');
+        }
+
+        // Fungsi untuk menangani proses login
+        function handleLogin() {
+            // Cukup arahkan browser ke endpoint login di backend.
+            // Backend akan mengurus redirect ke Google.
+            window.location.href = '/api/login';
+        }
+
+        // Fungsi untuk menangani proses logout
+        async function handleLogout() {
+            try {
+                await fetch('/api/logout');
+                // Setelah berhasil logout di backend, update UI
+                updateUIForGuest();
+                showMessage('Anda berhasil logout.', 'success');
+            } catch (error) {
+                console.error('Gagal saat logout:', error);
+                showMessage('Gagal untuk logout.', 'error');
+            }
+        }
+
+        // Fungsi untuk mengambil dan menampilkan file dari Google Drive
+        async function fetchDriveFiles() {
+            try {
+                const response = await fetch('/api/drive-files');
+                
+                if (response.status === 401) {
+                    showMessage('Sesi Anda telah berakhir. Silakan login kembali.', 'error');
+                    updateUIForGuest();
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error('Gagal mengambil data dari server.');
+                }
+
+                const files = await response.json();
+                
+                // Buat konten HTML untuk ditampilkan di modal
+                let filesHtml = '<h3 class="text-xl font-semibold text-purple-400 mb-4">10 File Teratas di Google Drive</h3>';
+                if (files.length > 0 && !files.message) {
+                    filesHtml += '<div class="space-y-3">';
+                    files.forEach(file => {
+                        filesHtml += `
+                            <a href="${file.webViewLink}" target="_blank" class="block p-3 rounded-lg hover:bg-purple-500/20 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-file-alt text-xl text-blue-400"></i>
+                                    <div>
+                                        <p class="font-medium">${file.name}</p>
+                                        <p class="text-xs text-gray-400">${file.mimeType}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        `;
+                    });
+                    filesHtml += '</div>';
+                } else {
+                    filesHtml += '<p class="text-gray-400">Tidak ada file yang ditemukan atau Anda belum memberikan akses.</p>';
+                }
+                filesHtml += '<button class="closeModal custom-button custom-button-danger mt-6">Tutup</button>';
+                
+                // Tampilkan hasilnya di modal
+                showModal(filesHtml);
+
+            } catch (error) {
+                console.error('Error saat mengambil file Drive:', error);
+                showMessage('Gagal mengambil file dari Google Drive.', 'error');
+            }
+        }
+
+        // --- MODIFIKASI FUNGSI INISIALISASI ---
+        
+        // Kita modifikasi event listener utama untuk menyertakan fungsi-fungsi baru
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchSection(item.dataset.section)));
+            document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu);
+            document.getElementById('overlay').addEventListener('click', closeMobileMenu);
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.getElementById('modeSelect').addEventListener('change', switchMode);
+            document.getElementById('logo-icon').addEventListener('click', enterPreviewMode);
+            document.getElementById('addTransactionBtn').addEventListener('click', () => showTransactionModal());
+            document.getElementById('exportFinanceBtn').addEventListener('click', exportFinancePDF);
+            document.getElementById('searchTransaction').addEventListener('input', filterAndRenderTransactions);
+            document.getElementById('categoryFilter').addEventListener('change', filterAndRenderTransactions);
+            document.getElementById('typeFilter').addEventListener('change', filterAndRenderTransactions);
+            document.getElementById('financeDateFilterBtn').addEventListener('click', () => showDateRangeModal('finance'));
+            document.getElementById('taskForm').addEventListener('submit', saveTask);
+            document.getElementById('startTimerBtn').addEventListener('click', startTimer);
+            document.getElementById('pauseTimerBtn').addEventListener('click', pauseTimer);
+            document.getElementById('resetTimerBtn').addEventListener('click', resetTimer);
+            document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+            document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+            document.getElementById('splitBillForm').addEventListener('submit', calculateSplitBill);
+            document.getElementById('backupData').addEventListener('click', backupData);
+            document.getElementById('restoreData').addEventListener('click', restoreData);
+            document.getElementById('clearAllData').addEventListener('click', () => {
+                showConfirm('Hapus Semua Data?', 'Operasi ini tidak dapat diurungkan. Anda yakin ingin menghapus semua data personal dan bisnis?', clearAllDataConfirmed);
+            });
+            document.getElementById('applyBgMediaBtn').addEventListener('click', applyUploadedMedia);
+            document.getElementById('resetBgMediaBtn').addEventListener('click', resetBackgroundMedia);
+            document.getElementById('toggleVideoSoundBtn').addEventListener('click', toggleVideoSound);
+            document.body.addEventListener('touchstart', handleTouchStart, { passive: true });
+            document.body.addEventListener('touchend', handleTouchEnd);
+            document.body.addEventListener('mousedown', handleMouseDown);
+            document.body.addEventListener('mouseup', handleMouseUp);
+            setupMasterRangeSelector();
+            document.getElementById('applyDateRange').addEventListener('click', applyDateRange);
+            document.getElementById('cancelDateRange').addEventListener('click', () => document.getElementById('dateRangeModal').classList.remove('show'));
+
+            // Event listener untuk tombol-tombol autentikasi
+            document.getElementById('login-btn').addEventListener('click', handleLogin);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            document.getElementById('fetch-drive-btn').addEventListener('click', fetchDriveFiles);
+        }
+
+        // Modifikasi fungsi inisialisasi utama untuk memanggil checkAuthStatus
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            setupEventListeners();
+            
+            // Inisialisasi DiaryApp
+            const diaryApp = new DiaryApp();
+            diaryApp.init();
+
+            // Cek status login saat halaman dimuat
+            checkAuthStatus();
+        });
 
     </script>
 </body>
