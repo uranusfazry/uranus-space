@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LifeHub v4 - Integrated Terminal</title>
+    <title>LifeHub v4 - Integrated Terminal (Google Drive Backup)</title>
     
     <!-- Memuat Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,7 +20,7 @@
     <!-- Memuat html2canvas untuk konversi HTML ke gambar (diperlukan untuk PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- Google Identity Services -->
+    <!-- PENTING: Memuat Google Identity Services (GSI) untuk otentikasi -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <!-- Gaya Kustom -->
@@ -130,15 +130,19 @@
             border: none;
             cursor: pointer;
         }
-        .custom-button:hover {
+        .custom-button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(147, 51, 234, 0.5);
+        }
+        .custom-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .custom-button-danger {
             background: linear-gradient(90deg, #ef4444, #dc2626);
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
         }
-        .custom-button-danger:hover {
+        .custom-button-danger:hover:not(:disabled) {
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
         }
 
@@ -686,7 +690,8 @@
                         </div>
                     </div>
                 </div>
-                                <!-- Diary Section (MERGED) -->
+
+                <!-- Diary Section (MERGED) -->
                 <div id="diary-section" class="section hidden">
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                          <h2 class="text-3xl font-bold text-purple-300">My Diary Elite</h2>
@@ -745,7 +750,6 @@
                                 <!-- Insertions -->
                                 <button data-command="createLink" title="Sisipkan Tautan"><i class="fas fa-link"></i></button>
                                 <button id="diaryEmbedYouTubeBtn" title="Sematkan Video YouTube"><i class="fab fa-youtube"></i></button>
-                                <!-- PERUBAHAN: Tombol TikTok ditambahkan di sini -->
                                 <button id="diaryEmbedTikTokBtn" title="Sematkan Video TikTok"><i class="fab fa-tiktok"></i></button>
                                 <button id="diaryUploadFileBtn" title="Unggah File"><i class="fas fa-upload"></i></button>
                                 <input type="file" id="diaryFileUpload" class="hidden" accept=".txt,.json,.md,.pdf,image/*,video/*">
@@ -802,27 +806,37 @@
                     </div>
                 </div>
                 
-                                <!-- Settings Section -->
+                      <!-- Settings Section -->
                 <div id="settings-section" class="section hidden">
                     <h2 class="text-3xl font-bold mb-6 text-purple-300">Pengaturan</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="glass-effect p-6">
                             <h3 class="text-xl font-semibold mb-4 text-blue-400">Backup & Restore</h3>
                             <div class="space-y-4">
-                                <button id="backupData" class="custom-button w-full"><i class="fas fa-download mr-2"></i>Backup Data (.txt)</button>
+                                <button id="backupData" class="custom-button w-full"><i class="fas fa-download mr-2"></i>Backup Data Lokal (.txt)</button>
                                 <div>
                                     <label class="block text-sm font-medium mb-2">Restore Data (.txt)</label>
                                     <input type="file" id="restoreFile" accept=".txt" class="custom-input">
-                                    <button id="restoreData" class="custom-button custom-button-danger w-full mt-2"><i class="fas fa-upload mr-2"></i>Restore Data</button>
+                                    <button id="restoreData" class="custom-button custom-button-danger w-full mt-2"><i class="fas fa-upload mr-2"></i>Restore dari Lokal</button>
                                 </div>
-                                <button id="clearAllData" class="custom-button custom-button-danger w-full"><i class="fas fa-trash mr-2"></i>Hapus Semua Data</button>
+                                <hr class="border-purple-500/20">
                                 
-                                <div class="border-t border-purple-800 pt-4 mt-4">
-                                     <h4 class="text-lg font-semibold mb-2 text-blue-400">Google Drive Backup</h4>
-                                     <div id="loginBtnContainer"></div>
-                                     <button id="backupBtn" class="custom-button w-full mt-2" disabled><i class="fab fa-google-drive mr-2"></i>Backup ke Drive</button>
-                                     <div id="status" class="text-sm text-gray-400 mt-2"></div>
+                                <!-- ================================== -->
+                                <!-- BAGIAN INTEGRASI GOOGLE DRIVE      -->
+                                <!-- ================================== -->
+                                <h4 class="text-lg font-semibold text-purple-300 pt-2">Sinkronisasi Google Drive</h4>
+                                <div id="google-drive-ui" class="space-y-3">
+                                    <button id="auth-button" class="custom-button w-full" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"><i class="fab fa-google mr-2"></i>Hubungkan ke Google</button>
+                                    <button id="backup-button" class="custom-button w-full" disabled><i class="fab fa-google-drive mr-2"></i>Backup Data ke Drive</button>
+                                    <div id="auth-status" class="text-center text-sm text-gray-400">Belum terhubung.</div>
+                                    <div id="file-list" class="text-xs text-gray-500 bg-black/20 p-2 rounded-md max-h-40 overflow-y-auto"></div>
                                 </div>
+                                <!-- ================================== -->
+                                <!-- AKHIR BAGIAN INTEGRASI           -->
+                                <!-- ================================== -->
+                                
+                                <hr class="border-purple-500/20">
+                                <button id="clearAllData" class="custom-button custom-button-danger w-full mt-4"><i class="fas fa-trash mr-2"></i>Hapus Semua Data</button>
                             </div>
                         </div>
                         
@@ -845,9 +859,9 @@
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Informasi Aplikasi</h3>
                                 <div class="space-y-2 text-sm">
                                     <p><strong>Nama:</strong> LifeHub v4</p>
-                                    <p><strong>Versi:</strong> 4.8.0-Drive-Backup</p>
-                                    <p><strong>Fitur:</strong> Editor Teks Modern, TikTok & YouTube Embed, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Custom BG, Preview Mode, Google Drive Backup</p>
-                                    <p><strong>Storage:</strong> LocalStorage (Data terenkripsi di terminal Anda)</p>
+                                    <p><strong>Versi:</strong> 4.8.0-Google-Drive</p>
+                                    <p><strong>Fitur:</strong> Editor Teks Modern, Google Drive Backup, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Custom BG, Preview Mode</p>
+                                    <p><strong>Storage:</strong> LocalStorage & Google Drive (Data terenkripsi di terminal Anda)</p>
                                 </div>
                             </div>
                         </div>
@@ -908,25 +922,12 @@
         </div>
     </div>
 
+
     <script>
         /**
-         * LifeHub v4.8.0 - Integrated Terminal with Google Drive Backup
-         * Author: Uranuspace
-         * Description: A comprehensive life management tool with finance, tasks, split bill,
-         * and a rich-text diary, now featuring Google Drive backup functionality.
-         */
-
-        // ====== GOOGLE DRIVE API CONFIG ======
-        const CLIENT_ID = "175269804015-7agb1gr0nd6ah66co5qen34dd2mvtm68.apps.googleusercontent.com";
-        const SCOPES = "https://www.googleapis.com/auth/drive.file";
-        let tokenClient;
-        let gapiInited = false;
-        let gisInited = false;
-
-        /**
          * DiaryApp Class
-         * Contains all logic, state, and functions for the diary application.
-         * The editor has been upgraded with richer functionality.
+         * Berisi semua logika, status, dan fungsi untuk aplikasi diary.
+         * Editor telah di-upgrade dengan fungsionalitas yang lebih kaya.
          */
         class DiaryApp {
             constructor() {
@@ -940,7 +941,7 @@
                 this.bindEvents();
                 this.checkAuthentication();
                 this.loadNotes();
-                setInterval(() => this.autoSave(), 30000); // Autosave every 30 seconds
+                setInterval(() => this.autoSave(), 30000); // Autosave setiap 30 detik
             }
 
             cacheDOMElements() {
@@ -985,7 +986,7 @@
                 this.dom.moodFilter.addEventListener('change', () => this.filterNotes());
                 this.dom.dateFilter.addEventListener('change', () => this.saveNote());
 
-                // Event listener for the entire toolbar
+                // Event listener untuk seluruh toolbar
                 this.dom.editorToolbar.addEventListener('click', (e) => {
                     const button = e.target.closest('button');
                     if (button && button.dataset.command) {
@@ -994,7 +995,7 @@
                     }
                 });
                 
-                // Specific event listener for non-button elements in the toolbar
+                // Event listener khusus untuk elemen non-button di toolbar
                 this.dom.formatBlockSelect.addEventListener('change', (e) => this.formatText('formatBlock', e.target.value));
 
                 this.dom.embedYouTubeBtn.addEventListener('click', () => this.embedYouTube());
@@ -1116,15 +1117,15 @@
                 }
 
                 if (videoId) {
-                    const embedHTML = \`<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 1rem 0;">
-                            <iframe 
-                                src="https://www.youtube.com/embed/\${videoId}" 
-                                frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowfullscreen 
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;">
-                            </iframe>
-                        </div><p><br></p>\`;
+                    const embedHTML = `<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 1rem 0;">
+                        <iframe 
+                            src="https://www.youtube.com/embed/${videoId}" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;">
+                        </iframe>
+                    </div><p><br></p>`;
                     this.formatText('insertHTML', embedHTML);
                 } else {
                     showMessage("URL YouTube tidak valid.", "error");
@@ -1135,21 +1136,21 @@
                 const url = prompt("Masukkan URL video TikTok:");
                 if (!url) return;
 
-                const regex = /tiktok\.com\/.*\/video\/(\\d+)/;
+                const regex = /tiktok\.com\/.*\/video\/(\d+)/;
                 const match = url.match(regex);
                 const videoId = match && match[1] ? match[1] : null;
 
                 if (videoId) {
-                    const embedHTML = \`
-                            <div style="position: relative; padding-bottom: 177.78%; /* Aspect Ratio 9:16 */ height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                                <iframe 
-                                    src="https://www.tiktok.com/embed/v2/\${videoId}" 
-                                    frameborder="0" 
-                                    allow="autoplay; encrypted-media" 
-                                    allowfullscreen 
-                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-                                </iframe>
-                            </div><p><br></p>\`;
+                    const embedHTML = `
+                        <div style="position: relative; padding-bottom: 177.78%; /* Aspect Ratio 9:16 untuk video vertikal */ height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                            <iframe 
+                                src="https://www.tiktok.com/embed/v2/${videoId}" 
+                                frameborder="0" 
+                                allow="autoplay; encrypted-media" 
+                                allowfullscreen 
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                            </iframe>
+                        </div><p><br></p>`;
                     
                     this.formatText('insertHTML', embedHTML);
                     showMessage("Video TikTok berhasil disematkan!", "success");
@@ -1168,16 +1169,16 @@
                     let elementHTML = '';
 
                     if (file.type.startsWith('image/')) {
-                        elementHTML = \`<img src="\${result}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;" />\`;
+                        elementHTML = `<img src="${result}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;" />`;
                     } else if (file.type.startsWith('video/')) {
-                        elementHTML = \`<video controls src="\${result}" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;"></video>\`;
+                        elementHTML = `<video controls src="${result}" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;"></video>`;
                     } else if (file.type === 'application/pdf') {
-                        elementHTML = \`<embed src="\${result}" type="application/pdf" width="100%" height="500px" style="border-radius: 8px; margin: 1rem 0;" />\`;
+                        elementHTML = `<embed src="${result}" type="application/pdf" width="100%" height="500px" style="border-radius: 8px; margin: 1rem 0;" />`;
                     } else if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) {
                         const escapedText = result.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                        elementHTML = \`<pre style="background: rgba(0,0,0,0.2); border: 1px solid var(--input-border); padding: 1rem; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"><code>\${escapedText}</code></pre>\`;
+                        elementHTML = `<pre style="background: rgba(0,0,0,0.2); border: 1px solid var(--input-border); padding: 1rem; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"><code>${escapedText}</code></pre>`;
                     } else {
-                        showMessage(\`Tipe file \${file.type} tidak didukung untuk pratinjau.\`, 'error');
+                        showMessage(`Tipe file ${file.type} tidak didukung untuk pratinjau.`, 'error');
                         return;
                     }
                     
@@ -1241,7 +1242,7 @@
             }
 
             loadNotes() {
-                const saved = localStorage.getItem('diaryNotes_v4.8');
+                const saved = localStorage.getItem('diaryNotes_v4.6'); // Versi baru
                 if (saved) {
                     this.notes = JSON.parse(saved);
                     this.displayNotes();
@@ -1249,7 +1250,7 @@
             }
 
             saveToStorage() {
-                localStorage.setItem('diaryNotes_v4.8', JSON.stringify(this.notes));
+                localStorage.setItem('diaryNotes_v4.6', JSON.stringify(this.notes));
             }
 
             displayNotes(filteredNotes = null) {
@@ -1260,21 +1261,21 @@
                     return;
                 }
                 
-                this.dom.notesList.innerHTML = notesToShow.map(note => \`
-                    <div class="note-item p-3 rounded-lg mb-2 cursor-pointer note-item-clickable" data-action="click-to-edit" data-id="\${note.id}">
+                this.dom.notesList.innerHTML = notesToShow.map(note => `
+                    <div class="note-item p-3 rounded-lg mb-2 cursor-pointer note-item-clickable" data-action="click-to-edit" data-id="${note.id}">
                         <div class="flex items-start justify-between mb-1">
                             <div>
-                                <strong class="text-md text-purple-300">\${note.title || 'Tanpa Judul'}</strong>
-                                <span class="block text-xs text-gray-400">\${this.formatDate(note.date)}</span>
+                                <strong class="text-md text-purple-300">${note.title || 'Tanpa Judul'}</strong>
+                                <span class="block text-xs text-gray-400">${this.formatDate(note.date)}</span>
                             </div>
                             <div class="flex gap-2">
-                                <button data-action="preview" data-id="\${note.id}" class="text-green-400 hover:text-green-300"><i class="fas fa-eye"></i></button>
-                                <button data-action="delete" data-id="\${note.id}" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                                <button data-action="preview" data-id="${note.id}" class="text-green-400 hover:text-green-300"><i class="fas fa-eye"></i></button>
+                                <button data-action="delete" data-id="${note.id}" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
-                        <div class="text-sm text-gray-400">\${this.truncateContent(note.content, 80)}</div>
+                        <div class="text-sm text-gray-400">${this.truncateContent(note.content, 80)}</div>
                     </div>
-                \`).join('');
+                `).join('');
             }
 
             editNote(id) {
@@ -1306,11 +1307,11 @@
             previewNote(id) {
                 const note = this.notes.find(n => n.id === id);
                 if (note) {
-                    this.dom.previewContent.innerHTML = \`
-                        <h2 class="font-bold text-2xl mb-2 text-purple-300">\${note.title || 'Tanpa Judul'}</h2>
-                        <p class="text-sm text-gray-400 mb-4">\${this.formatDate(note.date)}</p>
-                        <div class="prose max-w-none">\${note.content}</div>
-                    \`;
+                    this.dom.previewContent.innerHTML = `
+                        <h2 class="font-bold text-2xl mb-2 text-purple-300">${note.title || 'Tanpa Judul'}</h2>
+                        <p class="text-sm text-gray-400 mb-4">${this.formatDate(note.date)}</p>
+                        <div class="prose max-w-none">${note.content}</div>
+                    `;
                     this.dom.previewModal.classList.add('show');
                 }
             }
@@ -1364,10 +1365,10 @@
                     return;
                 }
 
-                const filename = \`\${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.\${format === 'json' ? 'txt' : format}\`;
+                const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${format === 'json' ? 'txt' : format}`;
 
                 if (format === 'html') {
-                    const htmlContent = \`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>\${title}</title><style>body{font-family: sans-serif; line-height: 1.6; padding: 2rem;} img, video {max-width: 100%; height: auto;}</style></head><body><h1>\${title}</h1>\${content}</body></html>\`;
+                    const htmlContent = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family: sans-serif; line-height: 1.6; padding: 2rem;} img, video {max-width: 100%; height: auto;}</style></head><body><h1>${title}</h1>${content}</body></html>`;
                     this.downloadFile(filename, htmlContent, 'text/html');
                 } else if (format === 'json') {
                     const jsonContent = JSON.stringify({
@@ -1383,14 +1384,15 @@
                     const { jsPDF } = window.jspdf;
                     const doc = new jsPDF();
                     
+                    // Buat elemen sementara untuk rendering
                     const tempContainer = document.createElement('div');
-                    tempContainer.innerHTML = \`<h1>\${title}</h1>\${content}\`;
+                    tempContainer.innerHTML = `<h1>${title}</h1>${content}`;
                     Object.assign(tempContainer.style, {
                         position: 'absolute',
                         left: '-9999px',
-                        width: '700px',
+                        width: '700px', // Lebar konten PDF
                         padding: '20px',
-                        color: '#000',
+                        color: '#000', // Pastikan teks terlihat
                         background: '#fff'
                     });
                     document.body.appendChild(tempContainer);
@@ -1447,9 +1449,8 @@
                 return text.substring(0, length) + '...';
             }
         }
-
-
-        // --- GLOBAL VARIABLES & STATE MANAGEMENT ---
+        
+                // --- GLOBAL VARIABLES & STATE MANAGEMENT ---
         let currentSection = 'dashboard';
         let currentDate = new Date();
         let currentMode = 'personal';
@@ -1478,7 +1479,7 @@
                 localStorage.setItem(key, JSON.stringify(value));
             },
             getAppData: () => {
-                return storage.get('lifeHubData_v4.8', {
+                return storage.get('lifeHubData_v4.8', { // Updated version key
                     currentMode: 'personal',
                     isLightMode: false,
                     isVideoMuted: true,
@@ -1491,16 +1492,24 @@
             }
         };
 
+        // --- GOOGLE DRIVE INTEGRATION STATE ---
+        const GOOGLE_CLIENT_ID = "175269804015-7agb1gr0nd6ah66co5qen34dd2mvtm68.apps.googleusercontent.com";
+        const GOOGLE_SCOPES = "https://www.googleapis.com/auth/drive.file";
+        let googleTokenClient;
+        let googleAccessToken = null;
+
+
         // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
             setupEventListeners();
             
+            // Inisialisasi DiaryApp
             const diaryApp = new DiaryApp();
             diaryApp.init();
 
-            // Initialize Google Sign-In
-            initializeGoogleSignIn();
+            // Inisialisasi Google Client
+            initGisClient();
         });
 
         function initializeApp() {
@@ -1547,7 +1556,7 @@
             document.getElementById('backupData').addEventListener('click', backupData);
             document.getElementById('restoreData').addEventListener('click', restoreData);
             document.getElementById('clearAllData').addEventListener('click', () => {
-                showConfirm('Hapus Semua Data?', 'Operasi ini tidak dapat diurungkan. Anda yakin ingin menghapus semua data personal dan bisnis?', clearAllDataConfirmed);
+                showConfirm('Hapus Semua Data?', 'Operasi ini tidak dapat diurungkan. Anda yakin ingin menghapus semua data lokal?', clearAllDataConfirmed);
             });
             document.getElementById('applyBgMediaBtn').addEventListener('click', applyUploadedMedia);
             document.getElementById('resetBgMediaBtn').addEventListener('click', resetBackgroundMedia);
@@ -1559,91 +1568,10 @@
             setupMasterRangeSelector();
             document.getElementById('applyDateRange').addEventListener('click', applyDateRange);
             document.getElementById('cancelDateRange').addEventListener('click', () => document.getElementById('dateRangeModal').classList.remove('show'));
-            document.getElementById('backupBtn').addEventListener('click', backupToDrive);
-        }
 
-        // --- GOOGLE DRIVE INTEGRATION ---
-        function initializeGoogleSignIn() {
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: '', // defined later
-            });
-            gisInited = true;
-            
-            // Render the login button
-            google.accounts.id.initialize({
-                client_id: CLIENT_ID,
-                callback: handleCredentialResponse
-            });
-            google.accounts.id.renderButton(
-                document.getElementById("loginBtnContainer"),
-                { theme: "outline", size: "large", type: "standard" }
-            );
-        }
-
-        function handleCredentialResponse(response) {
-            // This is for Sign In with Google, which gives an ID token.
-            // For Drive API, we need an access token. We will request it when needed.
-            document.getElementById("status").innerText = "Login berhasil. Siap untuk backup.";
-            document.getElementById("backupBtn").disabled = false;
-        }
-
-        function backupToDrive() {
-            tokenClient.callback = async (resp) => {
-                if (resp.error !== undefined) {
-                    throw (resp);
-                }
-                document.getElementById('status').innerText = 'Token diterima, memulai backup...';
-                await performBackup(resp.access_token);
-            };
-        
-            if (gapi.client.getToken() === null) {
-                tokenClient.requestAccessToken({prompt: 'consent'});
-            } else {
-                tokenClient.requestAccessToken({prompt: ''});
-            }
-        }
-
-        async function performBackup(accessToken) {
-            const allData = {
-                lifeHub: storage.get('lifeHubData_v4.8'),
-                diary: storage.get('diaryNotes_v4.8')
-            };
-
-            if (!allData.lifeHub && !allData.diary) {
-                showMessage("Tidak ada data untuk di-backup.", "error");
-                return;
-            }
-
-            const fileContent = JSON.stringify(allData, null, 2);
-            const file = new Blob([fileContent], { type: "application/json" });
-            const metadata = {
-                'name': \`Uranuspace_Backup_\${new Date().toISOString().slice(0,10)}.json\`,
-                'mimeType': 'application/json'
-            };
-
-            const form = new FormData();
-            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-            form.append('file', file);
-
-            try {
-                const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
-                    method: 'POST',
-                    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
-                    body: form
-                });
-                const result = await response.json();
-                if (result.error) {
-                    throw new Error(result.error.message);
-                }
-                document.getElementById("status").innerText = \`Backup berhasil! File: \${result.name}\`;
-                showMessage("Backup ke Google Drive berhasil!", "success");
-            } catch (error) {
-                console.error("Error backing up to Drive:", error);
-                document.getElementById("status").innerText = \`Error: \${error.message}\`;
-                showMessage("Gagal backup ke Google Drive.", "error");
-            }
+            // Google Drive Event Listeners
+            document.getElementById('auth-button').addEventListener('click', handleAuthClick);
+            document.getElementById('backup-button').addEventListener('click', handleBackupClick);
         }
 
         // --- PREVIEW MODE LOGIC ---
@@ -1675,7 +1603,7 @@
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.getElementById(section + '-section').classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.querySelector(\`[data-section="\${section}"]\`).classList.add('active');
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
             currentSection = section;
 
             switch(section) {
@@ -1751,13 +1679,13 @@
             const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime');
             const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date');
             
-            filteredTransactions.forEach(t => activities.push({ type: 'transaction', icon: t.type === 'income' ? 'fa-arrow-up text-green-500' : 'fa-arrow-down text-pink-500', text: \`\${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: \${formatCurrency(t.amount)}\`, time: t.date }));
-            filteredTasks.forEach(p => activities.push({ type: 'task', icon: 'fa-calendar-check text-blue-500', text: \`Tugas: \${p.title}\`, time: p.datetime }));
-            filteredSplits.forEach(s => activities.push({ type: 'split', icon: 'fa-receipt text-green-500', text: \`Split Bill: \${formatCurrency(s.totalBill)}\`, time: s.date }));
+            filteredTransactions.forEach(t => activities.push({ type: 'transaction', icon: t.type === 'income' ? 'fa-arrow-up text-green-500' : 'fa-arrow-down text-pink-500', text: `${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: ${formatCurrency(t.amount)}`, time: t.date }));
+            filteredTasks.forEach(p => activities.push({ type: 'task', icon: 'fa-calendar-check text-blue-500', text: `Tugas: ${p.title}`, time: p.datetime }));
+            filteredSplits.forEach(s => activities.push({ type: 'split', icon: 'fa-receipt text-green-500', text: `Split Bill: ${formatCurrency(s.totalBill)}`, time: s.date }));
 
             activities.sort((a, b) => new Date(b.time) - new Date(a.time));
             const container = document.getElementById('recentActivities');
-            container.innerHTML = activities.length > 0 ? activities.slice(0, 15).map(activity => \`<div class="flex items-center justify-between p-2 hover:bg-purple-500/10 rounded"><div class="flex items-center"><i class="fas \${activity.icon} mr-3"></i><span>\${activity.text}</span></div><span class="text-sm text-gray-400">\${formatDate(activity.time)}</span></div>\`).join('') : '<p class="text-gray-500">Tidak ada aktivitas dalam rentang waktu ini.</p>';
+            container.innerHTML = activities.length > 0 ? activities.slice(0, 15).map(activity => `<div class="flex items-center justify-between p-2 hover:bg-purple-500/10 rounded"><div class="flex items-center"><i class="fas ${activity.icon} mr-3"></i><span>${activity.text}</span></div><span class="text-sm text-gray-400">${formatDate(activity.time)}</span></div>`).join('') : '<p class="text-gray-500">Tidak ada aktivitas dalam rentang waktu ini.</p>';
         }
 
         // --- FINANCE ---
@@ -1805,36 +1733,36 @@
                 container.innerHTML = '<p class="text-center text-gray-500">Belum ada transmisi data</p>';
                 return;
             }
-            container.innerHTML = [...transactions].reverse().map(t => \`
-                <div class="p-4 rounded-md flex justify-between items-center hover:bg-purple-500/10 cursor-pointer \${t.type}" onclick="showTransactionModal('\${t.id}')">
+            container.innerHTML = [...transactions].reverse().map(t => `
+                <div class="p-4 rounded-md flex justify-between items-center hover:bg-purple-500/10 cursor-pointer ${t.type}" onclick="showTransactionModal('${t.id}')">
                     <div class="flex items-center">
-                        <i class="fas \${getTransactionIcon(t.category)} mr-4 text-xl"></i>
+                        <i class="fas ${getTransactionIcon(t.category)} mr-4 text-xl"></i>
                         <div>
-                            <h4 class="font-semibold">\${t.description}</h4>
-                            <p class="text-sm text-gray-400">\${getCategoryName(t.category)} • \${formatDate(t.date)}</p>
+                            <h4 class="font-semibold">${t.description}</h4>
+                            <p class="text-sm text-gray-400">${getCategoryName(t.category)} • ${formatDate(t.date)}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="font-bold font-mono \${t.type === 'income' ? 'text-green-500' : 'text-pink-500'}">\${t.type === 'income' ? '+' : '-'}\${formatCurrency(t.amount)}</p>
-                        <button onclick="confirmDeleteTransaction('\${t.id}', event)" class="text-red-500 hover:text-red-400 ml-2 text-xs"><i class="fas fa-trash"></i></button>
+                        <p class="font-bold font-mono ${t.type === 'income' ? 'text-green-500' : 'text-pink-500'}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</p>
+                        <button onclick="confirmDeleteTransaction('${t.id}', event)" class="text-red-500 hover:text-red-400 ml-2 text-xs"><i class="fas fa-trash"></i></button>
                     </div>
-                </div>\`).join('');
+                </div>`).join('');
         }
 
         function showTransactionModal(id = null) {
             const appData = storage.getAppData();
             const transaction = id ? appData[currentMode].transactions.find(t => t.id === id) : null;
-            const content = \`
-                <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-purple-600">\${id ? 'Edit' : 'Tambah'} Transaksi</h3><button class="closeModal text-gray-400 hover:text-purple-600"><i class="fas fa-times"></i></button></div>
+            const content = `
+                <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-purple-600">${id ? 'Edit' : 'Tambah'} Transaksi</h3><button class="closeModal text-gray-400 hover:text-purple-600"><i class="fas fa-times"></i></button></div>
                 <form id="transactionForm" class="space-y-4">
-                    <input type="hidden" id="transactionId" value="\${id || ''}">
-                    <div><label class="block text-sm font-medium mb-1">Tipe</label><select id="transactionType" class="custom-input" required>\${['income', 'expense'].map(o => \`<option value="\${o}" \${transaction?.type === o ? 'selected' : ''}>\${o === 'income' ? 'Pemasukan' : 'Pengeluaran'}</option>\`).join('')}</select></div>
-                    <div><label class="block text-sm font-medium mb-1">Jumlah</label><input type="number" id="transactionAmount" class="custom-input" value="\${transaction?.amount || ''}" required></div>
-                    <div><label class="block text-sm font-medium mb-1">Kategori</label><select id="transactionCategory" class="custom-input" required>\${Object.keys(getCategoryName()).map(c => \`<option value="\${c}" \${transaction?.category === c ? 'selected' : ''}>\${getCategoryName(c)}</option>\`).join('')}</select></div>
-                    <div><label class="block text-sm font-medium mb-1">Deskripsi</label><input type="text" id="transactionDescription" class="custom-input" value="\${transaction?.description || ''}" required></div>
-                    <div><label class="block text-sm font-medium mb-1">Tanggal</label><input type="date" id="transactionDate" class="custom-input" value="\${transaction?.date || new Date().toISOString().split('T')[0]}" required></div>
+                    <input type="hidden" id="transactionId" value="${id || ''}">
+                    <div><label class="block text-sm font-medium mb-1">Tipe</label><select id="transactionType" class="custom-input" required>${['income', 'expense'].map(o => `<option value="${o}" ${transaction?.type === o ? 'selected' : ''}>${o === 'income' ? 'Pemasukan' : 'Pengeluaran'}</option>`).join('')}</select></div>
+                    <div><label class="block text-sm font-medium mb-1">Jumlah</label><input type="number" id="transactionAmount" class="custom-input" value="${transaction?.amount || ''}" required></div>
+                    <div><label class="block text-sm font-medium mb-1">Kategori</label><select id="transactionCategory" class="custom-input" required>${Object.keys(getCategoryName()).map(c => `<option value="${c}" ${transaction?.category === c ? 'selected' : ''}>${getCategoryName(c)}</option>`).join('')}</select></div>
+                    <div><label class="block text-sm font-medium mb-1">Deskripsi</label><input type="text" id="transactionDescription" class="custom-input" value="${transaction?.description || ''}" required></div>
+                    <div><label class="block text-sm font-medium mb-1">Tanggal</label><input type="date" id="transactionDate" class="custom-input" value="${transaction?.date || new Date().toISOString().split('T')[0]}" required></div>
                     <div class="flex gap-2 mt-6"><button type="submit" class="custom-button flex-1">Simpan</button><button type="button" class="closeModal custom-button custom-button-danger">Batal</button></div>
-                </form>\`;
+                </form>`;
             showModal(content);
             document.getElementById('transactionForm').addEventListener('submit', saveTransaction);
         }
@@ -1880,7 +1808,7 @@
             const appData = storage.getAppData();
             const categories = [...new Set(appData[currentMode].transactions.map(t => t.category))];
             const categoryFilter = document.getElementById('categoryFilter');
-            categoryFilter.innerHTML = '<option value="">Semua Kategori</option>' + categories.map(c => \`<option value="\${c}">\${getCategoryName(c)}</option>\`).join('');
+            categoryFilter.innerHTML = '<option value="">Semua Kategori</option>' + categories.map(c => `<option value="${c}">${getCategoryName(c)}</option>`).join('');
             
             const typeFilter = document.getElementById('typeFilter');
             typeFilter.innerHTML = '<option value="">Semua Tipe</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option>';
@@ -1907,19 +1835,19 @@
 
             sortedTasks.forEach(task => {
                 const item = document.createElement('div');
-                item.className = \`task-item p-3 rounded-lg flex justify-between items-center hover:bg-purple-500/10 \${task.completed ? 'completed' : ''}\`;
+                item.className = `task-item p-3 rounded-lg flex justify-between items-center hover:bg-purple-500/10 ${task.completed ? 'completed' : ''}`;
                 const priorityColor = { high: '#f472b6', medium: '#fbbf24', low: '#4ade80' };
                 
-                item.innerHTML = \`
+                item.innerHTML = `
                     <div class="flex items-center">
-                        <input type="checkbox" \${task.completed ? 'checked' : ''} onchange="toggleTask('\${task.id}')" class="w-5 h-5 rounded bg-purple-900/50 border-purple-400 text-purple-600 focus:ring-purple-500">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.id}')" class="w-5 h-5 rounded bg-purple-900/50 border-purple-400 text-purple-600 focus:ring-purple-500">
                         <div class="ml-4">
-                            <strong class="block">\${task.title}</strong>
-                            <small class="text-gray-400">\${formatDateTime(task.datetime)} | <span style="color: \${priorityColor[task.priority]}">●</span> \${task.priority}</small>
+                            <strong class="block">${task.title}</strong>
+                            <small class="text-gray-400">${formatDateTime(task.datetime)} | <span style="color: ${priorityColor[task.priority]}">●</span> ${task.priority}</small>
                         </div>
                     </div>
-                    <button onclick="confirmDeleteTask('\${task.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
-                \`;
+                    <button onclick="confirmDeleteTask('${task.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
+                `;
                 list.appendChild(item);
             });
         }
@@ -1982,12 +1910,12 @@
             const tasks = appData[currentMode].tasks;
 
             const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-            days.forEach(day => calendar.innerHTML += \`<div class="text-center font-bold text-purple-400 text-sm">\${day}</div>\`);
+            days.forEach(day => calendar.innerHTML += `<div class="text-center font-bold text-purple-400 text-sm">${day}</div>`);
             
             for (let i = 0; i < firstDay; i++) calendar.innerHTML += '<div></div>';
             
             for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = \`\${year}-\${String(month + 1).padStart(2, '0')}-\${String(day).padStart(2, '0')}\`;
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const dayTasks = tasks.filter(t => t.datetime && t.datetime.startsWith(dateStr));
                 const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
                 
@@ -2006,11 +1934,11 @@
                     else if (hasLow) indicatorColor = '#4ade80';
                     
                     if (indicatorColor) {
-                        priorityIndicator = \`<span class="absolute top-1 right-1 h-2 w-2 rounded-full" style="background-color: \${indicatorColor};"></span>\`;
+                        priorityIndicator = `<span class="absolute top-1 right-1 h-2 w-2 rounded-full" style="background-color: ${indicatorColor};"></span>`;
                     }
                 }
 
-                calendar.innerHTML += \`<div class="\${dayClass}">\${day}\${priorityIndicator}</div>\`;
+                calendar.innerHTML += `<div class="${dayClass}">${day}${priorityIndicator}</div>`;
             }
         }
         
@@ -2041,7 +1969,7 @@
 
         function pauseTimer() { isTimerRunning = false; clearInterval(timerInterval); }
         function resetTimer() { pauseTimer(); timerMinutes = 25; timerSeconds = 0; updateTimerDisplay(); }
-        function updateTimerDisplay() { document.getElementById('timerDisplay').textContent = \`\${String(timerMinutes).padStart(2, '0')}:\${String(timerSeconds).padStart(2, '0')}\`; }
+        function updateTimerDisplay() { document.getElementById('timerDisplay').textContent = `${String(timerMinutes).padStart(2, '0')}:${String(timerSeconds).padStart(2, '0')}`; }
 
         // --- SPLIT BILL ---
         function loadSplitPage() { 
@@ -2071,7 +1999,7 @@
                 }
                 const totalPercentage = percentages.reduce((sum, p) => sum + p, 0);
                 if (Math.round(totalPercentage) !== 100) {
-                    showMessage(\`Total persentase harus 100%, bukan \${totalPercentage}%.\`, 'error');
+                    showMessage(`Total persentase harus 100%, bukan ${totalPercentage}%.`, 'error');
                     return;
                 }
                 if (percentages.some(isNaN)) {
@@ -2101,12 +2029,12 @@
 
         function displaySplitResults(results, totalBill, date) {
             const resultDiv = document.getElementById('splitResult');
-            resultDiv.innerHTML = \`<h4 class="font-bold mb-2">Total: \${formatCurrency(totalBill)}</h4>\` + results.map(r => \`
+            resultDiv.innerHTML = `<h4 class="font-bold mb-2">Total: ${formatCurrency(totalBill)}</h4>` + results.map(r => `
                 <div class="flex justify-between p-2 border-b border-purple-900/50">
-                    <span>\${r.name} \${r.percentage ? \`(\${r.percentage}%)\` : ''}</span>
-                    <strong>\${formatCurrency(r.amount)}</strong>
+                    <span>${r.name} ${r.percentage ? `(${r.percentage}%)` : ''}</span>
+                    <strong>${formatCurrency(r.amount)}</strong>
                 </div>
-            \`).join('');
+            `).join('');
             document.getElementById('splitResultCard').classList.remove('hidden');
             document.getElementById('exportSplitBtn').onclick = () => exportSplitBillPDF(results, totalBill, date);
         }
@@ -2115,16 +2043,16 @@
             const appData = storage.getAppData();
             const history = appData[currentMode].splitBills;
             const container = document.getElementById('splitHistory');
-            container.innerHTML = [...history].reverse().map(split => \`
+            container.innerHTML = [...history].reverse().map(split => `
                 <div class="p-3 rounded-md border border-purple-900/50 hover:bg-purple-500/10">
                     <div class="flex justify-between items-center">
                         <div>
-                            <strong class="block text-blue-400">\${formatCurrency(split.totalBill)}</strong>
-                            <small class="text-gray-400">\${formatDate(split.date)} | \${split.results.length} orang | <span class="font-semibold \${split.type === 'custom' ? 'text-pink-400' : 'text-green-400'}">\${split.type === 'custom' ? 'Kustom' : 'Merata'}</span></small>
+                            <strong class="block text-blue-400">${formatCurrency(split.totalBill)}</strong>
+                            <small class="text-gray-400">${formatDate(split.date)} | ${split.results.length} orang | <span class="font-semibold ${split.type === 'custom' ? 'text-pink-400' : 'text-green-400'}">${split.type === 'custom' ? 'Kustom' : 'Merata'}</span></small>
                         </div>
-                        <button onclick="confirmDeleteSplit('\${split.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
+                        <button onclick="confirmDeleteSplit('${split.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
                     </div>
-                </div>\`).join('') || '<p class="text-gray-500 text-center">Tidak ada riwayat.</p>';
+                </div>`).join('') || '<p class="text-gray-500 text-center">Tidak ada riwayat.</p>';
         }
         
         function confirmDeleteSplit(id) {
@@ -2150,7 +2078,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = \`lifehub-backup-\${new Date().toISOString().split('T')[0]}.txt\`;
+            a.download = `lifehub-backup-${new Date().toISOString().split('T')[0]}.txt`;
             a.click();
             URL.revokeObjectURL(url);
             showMessage("Backup berhasil!", "success");
@@ -2182,9 +2110,9 @@
 
         function clearAllDataConfirmed() {
             localStorage.removeItem('lifeHubData_v4.8');
-            localStorage.removeItem('diaryNotes_v4.8'); // Also clear diary data
+            localStorage.removeItem('diaryNotes_v4.6'); // Also clear diary data
             initializeApp();
-            showMessage("Semua data telah dihapus.", "success");
+            showMessage("Semua data lokal telah dihapus.", "success");
         }
         
         // --- BACKGROUND MEDIA ---
@@ -2205,7 +2133,7 @@
             resetBackgrounds();
 
             if (selectedMediaFile.type.startsWith('image/')) {
-                bgImageLayer.style.backgroundImage = \`url('\${fileUrl}')\`;
+                bgImageLayer.style.backgroundImage = `url('${fileUrl}')`;
                 bgImageLayer.style.display = 'block';
                 document.body.classList.remove('gradient-bg');
                 showMessage('Gambar diterapkan sebagai background.', 'success');
@@ -2279,8 +2207,8 @@
             doc.setFontSize(20);
             doc.text('Laporan Keuangan', 20, 20);
             doc.setFontSize(12);
-            doc.text(\`Mode: \${currentMode === 'personal' ? 'Pribadi' : 'Bisnis'}\`, 20, 30);
-            doc.text(\`Tanggal: \${formatDate(new Date().toISOString())}\`, 20, 40);
+            doc.text(`Mode: ${currentMode === 'personal' ? 'Pribadi' : 'Bisnis'}`, 20, 30);
+            doc.text(`Tanggal: ${formatDate(new Date().toISOString())}`, 20, 40);
 
             const tableData = transactions.map(t => [
                 formatDate(t.date),
@@ -2296,7 +2224,7 @@
                 startY: 50
             });
 
-            doc.save(\`laporan-keuangan-\${currentMode}.pdf\`);
+            doc.save(`laporan-keuangan-${currentMode}.pdf`);
         }
         
         function exportSplitBillPDF(results, totalBill, date) {
@@ -2305,8 +2233,8 @@
             doc.setFontSize(16);
             doc.text('Laporan Split Bill', 20, 20);
             doc.setFontSize(12);
-            doc.text(\`Total Tagihan: \${formatCurrency(totalBill)}\`, 20, 30);
-            doc.text(\`Tanggal: \${formatDate(date)}\`, 20, 38);
+            doc.text(`Total Tagihan: ${formatCurrency(totalBill)}`, 20, 30);
+            doc.text(`Tanggal: ${formatDate(date)}`, 20, 38);
             
             const tableData = results.map(r => [r.name, formatCurrency(r.amount)]);
             doc.autoTable({
@@ -2439,7 +2367,7 @@
             const appData = storage.getAppData();
             const modeData = appData[currentMode];
             const colors = getChartColors();
-            const diaryNotes = JSON.parse(localStorage.getItem('diaryNotes_v4.8') || '[]');
+            const diaryNotes = JSON.parse(localStorage.getItem('diaryNotes_v4.6') || '[]');
 
             Chart.defaults.color = colors.legendColor;
             Chart.defaults.font.family = "'Poppins', 'sans-serif'";
@@ -2662,7 +2590,7 @@
                     labels.push(current.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }));
                     current.setDate(current.getDate() + 1);
                 } else if (unit === 'week') {
-                    labels.push(\`W\${getWeekNumber(current)}\`);
+                    labels.push(`W${getWeekNumber(current)}`);
                     current.setDate(current.getDate() + 7);
                 } else {
                     labels.push(current.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }));
@@ -2722,8 +2650,8 @@
             Object.assign(msgDiv.style, {
                 position: 'fixed', bottom: '20px', right: '20px', padding: '15px',
                 backgroundColor: isLight ? '#ffffff' : 'rgba(15, 10, 32, 0.8)',
-                backdropFilter: 'blur(10px)', color: colors[type], border: \`1px solid \${colors[type]}\`,
-                borderRadius: '8px', boxShadow: \`0 4px 15px rgba(0,0,0,0.1)\`, zIndex: '9999',
+                backdropFilter: 'blur(10px)', color: colors[type], border: `1px solid ${colors[type]}`,
+                borderRadius: '8px', boxShadow: `0 4px 15px rgba(0,0,0,0.1)`, zIndex: '9999',
                 transition: 'opacity 0.5s'
             });
             msgDiv.textContent = message;
@@ -2774,8 +2702,8 @@
         }
 
         function updateActiveButton(selectorId, activeRange) {
-            document.querySelectorAll(\`#\${selectorId} .range-btn\`).forEach(b => b.classList.remove('active'));
-            document.querySelector(\`#\${selectorId} .range-btn[data-range="\${activeRange}"]\`).classList.add('active');
+            document.querySelectorAll(`#${selectorId} .range-btn`).forEach(b => b.classList.remove('active'));
+            document.querySelector(`#${selectorId} .range-btn[data-range="${activeRange}"]`).classList.add('active');
         }
 
         function filterDataByRange(data, range, dateKey) {
@@ -2798,6 +2726,165 @@
                 return itemDate >= startDate && itemDate <= endDate;
             });
         }
+
+        // =======================================================
+        // --- GOOGLE DRIVE INTEGRATION ---
+        // =======================================================
+        function initGisClient() {
+            try {
+                googleTokenClient = google.accounts.oauth2.initTokenClient({
+                    client_id: GOOGLE_CLIENT_ID,
+                    scope: GOOGLE_SCOPES,
+                    callback: (tokenResponse) => {
+                        if (tokenResponse && tokenResponse.access_token) {
+                            googleAccessToken = tokenResponse.access_token;
+                            updateSigninStatus(true);
+                        } else {
+                            console.error("Gagal mendapatkan access token:", tokenResponse);
+                            showMessage("Gagal melakukan otentikasi.", "error");
+                        }
+                    },
+                });
+            } catch (error) {
+                console.error("Google Identity Services client gagal dimuat.", error);
+                showMessage("Gagal memuat API Google. Coba refresh halaman.", "error");
+            }
+        }
+
+        function handleAuthClick() {
+            if (googleAccessToken) {
+                google.accounts.oauth2.revoke(googleAccessToken, () => {
+                    googleAccessToken = null;
+                    updateSigninStatus(false);
+                    showMessage("Berhasil keluar dari akun Google.", "success");
+                });
+            } else {
+                if (googleTokenClient) {
+                    googleTokenClient.requestAccessToken({ prompt: 'consent' });
+                } else {
+                    showMessage("Client otentikasi belum siap.", "error");
+                }
+            }
+        }
+
+        function handleBackupClick() {
+            const lifeHubData = storage.getAppData();
+            const diaryData = JSON.parse(localStorage.getItem('diaryNotes_v4.6') || '[]');
+            
+            const allData = {
+                lifeHubData,
+                diaryData,
+                backupVersion: "4.8.0",
+                backupDate: new Date().toISOString()
+            };
+            
+            if (Object.keys(lifeHubData.personal).length === 0 && Object.keys(lifeHubData.business).length === 0 && diaryData.length === 0) {
+                showMessage("Tidak ada data untuk di-backup.", "error");
+                return;
+            }
+            
+            backupDataToDrive(allData);
+        }
+        
+        function updateSigninStatus(isSignedIn) {
+            const authButton = document.getElementById('auth-button');
+            const backupButton = document.getElementById('backup-button');
+            const authStatus = document.getElementById('auth-status');
+            const fileListDiv = document.getElementById('file-list');
+
+            if (isSignedIn) {
+                authButton.innerHTML = '<i class="fab fa-google mr-2"></i>Putuskan Hubungan Google';
+                backupButton.disabled = false;
+                authStatus.innerText = "Terhubung ke Google Drive";
+                listFiles();
+            } else {
+                authButton.innerHTML = '<i class="fab fa-google mr-2"></i>Hubungkan ke Google';
+                backupButton.disabled = true;
+                authStatus.innerText = "Belum terhubung.";
+                fileListDiv.innerHTML = '';
+            }
+        }
+
+        async function backupDataToDrive(data) {
+            if (!googleAccessToken) {
+                showMessage("Otentikasi diperlukan.", "error");
+                return;
+            }
+
+            const authStatus = document.getElementById('auth-status');
+            authStatus.innerText = "Memulai proses backup...";
+            showMessage("Mengunggah data ke Google Drive...", "info");
+
+            const fileContent = JSON.stringify(data, null, 2);
+            const file = new Blob([fileContent], { type: 'application/json' });
+            const metadata = {
+                'name': `uranuspace_backup_${new Date().toISOString().replace(/:/g, '-')}.json`,
+                'mimeType': 'application/json',
+                'parents': ['appDataFolder']
+            };
+
+            const form = new FormData();
+            form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+            form.append('file', file);
+
+            try {
+                const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+                    method: 'POST',
+                    headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }),
+                    body: form
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Error response from Drive API:", errorData);
+                    throw new Error(`Gagal mengunggah: ${errorData.error.message}`);
+                }
+
+                const result = await response.json();
+                authStatus.innerText = `Backup berhasil! File: ${result.name}`;
+                showMessage("Backup ke Google Drive berhasil!", "success");
+                listFiles();
+            } catch (error) {
+                console.error("Error saat backup ke Drive:", error);
+                authStatus.innerText = "Backup gagal. Lihat konsol untuk detail.";
+                showMessage(`Backup gagal: ${error.message}`, "error");
+            }
+        }
+
+        async function listFiles() {
+            if (!googleAccessToken) return;
+
+            const fileListDiv = document.getElementById('file-list');
+            fileListDiv.innerHTML = '<p class="text-gray-400">Memuat daftar file...</p>';
+
+            try {
+                const response = await fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files(id,name,createdTime)&pageSize=5&orderBy=createdTime desc", {
+                    headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Gagal memuat daftar file: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                if (data.files && data.files.length > 0) {
+                    fileListDiv.innerHTML = "<strong class='block mb-1 text-purple-300'>Backup Terbaru:</strong>" + 
+                        data.files.map(file => 
+                            `<div class="p-1">
+                                <span>${file.name}</span>
+                                <span class="block text-gray-500 text-xs">${new Date(file.createdTime).toLocaleString('id-ID')}</span>
+                            </div>`
+                        ).join('');
+                } else {
+                    fileListDiv.innerHTML = '<p class="text-gray-500">Belum ada file backup di Google Drive.</p>';
+                }
+            } catch (error) {
+                console.error('Error listing files:', error);
+                fileListDiv.innerHTML = `<p class="text-red-500">Gagal memuat daftar file.</p>`;
+            }
+        }
     </script>
 </body>
 </html>
+
+
