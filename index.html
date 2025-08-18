@@ -2740,7 +2740,7 @@
         }
 
         // =======================================================
-        // --- GOOGLE DRIVE INTEGRATION ---
+        // --- GOOGLE DRIVE INTEGRATION (WITH PERSISTENT LOGIN) ---
         // =======================================================
         function initGisClient() {
             try {
@@ -2755,13 +2755,23 @@
                     callback: (tokenResponse) => {
                         if (tokenResponse && tokenResponse.access_token) {
                             googleAccessToken = tokenResponse.access_token;
+                            // PERUBAHAN: Simpan status login di localStorage
+                            localStorage.setItem('googleAuthLoggedIn', 'true');
                             updateSigninStatus(true);
                         } else {
                             console.error("Gagal mendapatkan access token:", tokenResponse);
                             showMessage("Gagal melakukan otentikasi.", "error");
+                            // PERUBAHAN: Hapus status jika gagal
+                            localStorage.removeItem('googleAuthLoggedIn');
                         }
                     },
                 });
+
+                // PERUBAHAN: Coba login secara diam-diam jika sebelumnya sudah pernah login
+                if (localStorage.getItem('googleAuthLoggedIn') === 'true') {
+                    googleTokenClient.requestAccessToken({ prompt: '' });
+                }
+
             } catch (error) {
                 console.error("Google Identity Services client gagal dimuat.", error);
                 showMessage("Gagal memuat API Google. Coba refresh halaman.", "error");
@@ -2772,6 +2782,8 @@
             if (googleAccessToken) {
                 google.accounts.oauth2.revoke(googleAccessToken, () => {
                     googleAccessToken = null;
+                    // PERUBAHAN: Hapus status login dari localStorage saat logout
+                    localStorage.removeItem('googleAuthLoggedIn');
                     updateSigninStatus(false);
                     showMessage("Berhasil keluar dari akun Google.", "success");
                 });
