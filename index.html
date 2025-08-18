@@ -802,7 +802,7 @@
                     </div>
                 </div>
                 
-                         <!-- Settings Section -->
+                                <!-- Settings Section -->
                 <div id="settings-section" class="section hidden">
                     <h2 class="text-3xl font-bold mb-6 text-purple-300">Pengaturan</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1116,15 +1116,15 @@
                 }
 
                 if (videoId) {
-                    const embedHTML = `<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 1rem 0;">
-                        <iframe 
-                            src="https://www.youtube.com/embed/${videoId}" 
-                            frameborder="0" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen 
-                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;">
-                        </iframe>
-                    </div><p><br></p>`;
+                    const embedHTML = \`<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 1rem 0;">
+                            <iframe 
+                                src="https://www.youtube.com/embed/\${videoId}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen 
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;">
+                            </iframe>
+                        </div><p><br></p>\`;
                     this.formatText('insertHTML', embedHTML);
                 } else {
                     showMessage("URL YouTube tidak valid.", "error");
@@ -1135,21 +1135,21 @@
                 const url = prompt("Masukkan URL video TikTok:");
                 if (!url) return;
 
-                const regex = /tiktok\.com\/.*\/video\/(\d+)/;
+                const regex = /tiktok\.com\/.*\/video\/(\\d+)/;
                 const match = url.match(regex);
                 const videoId = match && match[1] ? match[1] : null;
 
                 if (videoId) {
-                    const embedHTML = `
-                        <div style="position: relative; padding-bottom: 177.78%; /* Aspect Ratio 9:16 */ height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                            <iframe 
-                                src="https://www.tiktok.com/embed/v2/${videoId}" 
-                                frameborder="0" 
-                                allow="autoplay; encrypted-media" 
-                                allowfullscreen 
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-                            </iframe>
-                        </div><p><br></p>`;
+                    const embedHTML = \`
+                            <div style="position: relative; padding-bottom: 177.78%; /* Aspect Ratio 9:16 */ height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                                <iframe 
+                                    src="https://www.tiktok.com/embed/v2/\${videoId}" 
+                                    frameborder="0" 
+                                    allow="autoplay; encrypted-media" 
+                                    allowfullscreen 
+                                    style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                                </iframe>
+                            </div><p><br></p>\`;
                     
                     this.formatText('insertHTML', embedHTML);
                     showMessage("Video TikTok berhasil disematkan!", "success");
@@ -1168,16 +1168,16 @@
                     let elementHTML = '';
 
                     if (file.type.startsWith('image/')) {
-                        elementHTML = `<img src="${result}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;" />`;
+                        elementHTML = \`<img src="\${result}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;" />\`;
                     } else if (file.type.startsWith('video/')) {
-                        elementHTML = `<video controls src="${result}" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;"></video>`;
+                        elementHTML = \`<video controls src="\${result}" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;"></video>\`;
                     } else if (file.type === 'application/pdf') {
-                        elementHTML = `<embed src="${result}" type="application/pdf" width="100%" height="500px" style="border-radius: 8px; margin: 1rem 0;" />`;
+                        elementHTML = \`<embed src="\${result}" type="application/pdf" width="100%" height="500px" style="border-radius: 8px; margin: 1rem 0;" />\`;
                     } else if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) {
                         const escapedText = result.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                        elementHTML = `<pre style="background: rgba(0,0,0,0.2); border: 1px solid var(--input-border); padding: 1rem; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"><code>${escapedText}</code></pre>`;
+                        elementHTML = \`<pre style="background: rgba(0,0,0,0.2); border: 1px solid var(--input-border); padding: 1rem; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"><code>\${escapedText}</code></pre>\`;
                     } else {
-                        showMessage(`Tipe file ${file.type} tidak didukung untuk pratinjau.`, 'error');
+                        showMessage(\`Tipe file \${file.type} tidak didukung untuk pratinjau.\`, 'error');
                         return;
                     }
                     
@@ -1260,21 +1260,21 @@
                     return;
                 }
                 
-                this.dom.notesList.innerHTML = notesToShow.map(note => `
-                    <div class="note-item p-3 rounded-lg mb-2 cursor-pointer note-item-clickable" data-action="click-to-edit" data-id="${note.id}">
+                this.dom.notesList.innerHTML = notesToShow.map(note => \`
+                    <div class="note-item p-3 rounded-lg mb-2 cursor-pointer note-item-clickable" data-action="click-to-edit" data-id="\${note.id}">
                         <div class="flex items-start justify-between mb-1">
                             <div>
-                                <strong class="text-md text-purple-300">${note.title || 'Tanpa Judul'}</strong>
-                                <span class="block text-xs text-gray-400">${this.formatDate(note.date)}</span>
+                                <strong class="text-md text-purple-300">\${note.title || 'Tanpa Judul'}</strong>
+                                <span class="block text-xs text-gray-400">\${this.formatDate(note.date)}</span>
                             </div>
                             <div class="flex gap-2">
-                                <button data-action="preview" data-id="${note.id}" class="text-green-400 hover:text-green-300"><i class="fas fa-eye"></i></button>
-                                <button data-action="delete" data-id="${note.id}" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
+                                <button data-action="preview" data-id="\${note.id}" class="text-green-400 hover:text-green-300"><i class="fas fa-eye"></i></button>
+                                <button data-action="delete" data-id="\${note.id}" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button>
                             </div>
                         </div>
-                        <div class="text-sm text-gray-400">${this.truncateContent(note.content, 80)}</div>
+                        <div class="text-sm text-gray-400">\${this.truncateContent(note.content, 80)}</div>
                     </div>
-                `).join('');
+                \`).join('');
             }
 
             editNote(id) {
@@ -1306,11 +1306,11 @@
             previewNote(id) {
                 const note = this.notes.find(n => n.id === id);
                 if (note) {
-                    this.dom.previewContent.innerHTML = `
-                        <h2 class="font-bold text-2xl mb-2 text-purple-300">${note.title || 'Tanpa Judul'}</h2>
-                        <p class="text-sm text-gray-400 mb-4">${this.formatDate(note.date)}</p>
-                        <div class="prose max-w-none">${note.content}</div>
-                    `;
+                    this.dom.previewContent.innerHTML = \`
+                        <h2 class="font-bold text-2xl mb-2 text-purple-300">\${note.title || 'Tanpa Judul'}</h2>
+                        <p class="text-sm text-gray-400 mb-4">\${this.formatDate(note.date)}</p>
+                        <div class="prose max-w-none">\${note.content}</div>
+                    \`;
                     this.dom.previewModal.classList.add('show');
                 }
             }
@@ -1364,10 +1364,10 @@
                     return;
                 }
 
-                const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${format === 'json' ? 'txt' : format}`;
+                const filename = \`\${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.\${format === 'json' ? 'txt' : format}\`;
 
                 if (format === 'html') {
-                    const htmlContent = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family: sans-serif; line-height: 1.6; padding: 2rem;} img, video {max-width: 100%; height: auto;}</style></head><body><h1>${title}</h1>${content}</body></html>`;
+                    const htmlContent = \`<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>\${title}</title><style>body{font-family: sans-serif; line-height: 1.6; padding: 2rem;} img, video {max-width: 100%; height: auto;}</style></head><body><h1>\${title}</h1>\${content}</body></html>\`;
                     this.downloadFile(filename, htmlContent, 'text/html');
                 } else if (format === 'json') {
                     const jsonContent = JSON.stringify({
@@ -1384,7 +1384,7 @@
                     const doc = new jsPDF();
                     
                     const tempContainer = document.createElement('div');
-                    tempContainer.innerHTML = `<h1>${title}</h1>${content}`;
+                    tempContainer.innerHTML = \`<h1>\${title}</h1>\${content}\`;
                     Object.assign(tempContainer.style, {
                         position: 'absolute',
                         left: '-9999px',
@@ -1619,7 +1619,7 @@
             const fileContent = JSON.stringify(allData, null, 2);
             const file = new Blob([fileContent], { type: "application/json" });
             const metadata = {
-                'name': `Uranuspace_Backup_${new Date().toISOString().slice(0,10)}.json`,
+                'name': \`Uranuspace_Backup_\${new Date().toISOString().slice(0,10)}.json\`,
                 'mimeType': 'application/json'
             };
 
@@ -1637,11 +1637,11 @@
                 if (result.error) {
                     throw new Error(result.error.message);
                 }
-                document.getElementById("status").innerText = `Backup berhasil! File: ${result.name}`;
+                document.getElementById("status").innerText = \`Backup berhasil! File: \${result.name}\`;
                 showMessage("Backup ke Google Drive berhasil!", "success");
             } catch (error) {
                 console.error("Error backing up to Drive:", error);
-                document.getElementById("status").innerText = `Error: ${error.message}`;
+                document.getElementById("status").innerText = \`Error: \${error.message}\`;
                 showMessage("Gagal backup ke Google Drive.", "error");
             }
         }
@@ -1675,7 +1675,7 @@
             document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
             document.getElementById(section + '-section').classList.remove('hidden');
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+            document.querySelector(\`[data-section="\${section}"]\`).classList.add('active');
             currentSection = section;
 
             switch(section) {
@@ -1751,13 +1751,13 @@
             const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime');
             const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date');
             
-            filteredTransactions.forEach(t => activities.push({ type: 'transaction', icon: t.type === 'income' ? 'fa-arrow-up text-green-500' : 'fa-arrow-down text-pink-500', text: `${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: ${formatCurrency(t.amount)}`, time: t.date }));
-            filteredTasks.forEach(p => activities.push({ type: 'task', icon: 'fa-calendar-check text-blue-500', text: `Tugas: ${p.title}`, time: p.datetime }));
-            filteredSplits.forEach(s => activities.push({ type: 'split', icon: 'fa-receipt text-green-500', text: `Split Bill: ${formatCurrency(s.totalBill)}`, time: s.date }));
+            filteredTransactions.forEach(t => activities.push({ type: 'transaction', icon: t.type === 'income' ? 'fa-arrow-up text-green-500' : 'fa-arrow-down text-pink-500', text: \`\${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: \${formatCurrency(t.amount)}\`, time: t.date }));
+            filteredTasks.forEach(p => activities.push({ type: 'task', icon: 'fa-calendar-check text-blue-500', text: \`Tugas: \${p.title}\`, time: p.datetime }));
+            filteredSplits.forEach(s => activities.push({ type: 'split', icon: 'fa-receipt text-green-500', text: \`Split Bill: \${formatCurrency(s.totalBill)}\`, time: s.date }));
 
             activities.sort((a, b) => new Date(b.time) - new Date(a.time));
             const container = document.getElementById('recentActivities');
-            container.innerHTML = activities.length > 0 ? activities.slice(0, 15).map(activity => `<div class="flex items-center justify-between p-2 hover:bg-purple-500/10 rounded"><div class="flex items-center"><i class="fas ${activity.icon} mr-3"></i><span>${activity.text}</span></div><span class="text-sm text-gray-400">${formatDate(activity.time)}</span></div>`).join('') : '<p class="text-gray-500">Tidak ada aktivitas dalam rentang waktu ini.</p>';
+            container.innerHTML = activities.length > 0 ? activities.slice(0, 15).map(activity => \`<div class="flex items-center justify-between p-2 hover:bg-purple-500/10 rounded"><div class="flex items-center"><i class="fas \${activity.icon} mr-3"></i><span>\${activity.text}</span></div><span class="text-sm text-gray-400">\${formatDate(activity.time)}</span></div>\`).join('') : '<p class="text-gray-500">Tidak ada aktivitas dalam rentang waktu ini.</p>';
         }
 
         // --- FINANCE ---
@@ -1805,36 +1805,36 @@
                 container.innerHTML = '<p class="text-center text-gray-500">Belum ada transmisi data</p>';
                 return;
             }
-            container.innerHTML = [...transactions].reverse().map(t => `
-                <div class="p-4 rounded-md flex justify-between items-center hover:bg-purple-500/10 cursor-pointer ${t.type}" onclick="showTransactionModal('${t.id}')">
+            container.innerHTML = [...transactions].reverse().map(t => \`
+                <div class="p-4 rounded-md flex justify-between items-center hover:bg-purple-500/10 cursor-pointer \${t.type}" onclick="showTransactionModal('\${t.id}')">
                     <div class="flex items-center">
-                        <i class="fas ${getTransactionIcon(t.category)} mr-4 text-xl"></i>
+                        <i class="fas \${getTransactionIcon(t.category)} mr-4 text-xl"></i>
                         <div>
-                            <h4 class="font-semibold">${t.description}</h4>
-                            <p class="text-sm text-gray-400">${getCategoryName(t.category)} • ${formatDate(t.date)}</p>
+                            <h4 class="font-semibold">\${t.description}</h4>
+                            <p class="text-sm text-gray-400">\${getCategoryName(t.category)} • \${formatDate(t.date)}</p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="font-bold font-mono ${t.type === 'income' ? 'text-green-500' : 'text-pink-500'}">${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}</p>
-                        <button onclick="confirmDeleteTransaction('${t.id}', event)" class="text-red-500 hover:text-red-400 ml-2 text-xs"><i class="fas fa-trash"></i></button>
+                        <p class="font-bold font-mono \${t.type === 'income' ? 'text-green-500' : 'text-pink-500'}">\${t.type === 'income' ? '+' : '-'}\${formatCurrency(t.amount)}</p>
+                        <button onclick="confirmDeleteTransaction('\${t.id}', event)" class="text-red-500 hover:text-red-400 ml-2 text-xs"><i class="fas fa-trash"></i></button>
                     </div>
-                </div>`).join('');
+                </div>\`).join('');
         }
 
         function showTransactionModal(id = null) {
             const appData = storage.getAppData();
             const transaction = id ? appData[currentMode].transactions.find(t => t.id === id) : null;
-            const content = `
-                <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-purple-600">${id ? 'Edit' : 'Tambah'} Transaksi</h3><button class="closeModal text-gray-400 hover:text-purple-600"><i class="fas fa-times"></i></button></div>
+            const content = \`
+                <div class="flex justify-between items-center mb-4"><h3 class="text-xl font-semibold text-purple-600">\${id ? 'Edit' : 'Tambah'} Transaksi</h3><button class="closeModal text-gray-400 hover:text-purple-600"><i class="fas fa-times"></i></button></div>
                 <form id="transactionForm" class="space-y-4">
-                    <input type="hidden" id="transactionId" value="${id || ''}">
-                    <div><label class="block text-sm font-medium mb-1">Tipe</label><select id="transactionType" class="custom-input" required>${['income', 'expense'].map(o => `<option value="${o}" ${transaction?.type === o ? 'selected' : ''}>${o === 'income' ? 'Pemasukan' : 'Pengeluaran'}</option>`).join('')}</select></div>
-                    <div><label class="block text-sm font-medium mb-1">Jumlah</label><input type="number" id="transactionAmount" class="custom-input" value="${transaction?.amount || ''}" required></div>
-                    <div><label class="block text-sm font-medium mb-1">Kategori</label><select id="transactionCategory" class="custom-input" required>${Object.keys(getCategoryName()).map(c => `<option value="${c}" ${transaction?.category === c ? 'selected' : ''}>${getCategoryName(c)}</option>`).join('')}</select></div>
-                    <div><label class="block text-sm font-medium mb-1">Deskripsi</label><input type="text" id="transactionDescription" class="custom-input" value="${transaction?.description || ''}" required></div>
-                    <div><label class="block text-sm font-medium mb-1">Tanggal</label><input type="date" id="transactionDate" class="custom-input" value="${transaction?.date || new Date().toISOString().split('T')[0]}" required></div>
+                    <input type="hidden" id="transactionId" value="\${id || ''}">
+                    <div><label class="block text-sm font-medium mb-1">Tipe</label><select id="transactionType" class="custom-input" required>\${['income', 'expense'].map(o => \`<option value="\${o}" \${transaction?.type === o ? 'selected' : ''}>\${o === 'income' ? 'Pemasukan' : 'Pengeluaran'}</option>\`).join('')}</select></div>
+                    <div><label class="block text-sm font-medium mb-1">Jumlah</label><input type="number" id="transactionAmount" class="custom-input" value="\${transaction?.amount || ''}" required></div>
+                    <div><label class="block text-sm font-medium mb-1">Kategori</label><select id="transactionCategory" class="custom-input" required>\${Object.keys(getCategoryName()).map(c => \`<option value="\${c}" \${transaction?.category === c ? 'selected' : ''}>\${getCategoryName(c)}</option>\`).join('')}</select></div>
+                    <div><label class="block text-sm font-medium mb-1">Deskripsi</label><input type="text" id="transactionDescription" class="custom-input" value="\${transaction?.description || ''}" required></div>
+                    <div><label class="block text-sm font-medium mb-1">Tanggal</label><input type="date" id="transactionDate" class="custom-input" value="\${transaction?.date || new Date().toISOString().split('T')[0]}" required></div>
                     <div class="flex gap-2 mt-6"><button type="submit" class="custom-button flex-1">Simpan</button><button type="button" class="closeModal custom-button custom-button-danger">Batal</button></div>
-                </form>`;
+                </form>\`;
             showModal(content);
             document.getElementById('transactionForm').addEventListener('submit', saveTransaction);
         }
@@ -1880,7 +1880,7 @@
             const appData = storage.getAppData();
             const categories = [...new Set(appData[currentMode].transactions.map(t => t.category))];
             const categoryFilter = document.getElementById('categoryFilter');
-            categoryFilter.innerHTML = '<option value="">Semua Kategori</option>' + categories.map(c => `<option value="${c}">${getCategoryName(c)}</option>`).join('');
+            categoryFilter.innerHTML = '<option value="">Semua Kategori</option>' + categories.map(c => \`<option value="\${c}">\${getCategoryName(c)}</option>\`).join('');
             
             const typeFilter = document.getElementById('typeFilter');
             typeFilter.innerHTML = '<option value="">Semua Tipe</option><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option>';
@@ -1907,19 +1907,19 @@
 
             sortedTasks.forEach(task => {
                 const item = document.createElement('div');
-                item.className = `task-item p-3 rounded-lg flex justify-between items-center hover:bg-purple-500/10 ${task.completed ? 'completed' : ''}`;
+                item.className = \`task-item p-3 rounded-lg flex justify-between items-center hover:bg-purple-500/10 \${task.completed ? 'completed' : ''}\`;
                 const priorityColor = { high: '#f472b6', medium: '#fbbf24', low: '#4ade80' };
                 
-                item.innerHTML = `
+                item.innerHTML = \`
                     <div class="flex items-center">
-                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask('${task.id}')" class="w-5 h-5 rounded bg-purple-900/50 border-purple-400 text-purple-600 focus:ring-purple-500">
+                        <input type="checkbox" \${task.completed ? 'checked' : ''} onchange="toggleTask('\${task.id}')" class="w-5 h-5 rounded bg-purple-900/50 border-purple-400 text-purple-600 focus:ring-purple-500">
                         <div class="ml-4">
-                            <strong class="block">${task.title}</strong>
-                            <small class="text-gray-400">${formatDateTime(task.datetime)} | <span style="color: ${priorityColor[task.priority]}">●</span> ${task.priority}</small>
+                            <strong class="block">\${task.title}</strong>
+                            <small class="text-gray-400">\${formatDateTime(task.datetime)} | <span style="color: \${priorityColor[task.priority]}">●</span> \${task.priority}</small>
                         </div>
                     </div>
-                    <button onclick="confirmDeleteTask('${task.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
-                `;
+                    <button onclick="confirmDeleteTask('\${task.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
+                \`;
                 list.appendChild(item);
             });
         }
@@ -1982,12 +1982,12 @@
             const tasks = appData[currentMode].tasks;
 
             const days = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
-            days.forEach(day => calendar.innerHTML += `<div class="text-center font-bold text-purple-400 text-sm">${day}</div>`);
+            days.forEach(day => calendar.innerHTML += \`<div class="text-center font-bold text-purple-400 text-sm">\${day}</div>\`);
             
             for (let i = 0; i < firstDay; i++) calendar.innerHTML += '<div></div>';
             
             for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dateStr = \`\${year}-\${String(month + 1).padStart(2, '0')}-\${String(day).padStart(2, '0')}\`;
                 const dayTasks = tasks.filter(t => t.datetime && t.datetime.startsWith(dateStr));
                 const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
                 
@@ -2006,11 +2006,11 @@
                     else if (hasLow) indicatorColor = '#4ade80';
                     
                     if (indicatorColor) {
-                        priorityIndicator = `<span class="absolute top-1 right-1 h-2 w-2 rounded-full" style="background-color: ${indicatorColor};"></span>`;
+                        priorityIndicator = \`<span class="absolute top-1 right-1 h-2 w-2 rounded-full" style="background-color: \${indicatorColor};"></span>\`;
                     }
                 }
 
-                calendar.innerHTML += `<div class="${dayClass}">${day}${priorityIndicator}</div>`;
+                calendar.innerHTML += \`<div class="\${dayClass}">\${day}\${priorityIndicator}</div>\`;
             }
         }
         
@@ -2041,7 +2041,7 @@
 
         function pauseTimer() { isTimerRunning = false; clearInterval(timerInterval); }
         function resetTimer() { pauseTimer(); timerMinutes = 25; timerSeconds = 0; updateTimerDisplay(); }
-        function updateTimerDisplay() { document.getElementById('timerDisplay').textContent = `${String(timerMinutes).padStart(2, '0')}:${String(timerSeconds).padStart(2, '0')}`; }
+        function updateTimerDisplay() { document.getElementById('timerDisplay').textContent = \`\${String(timerMinutes).padStart(2, '0')}:\${String(timerSeconds).padStart(2, '0')}\`; }
 
         // --- SPLIT BILL ---
         function loadSplitPage() { 
@@ -2071,7 +2071,7 @@
                 }
                 const totalPercentage = percentages.reduce((sum, p) => sum + p, 0);
                 if (Math.round(totalPercentage) !== 100) {
-                    showMessage(`Total persentase harus 100%, bukan ${totalPercentage}%.`, 'error');
+                    showMessage(\`Total persentase harus 100%, bukan \${totalPercentage}%.\`, 'error');
                     return;
                 }
                 if (percentages.some(isNaN)) {
@@ -2101,12 +2101,12 @@
 
         function displaySplitResults(results, totalBill, date) {
             const resultDiv = document.getElementById('splitResult');
-            resultDiv.innerHTML = `<h4 class="font-bold mb-2">Total: ${formatCurrency(totalBill)}</h4>` + results.map(r => `
+            resultDiv.innerHTML = \`<h4 class="font-bold mb-2">Total: \${formatCurrency(totalBill)}</h4>\` + results.map(r => \`
                 <div class="flex justify-between p-2 border-b border-purple-900/50">
-                    <span>${r.name} ${r.percentage ? `(${r.percentage}%)` : ''}</span>
-                    <strong>${formatCurrency(r.amount)}</strong>
+                    <span>\${r.name} \${r.percentage ? \`(\${r.percentage}%)\` : ''}</span>
+                    <strong>\${formatCurrency(r.amount)}</strong>
                 </div>
-            `).join('');
+            \`).join('');
             document.getElementById('splitResultCard').classList.remove('hidden');
             document.getElementById('exportSplitBtn').onclick = () => exportSplitBillPDF(results, totalBill, date);
         }
@@ -2115,16 +2115,16 @@
             const appData = storage.getAppData();
             const history = appData[currentMode].splitBills;
             const container = document.getElementById('splitHistory');
-            container.innerHTML = [...history].reverse().map(split => `
+            container.innerHTML = [...history].reverse().map(split => \`
                 <div class="p-3 rounded-md border border-purple-900/50 hover:bg-purple-500/10">
                     <div class="flex justify-between items-center">
                         <div>
-                            <strong class="block text-blue-400">${formatCurrency(split.totalBill)}</strong>
-                            <small class="text-gray-400">${formatDate(split.date)} | ${split.results.length} orang | <span class="font-semibold ${split.type === 'custom' ? 'text-pink-400' : 'text-green-400'}">${split.type === 'custom' ? 'Kustom' : 'Merata'}</span></small>
+                            <strong class="block text-blue-400">\${formatCurrency(split.totalBill)}</strong>
+                            <small class="text-gray-400">\${formatDate(split.date)} | \${split.results.length} orang | <span class="font-semibold \${split.type === 'custom' ? 'text-pink-400' : 'text-green-400'}">\${split.type === 'custom' ? 'Kustom' : 'Merata'}</span></small>
                         </div>
-                        <button onclick="confirmDeleteSplit('${split.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
+                        <button onclick="confirmDeleteSplit('\${split.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button>
                     </div>
-                </div>`).join('') || '<p class="text-gray-500 text-center">Tidak ada riwayat.</p>';
+                </div>\`).join('') || '<p class="text-gray-500 text-center">Tidak ada riwayat.</p>';
         }
         
         function confirmDeleteSplit(id) {
@@ -2150,7 +2150,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `lifehub-backup-${new Date().toISOString().split('T')[0]}.txt`;
+            a.download = \`lifehub-backup-\${new Date().toISOString().split('T')[0]}.txt\`;
             a.click();
             URL.revokeObjectURL(url);
             showMessage("Backup berhasil!", "success");
@@ -2205,7 +2205,7 @@
             resetBackgrounds();
 
             if (selectedMediaFile.type.startsWith('image/')) {
-                bgImageLayer.style.backgroundImage = `url('${fileUrl}')`;
+                bgImageLayer.style.backgroundImage = \`url('\${fileUrl}')\`;
                 bgImageLayer.style.display = 'block';
                 document.body.classList.remove('gradient-bg');
                 showMessage('Gambar diterapkan sebagai background.', 'success');
@@ -2279,8 +2279,8 @@
             doc.setFontSize(20);
             doc.text('Laporan Keuangan', 20, 20);
             doc.setFontSize(12);
-            doc.text(`Mode: ${currentMode === 'personal' ? 'Pribadi' : 'Bisnis'}`, 20, 30);
-            doc.text(`Tanggal: ${formatDate(new Date().toISOString())}`, 20, 40);
+            doc.text(\`Mode: \${currentMode === 'personal' ? 'Pribadi' : 'Bisnis'}\`, 20, 30);
+            doc.text(\`Tanggal: \${formatDate(new Date().toISOString())}\`, 20, 40);
 
             const tableData = transactions.map(t => [
                 formatDate(t.date),
@@ -2296,7 +2296,7 @@
                 startY: 50
             });
 
-            doc.save(`laporan-keuangan-${currentMode}.pdf`);
+            doc.save(\`laporan-keuangan-\${currentMode}.pdf\`);
         }
         
         function exportSplitBillPDF(results, totalBill, date) {
@@ -2305,8 +2305,8 @@
             doc.setFontSize(16);
             doc.text('Laporan Split Bill', 20, 20);
             doc.setFontSize(12);
-            doc.text(`Total Tagihan: ${formatCurrency(totalBill)}`, 20, 30);
-            doc.text(`Tanggal: ${formatDate(date)}`, 20, 38);
+            doc.text(\`Total Tagihan: \${formatCurrency(totalBill)}\`, 20, 30);
+            doc.text(\`Tanggal: \${formatDate(date)}\`, 20, 38);
             
             const tableData = results.map(r => [r.name, formatCurrency(r.amount)]);
             doc.autoTable({
@@ -2662,7 +2662,7 @@
                     labels.push(current.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }));
                     current.setDate(current.getDate() + 1);
                 } else if (unit === 'week') {
-                    labels.push(`W${getWeekNumber(current)}`);
+                    labels.push(\`W\${getWeekNumber(current)}\`);
                     current.setDate(current.getDate() + 7);
                 } else {
                     labels.push(current.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' }));
@@ -2722,8 +2722,8 @@
             Object.assign(msgDiv.style, {
                 position: 'fixed', bottom: '20px', right: '20px', padding: '15px',
                 backgroundColor: isLight ? '#ffffff' : 'rgba(15, 10, 32, 0.8)',
-                backdropFilter: 'blur(10px)', color: colors[type], border: `1px solid ${colors[type]}`,
-                borderRadius: '8px', boxShadow: `0 4px 15px rgba(0,0,0,0.1)`, zIndex: '9999',
+                backdropFilter: 'blur(10px)', color: colors[type], border: \`1px solid \${colors[type]}\`,
+                borderRadius: '8px', boxShadow: \`0 4px 15px rgba(0,0,0,0.1)\`, zIndex: '9999',
                 transition: 'opacity 0.5s'
             });
             msgDiv.textContent = message;
@@ -2774,8 +2774,8 @@
         }
 
         function updateActiveButton(selectorId, activeRange) {
-            document.querySelectorAll(`#${selectorId} .range-btn`).forEach(b => b.classList.remove('active'));
-            document.querySelector(`#${selectorId} .range-btn[data-range="${activeRange}"]`).classList.add('active');
+            document.querySelectorAll(\`#\${selectorId} .range-btn\`).forEach(b => b.classList.remove('active'));
+            document.querySelector(\`#\${selectorId} .range-btn[data-range="\${activeRange}"]\`).classList.add('active');
         }
 
         function filterDataByRange(data, range, dateKey) {
@@ -2801,4 +2801,3 @@
     </script>
 </body>
 </html>
-
