@@ -2740,12 +2740,14 @@
             });
         }
 
+
 // =======================================================
 // --- GOOGLE DRIVE INTEGRATION (WITH PERSISTENT LOGIN) ---
 // =======================================================
 
 //let googleTokenClient;
 //let googleAccessToken;
+let autoRefreshTimer = null;
 
 // ============ TOKEN STORAGE UTILS ============
 function saveToken(tokenResponse) {
@@ -2755,6 +2757,8 @@ function saveToken(tokenResponse) {
         expires_at: expiresAt
     };
     localStorage.setItem('googleAuthToken', JSON.stringify(tokenData));
+
+    scheduleAutoRefresh(tokenResponse.expires_in);
 }
 
 function loadToken() {
@@ -2770,10 +2774,61 @@ function loadToken() {
 function clearToken() {
     localStorage.removeItem('googleAuthToken');
     localStorage.removeItem('googleAuthLoggedIn');
+    if (autoRefreshTimer) {
+        clearTimeout(autoRefreshTimer);
+        autoRefreshTimer = null;
+    }
+}
+
+// ============ AUTO REFRESH TIMER ============
+function scheduleAutoRefresh(expiresInSec) {
+    if (autoRefreshTimer) clearTimeout(autoRefreshTimer);
+
+    // Refresh 5 menit sebelum expired
+    const refreshDelay = Math.max(0, (expiresInSec - 300) * 1000);
+    autoRefreshTimer = setTimeout(async () => {
+        console.log("Auto refreshing access token...");
+        try {
+            await refreshAccessToken(true);
+        } catch {
+            console.warn("Auto-refresh gagal, paksa login ulang...");
+            await refreshAccessToken(false);
+        }
+    }, refreshDelay);
+}
+
+// ============ REFRESH TOKEN HANDLER ============
+function refreshAccessToken(silent = true) {
+    return new Promise((resolve, reject) => {
+        if (!googleTokenClient) {
+            return reject(new Error("Google client belum siap"));
+        }
+
+        googleTokenClient.callback = (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+                googleAccessToken = tokenResponse.access_token;
+                saveToken(tokenResponse);
+                localStorage.setItem('googleAuthLoggedIn', 'true');
+                updateSigninStatus(true);
+                resolve(true);
+            } else {
+                console.warn("Refresh token gagal:", tokenResponse);
+                reject(new Error("Gagal refresh token"));
+            }
+        };
+
+        try {
+            googleTokenClient.requestAccessToken({
+                prompt: silent ? '' : 'consent'
+            });
+        } catch (err) {
+            reject(err);
+        }
+    });
 }
 
 // ============ INIT CLIENT ============
-function initGisClient() {
+async function initGisClient() {
     try {
         if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
             console.error("Google Identity Services script not loaded yet.");
@@ -2784,18 +2839,7 @@ function initGisClient() {
         googleTokenClient = google.accounts.oauth2.initTokenClient({
             client_id: GOOGLE_CLIENT_ID,
             scope: GOOGLE_SCOPES,
-            callback: (tokenResponse) => {
-                if (tokenResponse && tokenResponse.access_token) {
-                    googleAccessToken = tokenResponse.access_token;
-                    saveToken(tokenResponse);
-                    localStorage.setItem('googleAuthLoggedIn', 'true');
-                    updateSigninStatus(true);
-                } else {
-                    console.error("Gagal mendapatkan access token:", tokenResponse);
-                    showMessage("Gagal melakukan otentikasi.", "error");
-                    clearToken();
-                }
-            },
+            callback: () => { /* akan di-set dinamis saat request */ }
         });
 
         // ====== Cek apakah ada token tersimpan ======
@@ -2805,21 +2849,39 @@ function initGisClient() {
                 // Token masih valid
                 googleAccessToken = savedToken.access_token;
                 updateSigninStatus(true);
-                // Verifikasi token
-                verifyToken(googleAccessToken).then(valid => {
-                    if (!valid) {
-                        console.warn("Token invalid, refreshing...");
-                        googleTokenClient.requestAccessToken({ prompt: '' });
+
+                // Verifikasi token ke Google
+                const valid = await verifyToken(googleAccessToken);
+                if (!valid) {
+                    console.warn("Token invalid, coba refresh...");
+                    try {
+                        await refreshAccessToken(true); // silent
+                    } catch {
+                        console.warn("Silent refresh gagal, coba login ulang...");
+                        await refreshAccessToken(false); // consent
                     }
-                });
+                } else {
+                    // Token valid → set auto refresh
+                    const remaining = (savedToken.expires_at - Date.now()) / 1000;
+                    scheduleAutoRefresh(remaining);
+                }
             } else {
-                // Token expired → refresh silent
-                console.log("Token expired, requesting new one...");
-                googleTokenClient.requestAccessToken({ prompt: '' });
+                // Token expired → coba refresh
+                console.log("Token expired, refreshing...");
+                try {
+                    await refreshAccessToken(true);
+                } catch {
+                    console.warn("Silent refresh gagal, coba login ulang...");
+                    await refreshAccessToken(false);
+                }
             }
         } else if (localStorage.getItem('googleAuthLoggedIn') === 'true') {
-            // Pernah login, coba refresh silent
-            googleTokenClient.requestAccessToken({ prompt: '' });
+            // Pernah login, coba silent refresh
+            try {
+                await refreshAccessToken(true);
+            } catch {
+                await refreshAccessToken(false);
+            }
         }
 
     } catch (error) {
@@ -2921,6 +2983,7 @@ function updateSigninStatus(isSignedIn) {
     }
 }
 
+// ============ DRIVE HELPERS ============
 async function backupDataToDrive(data) {
     if (!googleAccessToken) {
         showMessage("Otentikasi diperlukan.", "error");
@@ -2984,7 +3047,6 @@ async function restoreDataFromDrive() {
     }
 }
 
-// ============ DRIVE HELPERS ============
 async function findOrCreateFolder(folderName) {
     let folderId = await findFolderId(folderName);
     if (folderId) return folderId;
@@ -3087,6 +3149,7 @@ async function listFiles() {
         fileListDiv.innerHTML = `<p class="text-red-500">Gagal memuat daftar file.</p>`;
     }
 }
+
 
 
 
