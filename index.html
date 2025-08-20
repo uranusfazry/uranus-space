@@ -2744,8 +2744,8 @@
 // --- GOOGLE DRIVE INTEGRATION (WITH PERSISTENT LOGIN) ---
 // =======================================================
 
-let googleTokenClient;
-let googleAccessToken;
+//let googleTokenClient;
+//let googleAccessToken;
 
 // ============ TOKEN STORAGE UTILS ============
 function saveToken(tokenResponse) {
@@ -2770,39 +2770,6 @@ function loadToken() {
 function clearToken() {
     localStorage.removeItem('googleAuthToken');
     localStorage.removeItem('googleAuthLoggedIn');
-}
-
-// ============ TOKEN MANAGER ============
-async function getValidAccessToken() {
-    let tokenData = loadToken();
-
-    // Token masih valid
-    if (tokenData && Date.now() < tokenData.expires_at) {
-        return tokenData.access_token;
-    }
-
-    // Token expired atau belum ada → coba refresh silent
-    return new Promise((resolve, reject) => {
-        if (!googleTokenClient) {
-            reject(new Error("Google client belum diinisialisasi."));
-            return;
-        }
-
-        googleTokenClient.callback = (tokenResponse) => {
-            if (tokenResponse && tokenResponse.access_token) {
-                googleAccessToken = tokenResponse.access_token;
-                saveToken(tokenResponse);
-                localStorage.setItem('googleAuthLoggedIn', 'true');
-                resolve(googleAccessToken);
-            } else {
-                clearToken();
-                reject(new Error("Gagal refresh token"));
-            }
-        };
-
-        // Refresh silent (no prompt)
-        googleTokenClient.requestAccessToken({ prompt: '' });
-    });
 }
 
 // ============ INIT CLIENT ============
@@ -2891,7 +2858,7 @@ async function verifyToken(token) {
 }
 
 // ============ BACKUP & RESTORE ============
-async function handleBackupClick() {
+function handleBackupClick() {
     const lifeHubData = storage.getAppData();
     const diaryData = JSON.parse(localStorage.getItem('diaryNotes_v4.6') || '[]');
     
@@ -2955,46 +2922,55 @@ function updateSigninStatus(isSignedIn) {
 }
 
 async function backupDataToDrive(data) {
-    try {
-        const accessToken = await getValidAccessToken();
-        const authStatus = document.getElementById('auth-status');
-        authStatus.innerText = "Memulai proses backup...";
-        showMessage("Mengunggah data ke Google Drive...", "info");
+    if (!googleAccessToken) {
+        showMessage("Otentikasi diperlukan.", "error");
+        return;
+    }
 
+    const authStatus = document.getElementById('auth-status');
+    authStatus.innerText = "Memulai proses backup...";
+    showMessage("Mengunggah data ke Google Drive...", "info");
+
+    try {
         const folderId = await findOrCreateFolder(DRIVE_FOLDER_NAME);
         if (!folderId) throw new Error("Tidak dapat membuat folder di Drive.");
 
         const fileContent = JSON.stringify(data, null, 2);
         const fileName = `uranuspace_backup_${new Date().toISOString().replace(/:/g, '-')}.txt`;
-
-        const createdFile = await createFileInFolder(folderId, fileName, 'text/plain', fileContent, accessToken);
+        
+        const createdFile = await createFileInFolder(folderId, fileName, 'text/plain', fileContent);
 
         authStatus.innerText = `Backup berhasil! File: ${createdFile.name}`;
         showMessage("Backup ke Google Drive berhasil!", "success");
         listFiles();
     } catch (error) {
         console.error("Error saat backup ke Drive:", error);
+        authStatus.innerText = "Backup gagal. Lihat konsol untuk detail.";
         showMessage(`Backup gagal: ${error.message}`, "error");
     }
 }
 
 async function restoreDataFromDrive() {
-    try {
-        const accessToken = await getValidAccessToken();
-        const authStatus = document.getElementById('auth-status');
-        authStatus.innerText = "Memulai proses restore...";
-        showMessage("Mencari file backup terbaru...", "info");
+    if (!googleAccessToken) {
+        showMessage("Otentikasi diperlukan.", "error");
+        return null;
+    }
+    
+    const authStatus = document.getElementById('auth-status');
+    authStatus.innerText = "Memulai proses restore...";
+    showMessage("Mencari file backup terbaru...", "info");
 
-        const folderId = await findFolderId(DRIVE_FOLDER_NAME, accessToken);
+    try {
+        const folderId = await findFolderId(DRIVE_FOLDER_NAME);
         if (!folderId) throw new Error(`Folder '${DRIVE_FOLDER_NAME}' tidak ditemukan.`);
 
-        const latestFile = await findLatestBackupFile(folderId, accessToken);
+        const latestFile = await findLatestBackupFile(folderId);
         if (!latestFile) throw new Error("Tidak ada file backup yang ditemukan.");
         
         authStatus.innerText = `File terbaru ditemukan: ${latestFile.name}`;
         showMessage(`Mengunduh ${latestFile.name}...`, "info");
 
-        const fileContent = await getFileContent(latestFile.id, accessToken);
+        const fileContent = await getFileContent(latestFile.id);
         const restoredData = JSON.parse(fileContent);
         
         authStatus.innerText = "Restore berhasil! Konfirmasi untuk menimpa data.";
@@ -3002,6 +2978,7 @@ async function restoreDataFromDrive() {
 
     } catch (error) {
         console.error("Error saat restore dari Drive:", error);
+        authStatus.innerText = "Restore gagal. Lihat konsol untuk detail.";
         showMessage(`Restore gagal: ${error.message}`, "error");
         return null;
     }
@@ -3009,8 +2986,7 @@ async function restoreDataFromDrive() {
 
 // ============ DRIVE HELPERS ============
 async function findOrCreateFolder(folderName) {
-    const accessToken = await getValidAccessToken();
-    let folderId = await findFolderId(folderName, accessToken);
+    let folderId = await findFolderId(folderName);
     if (folderId) return folderId;
 
     const fileMetadata = {
@@ -3019,7 +2995,7 @@ async function findOrCreateFolder(folderName) {
     };
     const response = await fetch('https://www.googleapis.com/drive/v3/files', {
         method: 'POST',
-        headers: new Headers({ 'Authorization': 'Bearer ' + accessToken, 'Content-Type': 'application/json' }),
+        headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' }),
         body: JSON.stringify(fileMetadata)
     });
     if (!response.ok) throw new Error("Gagal membuat folder.");
@@ -3027,17 +3003,17 @@ async function findOrCreateFolder(folderName) {
     return folder.id;
 }
 
-async function findFolderId(folderName, accessToken) {
+async function findFolderId(folderName) {
     const query = `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`;
     const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id, name)`, {
-        headers: new Headers({ 'Authorization': 'Bearer ' + accessToken })
+        headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken })
     });
     if (!response.ok) throw new Error("Gagal mencari folder.");
     const data = await response.json();
     return data.files.length > 0 ? data.files[0].id : null;
 }
 
-async function createFileInFolder(folderId, fileName, mimeType, content, accessToken) {
+async function createFileInFolder(folderId, fileName, mimeType, content) {
     const metadata = {
         'name': fileName,
         'mimeType': mimeType,
@@ -3049,38 +3025,39 @@ async function createFileInFolder(folderId, fileName, mimeType, content, accessT
 
     const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
         method: 'POST',
-        headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+        headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }),
         body: form
     });
     if (!response.ok) throw new Error("Gagal mengunggah file.");
     return await response.json();
 }
 
-async function findLatestBackupFile(folderId, accessToken) {
+async function findLatestBackupFile(folderId) {
     const query = `'${folderId}' in parents and mimeType='text/plain' and name contains 'uranuspace_backup_' and trashed=false`;
     const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&orderBy=createdTime desc&pageSize=1`, {
-        headers: new Headers({ 'Authorization': 'Bearer ' + accessToken })
+        headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken })
     });
     if (!response.ok) throw new Error("Gagal mencari file backup.");
     const data = await response.json();
     return data.files.length > 0 ? data.files[0] : null;
 }
 
-async function getFileContent(fileId, accessToken) {
+async function getFileContent(fileId) {
     const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-        headers: new Headers({ 'Authorization': 'Bearer ' + accessToken })
+        headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken })
     });
     if (!response.ok) throw new Error("Gagal mengunduh konten file.");
     return await response.text();
 }
 
 async function listFiles() {
-    try {
-        const accessToken = await getValidAccessToken();
-        const fileListDiv = document.getElementById('file-list');
-        fileListDiv.innerHTML = '<p class="text-gray-400">Memuat daftar file...</p>';
+    if (!googleAccessToken) return;
 
-        const folderId = await findFolderId(DRIVE_FOLDER_NAME, accessToken);
+    const fileListDiv = document.getElementById('file-list');
+    fileListDiv.innerHTML = '<p class="text-gray-400">Memuat daftar file...</p>';
+
+    try {
+        const folderId = await findFolderId(DRIVE_FOLDER_NAME);
         if (!folderId) {
             fileListDiv.innerHTML = '<p class="text-gray-500">Folder backup belum dibuat.</p>';
             return;
@@ -3088,7 +3065,7 @@ async function listFiles() {
 
         const query = `'${folderId}' in parents and mimeType='text/plain' and name contains 'uranuspace_backup_' and trashed=false`;
         const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&pageSize=5&orderBy=createdTime desc`, {
-            headers: new Headers({ 'Authorization': 'Bearer ' + accessToken })
+            headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken })
         });
 
         if (!response.ok) throw new Error(`Gagal memuat daftar file: ${response.statusText}`);
@@ -3110,8 +3087,6 @@ async function listFiles() {
         fileListDiv.innerHTML = `<p class="text-red-500">Gagal memuat daftar file.</p>`;
     }
 }
-
-
 
     </script>
 </body>
