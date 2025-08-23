@@ -536,29 +536,60 @@
             50% { background-color: #0f0; }
         }
 
-        /* === [BARU] GAYA UNTUK FITUR PORTAL === */
-        .portal-card {
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            color: var(--primary-brand);
-            border: 1px solid var(--primary-brand);
-            box-shadow: 0 0 5px var(--primary-brand), inset 0 0 5px var(--primary-brand), 0 0 10px var(--primary-brand);
-        }
-        .portal-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 0 20px var(--primary-brand);
-        }
-        .portal-card h3 {
-            color: var(--primary-brand);
-            text-shadow: 0 0 5px var(--primary-brand), 0 0 10px var(--primary-brand);
-        }
-        .portal-card p {
+        /* === [BARU] GAYA UNTUK PORTAL DI SIDEBAR === */
+        .sidebar-portal-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem; /* py-2 px-3 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
             color: var(--text-secondary);
+            background-color: transparent;
+            border: 1px solid transparent;
         }
-        .portal-card i {
-            color: var(--primary-brand);
-            text-shadow: 0 0 5px var(--primary-brand), 0 0 10px var(--primary-brand);
+
+        .sidebar-portal-item:hover {
+            background-color: var(--hover-nav-bg);
+            color: var(--text-primary);
+            border-color: var(--hover-nav-border);
         }
+
+        .sidebar-portal-item .portal-icon {
+            width: 1.5rem; /* w-6 */
+            height: 1.5rem; /* h-6 */
+            margin-right: 0.75rem; /* mr-3 */
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-portal-item .portal-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .sidebar-portal-item .portal-name {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.875rem; /* text-sm */
+        }
+
+        .sidebar-portal-item .delete-portal-btn {
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            margin-left: 0.5rem; /* ml-2 */
+            color: var(--danger-brand);
+        }
+
+        .sidebar-portal-item:hover .delete-portal-btn {
+            opacity: 1;
+        }
+
         .portal-modal-label {
             color: var(--primary-brand);
             text-shadow: 0 0 5px var(--primary-brand);
@@ -611,39 +642,54 @@
     <div class="app-container">
         <!-- Sidebar -->
         <div id="sidebar" class="sidebar">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-8">
-                    <div class="flex items-center space-x-3">
-                        <!-- PERUBAHAN: Ukuran logo diperbesar -->
-                        <div id="logo-container" class="w-14 h-14 rounded-full flex items-center justify-center cursor-pointer" title="Masuk Mode Pratinjau">
-                            <img src="https://i.imghippo.com/files/YXY6439eaY.png" alt="Uranus Space Logo" class="w-full h-full object-cover rounded-full">
+            <div class="p-6 h-full flex flex-col">
+                <!-- Bagian Atas (Logo, Judul, Mode) -->
+                <div>
+                    <div class="flex items-center justify-between mb-8">
+                        <div class="flex items-center space-x-3">
+                            <div id="logo-container" class="w-14 h-14 rounded-full flex items-center justify-center cursor-pointer" title="Masuk Mode Pratinjau">
+                                <img src="https://i.imghippo.com/files/YXY6439eaY.png" alt="Uranus Space Logo" class="w-full h-full object-cover rounded-full">
+                            </div>
+                            <h1 class="text-3xl font-bold text-purple-300">Uranus Space</h1>
                         </div>
-                        <!-- PERUBAHAN: Ukuran teks judul diperbesar -->
-                        <h1 class="text-3xl font-bold text-purple-300">Uranus Space</h1>
+                        <button id="themeToggle" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-purple-500/10 text-purple-300" title="Toggle Theme">
+                            <i class="fas fa-sun"></i>
+                        </button>
                     </div>
-                    <button id="themeToggle" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-purple-500/10 text-purple-300" title="Toggle Theme">
-                        <i class="fas fa-sun"></i>
-                    </button>
+                    
+                    <div class="mb-6">
+                        <label for="modeSelect" class="block text-sm font-medium mb-2 text-purple-300">Mode Terminal</label>
+                        <select id="modeSelect" class="custom-input">
+                            <option value="personal">Pribadi</option>
+                            <option value="business">Bisnis</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Navigasi Utama -->
+                    <nav>
+                        <div class="nav-item active" data-section="dashboard"><i class="fas fa-tachometer-alt mr-3 w-5"></i>Dashboard</div>
+                        <div class="nav-item" data-section="finance"><i class="fas fa-wallet mr-3 w-5"></i>Manajemen Keuangan</div>
+                        <div class="nav-item" data-section="tasks"><i class="fas fa-tasks mr-3 w-5"></i>Manajemen Waktu</div>
+                        <div class="nav-item" data-section="split"><i class="fas fa-receipt mr-3 w-5"></i>Split Bill</div>
+                        <div class="nav-item" data-section="notes"><i class="fas fa-book mr-3 w-5"></i>Catatan</div>
+                        <div class="nav-item" data-section="settings"><i class="fas fa-cog mr-3 w-5"></i>Pengaturan</div>
+                    </nav>
                 </div>
-                
-                <div class="mb-6">
-                    <label for="modeSelect" class="block text-sm font-medium mb-2 text-purple-300">Mode Terminal</label>
-                    <select id="modeSelect" class="custom-input">
-                        <option value="personal">Pribadi</option>
-                        <option value="business">Bisnis</option>
-                    </select>
+
+                <!-- [BARU] Container untuk Portal di Sidebar -->
+                <div class="mt-8 pt-6 border-t border-[var(--sidebar-border)] flex-grow flex flex-col min-h-0">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-purple-300">Portal Tautan</h3>
+                        <button id="addNewPortalBtn" class="custom-button !p-2 !text-xs" title="Tambah Portal Baru">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <!-- Daftar Portal akan dirender di sini oleh JavaScript -->
+                    <div id="sidebar-portals-container" class="flex-grow overflow-y-auto pr-2 space-y-2">
+                        <!-- Konten portal akan diisi oleh JS -->
+                    </div>
                 </div>
-                
-                <nav>
-                    <div class="nav-item active" data-section="dashboard"><i class="fas fa-tachometer-alt mr-3 w-5"></i>Dashboard</div>
-                    <div class="nav-item" data-section="finance"><i class="fas fa-wallet mr-3 w-5"></i>Manajemen Keuangan</div>
-                    <div class="nav-item" data-section="tasks"><i class="fas fa-tasks mr-3 w-5"></i>Manajemen Waktu</div>
-                    <div class="nav-item" data-section="split"><i class="fas fa-receipt mr-3 w-5"></i>Split Bill</div>
-                    <!-- [BARU] Navigasi untuk Portal -->
-                    <div class="nav-item" data-section="portals"><i class="fas fa-project-diagram mr-3 w-5"></i>Portal Tautan</div>
-                    <div class="nav-item" data-section="notes"><i class="fas fa-book mr-3 w-5"></i>Catatan</div>
-                    <div class="nav-item" data-section="settings"><i class="fas fa-cog mr-3 w-5"></i>Pengaturan</div>
-                </nav>
+
             </div>
         </div>
 
@@ -887,20 +933,6 @@
                     </div>
                 </div>
 
-                <!-- [BARU] Portals Section -->
-                <div id="portals-section" class="section hidden">
-                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
-                        <h2 class="text-3xl font-bold text-purple-300" style="font-family: 'Orbitron', sans-serif;">Portal Tautan</h2>
-                        <button id="addNewPortalBtn" class="custom-button">
-                            <i class="fas fa-plus mr-2"></i>Tambah Portal Baru
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-12" id="portals-grid">
-                        <!-- Kartu Portal akan ditampilkan di sini oleh JavaScript -->
-                    </div>
-                </div>
-
-
                 <!-- Notes Section -->
                 <div id="notes-section" class="section hidden">
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
@@ -960,7 +992,6 @@
                                 <input type="text" id="notesTagsInput" class="custom-input flex-1" placeholder="Tags, pisahkan koma">
                             </div>
 
-                            <!-- PERUBAHAN: Tombol ekspor HTML, PDF, JSON dihilangkan -->
                             <div class="flex flex-wrap gap-2 mt-4">
                                 <button id="notesSaveBtn" class="custom-button flex-grow"><i class="fas fa-save mr-2"></i>Simpan</button>
                                 <button id="notesSetPasswordBtn" class="custom-button flex-grow" style="background: linear-gradient(90deg, #f59e0b, #d97706);"><i class="fas fa-lock mr-2"></i>Kunci</button>
@@ -1066,8 +1097,8 @@
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Informasi Aplikasi</h3>
                                 <div class="space-y-2 text-sm">
                                     <p><strong>Nama:</strong> LifeHub v5 (Uranus Space)</p>
-                                    <p><strong>Versi:</strong> 5.1.0-Portal</p>
-                                    <p><strong>Fitur:</strong> Editor Teks Modern, Google Drive Backup & Restore, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, **Portal Tautan**, Custom BG (Persisten), Preview Mode, Kunci Catatan, Keamanan Lanjutan, Laporan PDF Komprehensif dengan Tema Custom.</p>
+                                    <p><strong>Versi:</strong> 5.2.0-SidebarPortal</p>
+                                    <p><strong>Fitur:</strong> Editor Teks Modern, Google Drive Backup & Restore, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, **Portal Tautan di Sidebar**, Custom BG (Persisten), Preview Mode, Kunci Catatan, Keamanan Lanjutan, Laporan PDF Komprehensif dengan Tema Custom.</p>
                                     <p><strong>Storage:</strong> LocalStorage, IndexedDB & Google Drive (Data terenkripsi di terminal Anda)</p>
                                 </div>
                             </div>
@@ -1257,9 +1288,6 @@ class NotesApp {
             previewContent: document.getElementById('notesPreviewContent'),
             closePreviewBtn: document.getElementById('notesClosePreviewBtn'),
             formatBlockSelect: document.getElementById('formatBlock'),
-            exportHTMLBtn: document.getElementById('exportHTMLBtn'),
-            exportPDFBtn: document.getElementById('exportPDFBtn'),
-            exportJSONBtn: document.getElementById('exportJSONBtn'),
         };
     }
 
@@ -1287,11 +1315,6 @@ class NotesApp {
         this.dom.setPasswordBtn.addEventListener('click', () => this.setPasswordForCurrentNote());
         this.dom.clearEditorBtn.addEventListener('click', () => this.clearEditor());
         
-        // Event listeners untuk tombol ekspor yang mungkin masih ada di DOM (jika tidak dihapus)
-        if (this.dom.exportHTMLBtn) this.dom.exportHTMLBtn.addEventListener('click', () => this.exportContent('html'));
-        if (this.dom.exportPDFBtn) this.dom.exportPDFBtn.addEventListener('click', () => this.exportContent('pdf'));
-        if (this.dom.exportJSONBtn) this.dom.exportJSONBtn.addEventListener('click', () => this.exportContent('json'));
-
         this.dom.notesList.addEventListener('click', (e) => {
             const target = e.target.closest('button, .note-item-clickable');
             if (!target) return;
@@ -1447,7 +1470,7 @@ class NotesApp {
         this.displayNotes();
     }
 
-    // --- FUNGSI INTI (Tidak berubah dari Part 1) ---
+    // --- FUNGSI INTI ---
     
     handleCommand(command) {
         const simpleCommands = ['bold', 'italic', 'underline', 'strikeThrough', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'undo', 'redo', 'removeFormat', 'copy', 'cut'];
@@ -1522,26 +1545,77 @@ class NotesApp {
     clearEditor() { this.dom.titleInput.value = ''; this.dom.editorContent.innerHTML = ''; this.dom.tagsInput.value = ''; this.dom.moodSelector.value = 'neutral'; this.dom.dateFilter.value = new Date().toISOString().split('T')[0]; this.currentNoteId = null; }
     addNewNote() { this.clearEditor(); this.dom.titleInput.focus(); showMessage('Editor siap untuk catatan baru.', 'info'); }
     filterNotes() { const query = this.dom.searchInput.value.toLowerCase(); const mood = this.dom.moodFilter.value; let filtered = this.notes; if (query) { filtered = filtered.filter(note => (note.title && note.title.toLowerCase().includes(query)) || (!note.isLocked && note.content.toLowerCase().includes(query)) || note.tags.some(tag => tag.toLowerCase().includes(query))); } if (mood) { filtered = filtered.filter(note => note.mood === mood); } this.displayNotes(filtered); }
-    exportContent(format) { const title = this.dom.titleInput.value.trim() || "Catatan Tanpa Judul"; const content = this.dom.editorContent.innerHTML; const note = this.notes.find(n => n.id === this.currentNoteId); if (!content.trim()) { showMessage("Tidak ada konten untuk diekspor.", "error"); return; } if (note && note.isLocked) { showMessage("Tidak dapat mengekspor catatan yang terkunci.", "error"); return; } const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.${format === 'json' ? 'txt' : format}`; if (format === 'html') { const htmlContent = `<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family: sans-serif; line-height: 1.6; padding: 2rem;} img, video {max-width: 100%; height: auto;}</style></head><body><h1>${title}</h1>${content}</body></html>`; this.downloadFile(filename, htmlContent, 'text/html'); } else if (format === 'json') { const jsonContent = JSON.stringify({ title: title, content: content, tags: note ? note.tags : [], mood: note ? note.mood : 'neutral', date: note ? note.date : new Date().toISOString() }, null, 2); this.downloadFile(filename, jsonContent, 'application/json'); } else if (format === 'pdf') { showMessage("Membuat PDF...", "info"); const { jsPDF } = window.jspdf; const doc = new jsPDF(); const tempContainer = document.createElement('div'); tempContainer.innerHTML = `<h1>${title}</h1>${content}`; Object.assign(tempContainer.style, { position: 'absolute', left: '-9999px', width: '700px', padding: '20px', color: '#000', background: '#fff' }); document.body.appendChild(tempContainer); html2canvas(tempContainer, { scale: 2 }).then(canvas => { document.body.removeChild(tempContainer); const imgData = canvas.toDataURL('image/png'); const imgProps = doc.getImageProperties(imgData); const pdfWidth = doc.internal.pageSize.getWidth(); const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width; let heightLeft = pdfHeight; let position = 0; doc.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight); heightLeft -= doc.internal.pageSize.getHeight(); while (heightLeft >= 0) { position = heightLeft - pdfHeight; doc.addPage(); doc.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight); heightLeft -= doc.internal.pageSize.getHeight(); } doc.save(filename); }).catch(err => { console.error("Gagal membuat PDF:", err); showMessage("Gagal membuat PDF.", "error"); document.body.removeChild(tempContainer); }); } }
-    downloadFile(filename, content, mimeType) { const blob = new Blob([content], { type: mimeType }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
     countWords(html) { const text = html.replace(/<[^>]*>/g, ''); return text.trim().split(/\s+/).filter(Boolean).length; }
     formatDate(dateString) { return dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''; }
     truncateContent(html, length) { const text = html.replace(/<[^>]*>/g, ''); if (text.length <= length) return text; return text.substring(0, length) + '...'; }
 }
 
-<!-- LANJUTAN DARI BAGIAN 1 -->
+// ===================================================================================
+// ========================== BAGIAN 2: LOGIKA APLIKASI UTAMA ========================
+// ===================================================================================
 
-// --- SISA KODE GLOBAL ---
-let currentSection = 'dashboard'; let currentDate = new Date(); let currentMode = 'personal'; let timerInterval; let timerMinutes = 25; let timerSeconds = 0; let isTimerRunning = false; let touchStartX = 0; let touchEndX = 0; let isDragging = false; 
+// --- Variabel Global dan Inisialisasi ---
+let currentSection = 'dashboard'; 
+let currentDate = new Date(); 
+let currentMode = 'personal'; 
+let timerInterval; 
+let timerMinutes = 25; 
+let timerSeconds = 0; 
+let isTimerRunning = false; 
+let touchStartX = 0; 
+let touchEndX = 0; 
+let isDragging = false; 
 
 let masterDateRange = '7d'; 
 let financeDateRange = { start: null, end: null };
 let dateRangeSource = 'dashboard';
 
-const storage = { get: (key, defaultValue = null) => { try { const item = localStorage.getItem(key); return item ? JSON.parse(item) : defaultValue; } catch { return defaultValue; } }, set: (key, value) => { localStorage.setItem(key, JSON.stringify(value)); }, getAppData: () => { return storage.get('lifeHubData_v5.1.0', { currentMode: 'personal', theme: 'dark', isVideoMuted: true, personal: { transactions: [], tasks: [], splitBills: [], portals: [] }, business: { transactions: [], tasks: [], splitBills: [], portals: [] } }); }, saveAppData: (data) => { storage.set('lifeHubData_v5.1.0', data); } };
-const GOOGLE_CLIENT_ID = "175269804015-7agb1gr0nd6ah66co5qen34dd2mvtm68.apps.googleusercontent.com"; const GOOGLE_SCOPES = "https://www.googleapis.com/auth/drive.file"; const DRIVE_FOLDER_NAME = "Uranuspace_App_Backups"; let googleTokenClient; let googleAccessToken = null;
-document.addEventListener('DOMContentLoaded', function() { initializeApp(); setupEventListeners(); const notesApp = new NotesApp(); notesApp.init(); setTimeout(initGisClient, 500); });
+// Objek helper untuk mengelola LocalStorage
+const storage = { 
+    get: (key, defaultValue = null) => { 
+        try { 
+            const item = localStorage.getItem(key); 
+            return item ? JSON.parse(item) : defaultValue; 
+        } catch { 
+            return defaultValue; 
+        } 
+    }, 
+    set: (key, value) => { 
+        localStorage.setItem(key, JSON.stringify(value)); 
+    }, 
+    getAppData: () => { 
+        return storage.get('lifeHubData_v5.2.0', { 
+            currentMode: 'personal', 
+            theme: 'dark', 
+            isVideoMuted: true, 
+            personal: { transactions: [], tasks: [], splitBills: [], portals: [] }, 
+            business: { transactions: [], tasks: [], splitBills: [], portals: [] } 
+        }); 
+    }, 
+    saveAppData: (data) => { 
+        storage.set('lifeHubData_v5.2.0', data); 
+    } 
+};
 
+// Konfigurasi Google Drive API
+const GOOGLE_CLIENT_ID = "175269804015-7agb1gr0nd6ah66co5qen34dd2mvtm68.apps.googleusercontent.com"; 
+const GOOGLE_SCOPES = "https://www.googleapis.com/auth/drive.file"; 
+const DRIVE_FOLDER_NAME = "Uranuspace_App_Backups"; 
+let googleTokenClient; 
+let googleAccessToken = null;
+
+// Titik masuk utama aplikasi
+document.addEventListener('DOMContentLoaded', function() { 
+    initializeApp(); 
+    setupEventListeners(); 
+    const notesApp = new NotesApp(); 
+    notesApp.init(); 
+    setTimeout(initGisClient, 500); 
+});
+
+/**
+ * Inisialisasi status awal aplikasi saat pertama kali dimuat.
+ */
 async function initializeApp() {
     await loadAndApplyCustomBackground();
 
@@ -1562,8 +1636,12 @@ async function initializeApp() {
         splitBillDateInput.value = new Date().toISOString().split('T')[0];
     }
     switchSection('dashboard');
+    renderPortals(); // Memuat portal di sidebar saat aplikasi dimulai
 }
 
+/**
+ * Menyiapkan semua event listener utama untuk elemen UI.
+ */
 function setupEventListeners() { 
     document.querySelectorAll('.nav-item').forEach(item => item.addEventListener('click', () => switchSection(item.dataset.section))); 
     document.getElementById('mobileMenuBtn').addEventListener('click', toggleMobileMenu); 
@@ -1600,7 +1678,6 @@ function setupEventListeners() {
     document.getElementById('auth-button').addEventListener('click', handleAuthClick); 
     document.getElementById('backup-button').addEventListener('click', handleBackupClick); 
     document.getElementById('restore-button').addEventListener('click', handleRestoreClick); 
-    // [BARU] Event listener untuk tombol portal
     document.getElementById('addNewPortalBtn').addEventListener('click', showPortalModal);
     
     const exportPdfBtn = document.getElementById('export-pdf-btn');
@@ -1631,8 +1708,8 @@ function setupEventListeners() {
     });
 }
 function enterPreviewMode() { document.body.classList.add('preview-mode'); } function handleGestureEnd() { const swipeThreshold = 70; const deltaX = touchEndX - touchStartX; if (document.querySelector('.modal.show')) return; if (deltaX < -swipeThreshold) { document.body.classList.remove('preview-mode'); } } function handleTouchStart(e) { touchStartX = e.changedTouches[0].screenX; } function handleTouchEnd(e) { touchEndX = e.changedTouches[0].screenX; handleGestureEnd(); } function handleMouseDown(e) { if (e.button !== 0 || e.target.closest('button, input, select, textarea, a, .modal')) return; isDragging = true; touchStartX = e.screenX; } function handleMouseUp(e) { if (!isDragging) return; isDragging = false; touchEndX = e.screenX; handleGestureEnd(); }
-function switchSection(section) { document.querySelectorAll('.section').forEach(s => s.classList.add('hidden')); document.getElementById(section + '-section').classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active')); document.querySelector(`[data-section="${section}"]`).classList.add('active'); currentSection = section; switch(section) { case 'dashboard': loadDashboard(); break; case 'finance': loadFinancePage(); break; case 'tasks': loadTasksPage(); break; case 'split': loadSplitPage(); break; case 'portals': loadPortalsPage(); break; case 'notes': break; } closeMobileMenu(); }
-function switchMode(e) { currentMode = e.target.value; let appData = storage.getAppData(); appData.currentMode = currentMode; storage.saveAppData(appData); switchSection(currentSection); } 
+function switchSection(section) { document.querySelectorAll('.section').forEach(s => s.classList.add('hidden')); document.getElementById(section + '-section').classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active')); document.querySelector(`[data-section="${section}"]`).classList.add('active'); currentSection = section; switch(section) { case 'dashboard': loadDashboard(); break; case 'finance': loadFinancePage(); break; case 'tasks': loadTasksPage(); break; case 'split': loadSplitPage(); break; case 'notes': break; case 'settings': break; } closeMobileMenu(); }
+function switchMode(e) { currentMode = e.target.value; let appData = storage.getAppData(); appData.currentMode = currentMode; storage.saveAppData(appData); switchSection(currentSection); renderPortals(); } 
 
 function toggleTheme() {
     let currentTheme = 'dark'; // Default
@@ -1676,10 +1753,7 @@ function updateThemeUI(theme) {
     if (currentSection === 'dashboard') {
         refreshDashboardData();
     }
-    // [BARU] Render ulang portal jika tema berubah untuk menyesuaikan warna
-    if (currentSection === 'portals') {
-        renderPortals();
-    }
+    renderPortals();
 }
 
 function toggleMobileMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); } function closeMobileMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
@@ -1693,7 +1767,7 @@ function generateCalendar() { const calendar = document.getElementById('calendar
 function changeMonth(dir) { currentDate.setMonth(currentDate.getMonth() + dir); generateCalendar(); }
 function startTimer() { if (isTimerRunning) return; isTimerRunning = true; timerInterval = setInterval(() => { if (timerSeconds === 0) { if (timerMinutes === 0) { resetTimer(); showMessage("Pomodoro Selesai!", "success"); return; } timerMinutes--; timerSeconds = 59; } else { timerSeconds--; } updateTimerDisplay(); }, 1000); } function pauseTimer() { isTimerRunning = false; clearInterval(timerInterval); } function resetTimer() { pauseTimer(); timerMinutes = 25; timerSeconds = 0; updateTimerDisplay(); } function updateTimerDisplay() { document.getElementById('timerDisplay').textContent = `${String(timerMinutes).padStart(2, '0')}:${String(timerSeconds).padStart(2, '0')}`; }
 function loadSplitPage() { document.getElementById('splitBillDate').value = new Date().toISOString().split('T')[0]; renderSplitHistory(); } function calculateSplitBill(e) { e.preventDefault(); const totalBill = parseFloat(document.getElementById('totalBill').value); const billDate = document.getElementById('splitBillDate').value; const peopleNames = document.getElementById('peopleNames').value.split(',').map(name => name.trim()).filter(name => name); const percentagesStr = document.getElementById('splitPercentages').value; const percentages = percentagesStr ? percentagesStr.split(',').map(p => parseFloat(p.trim())) : []; if (peopleNames.length === 0) { showMessage('Harap masukkan setidaknya satu nama.', 'error'); return; } let results; if (percentages.length > 0) { if (percentages.length !== peopleNames.length) { showMessage('Jumlah nama dan persentase harus sama.', 'error'); return; } const totalPercentage = percentages.reduce((sum, p) => sum + p, 0); if (Math.round(totalPercentage) !== 100) { showMessage(`Total persentase harus 100%, bukan ${totalPercentage}%.`, 'error'); return; } if (percentages.some(isNaN)) { showMessage('Mohon masukkan persentase yang valid.', 'error'); return; } results = peopleNames.map((name, index) => ({ name, amount: (totalBill * percentages[index]) / 100, percentage: percentages[index] })); } else { const amountPerPerson = totalBill / peopleNames.length; results = peopleNames.map(name => ({ name, amount: amountPerPerson })); } const splitBill = { id: generateId(), totalBill, results, date: billDate, type: percentages.length > 0 ? 'custom' : 'equal' }; let appData = storage.getAppData(); appData[currentMode].splitBills.push(splitBill); storage.saveAppData(appData); displaySplitResults(results, totalBill, billDate); renderSplitHistory(); document.getElementById('splitBillForm').reset(); document.getElementById('splitBillDate').value = new Date().toISOString().split('T')[0]; } function displaySplitResults(results, totalBill, date) { const resultDiv = document.getElementById('splitResult'); resultDiv.innerHTML = `<h4 class="font-bold mb-2">Total: ${formatCurrency(totalBill)}</h4>` + results.map(r => `<div class="flex justify-between p-2 border-b border-purple-900/50"><span>${r.name} ${r.percentage ? `(${r.percentage}%)` : ''}</span><strong>${formatCurrency(r.amount)}</strong></div>`).join(''); document.getElementById('splitResultCard').classList.remove('hidden'); document.getElementById('exportSplitBtn').onclick = () => exportSplitBillPDF(results, totalBill, date); } function renderSplitHistory() { const appData = storage.getAppData(); const history = appData[currentMode].splitBills; const container = document.getElementById('splitHistory'); container.innerHTML = [...history].reverse().map(split => `<div class="p-3 rounded-md border border-purple-900/50 hover:bg-purple-500/10"><div class="flex justify-between items-center"><div><strong class="block text-blue-400">${formatCurrency(split.totalBill)}</strong><small class="text-gray-400">${formatDate(split.date)} | ${split.results.length} orang | <span class="font-semibold ${split.type === 'custom' ? 'text-pink-400' : 'text-green-400'}">${split.type === 'custom' ? 'Kustom' : 'Merata'}</span></small></div><button onclick="confirmDeleteSplit('${split.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button></div></div>`).join('') || '<p class="text-gray-500 text-center">Tidak ada riwayat.</p>'; } function confirmDeleteSplit(id) { showConfirm('Hapus Riwayat?', 'Yakin ingin menghapus riwayat split bill ini?', () => deleteSplit(id)); } function deleteSplit(id) { let appData = storage.getAppData(); appData[currentMode].splitBills = appData[currentMode].splitBills.filter(s => s.id !== id); storage.saveAppData(appData); renderSplitHistory(); }
-function backupData() { const data = storage.get('lifeHubData_v5.1.0'); const notesData = storage.get('notes_v4.9.2', []); const allData = { lifeHub: data, notes: notesData }; if (!data && notesData.length === 0) { showMessage("Tidak ada data untuk di-backup.", "error"); return; } const dataStr = JSON.stringify(allData, null, 2); const blob = new Blob([dataStr], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `lifehub-backup-${new Date().toISOString().split('T')[0]}.txt`; a.click(); URL.revokeObjectURL(url); showMessage("Backup berhasil!", "success"); } function restoreData() { const file = document.getElementById('restoreFile').files[0]; if (!file) { showMessage("Pilih file untuk restore.", "error"); return; } const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (data.lifeHub && data.notes) { storage.saveAppData(data.lifeHub); storage.set('notes_v4.9.2', data.notes); initializeApp(); showMessage("Restore berhasil!", "success"); setTimeout(() => window.location.reload(), 1000); } else { throw new Error("Invalid file structure"); } } catch (err) { showMessage("File backup korup atau tidak valid.", "error"); } }; reader.readAsText(file); } function clearAllDataConfirmed() { localStorage.removeItem('lifeHubData_v5.1.0'); localStorage.removeItem('notes_v4.9.2'); localStorage.removeItem('customBackground'); deleteBackgroundFromDB('customBackground'); initializeApp(); showMessage("Semua data lokal telah dihapus.", "success"); setTimeout(() => window.location.reload(), 1000); }
+function backupData() { const data = storage.get('lifeHubData_v5.2.0'); const notesData = storage.get('notes_v4.9.2', []); const allData = { lifeHub: data, notes: notesData }; if (!data && notesData.length === 0) { showMessage("Tidak ada data untuk di-backup.", "error"); return; } const dataStr = JSON.stringify(allData, null, 2); const blob = new Blob([dataStr], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `lifehub-backup-${new Date().toISOString().split('T')[0]}.txt`; a.click(); URL.revokeObjectURL(url); showMessage("Backup berhasil!", "success"); } function restoreData() { const file = document.getElementById('restoreFile').files[0]; if (!file) { showMessage("Pilih file untuk restore.", "error"); return; } const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (data.lifeHub && data.notes) { storage.saveAppData(data.lifeHub); storage.set('notes_v4.9.2', data.notes); initializeApp(); showMessage("Restore berhasil!", "success"); setTimeout(() => window.location.reload(), 1000); } else { throw new Error("Invalid file structure"); } } catch (err) { showMessage("File backup korup atau tidak valid.", "error"); } }; reader.readAsText(file); } function clearAllDataConfirmed() { localStorage.removeItem('lifeHubData_v5.2.0'); localStorage.removeItem('notes_v4.9.2'); localStorage.removeItem('customBackground'); deleteBackgroundFromDB('customBackground'); initializeApp(); showMessage("Semua data lokal telah dihapus.", "success"); setTimeout(() => window.location.reload(), 1000); }
 
 async function loadAndApplyCustomBackground() {
     const bgInfo = await getBackgroundFromDB('customBackground');
@@ -1748,7 +1822,6 @@ function resetBackgroundMedia() {
 
 function resetBackgrounds() { const bgVideo = document.getElementById('bg-video'); const bgImageLayer = document.getElementById('bg-image-layer'); bgVideo.pause(); bgVideo.removeAttribute('src'); bgVideo.style.display = 'none'; bgImageLayer.style.backgroundImage = 'none'; bgImageLayer.style.display = 'none'; } function toggleVideoSound() { const video = document.getElementById('bg-video'); video.muted = !video.muted; let appData = storage.getAppData(); appData.isVideoMuted = video.muted; storage.saveAppData(appData); updateVideoSoundUI(); showMessage(video.muted ? 'Suara video dimatikan.' : 'Suara video diaktifkan.', 'info'); } function updateVideoSoundUI() { const appData = storage.getAppData(); const btn = document.getElementById('toggleVideoSoundBtn'); const icon = btn.querySelector('i'); const text = btn.querySelector('span'); if (appData.isVideoMuted) { icon.classList.remove('fa-volume-up'); icon.classList.add('fa-volume-mute'); text.textContent = 'Aktifkan Suara Video'; } else { icon.classList.remove('fa-volume-mute'); icon.classList.add('fa-volume-up'); text.textContent = 'Matikan Suara Video'; } }
 
-// PERUBAHAN: Menambahkan total pada laporan PDF
 function exportFinancePDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -1846,33 +1919,16 @@ function updateDashboardCharts() { updateCashFlowChart(); updateProductivityChar
 function loadAnalysisCharts() { const appData = storage.getAppData(); const modeData = appData[currentMode]; const colors = getChartColors(); const diaryNotes = JSON.parse(localStorage.getItem('notes_v4.9.2') || '[]'); Chart.defaults.color = colors.legendColor; Chart.defaults.font.family = "'Poppins', 'sans-serif'"; const chartIds = ['combinedAnalysisChart', 'incomeVsExpenseChart', 'spendingByCategoryChart', 'taskCompletionTrendChart', 'taskPriorityDistributionChart', 'splitBillByUserChart', 'splitBillFrequencyChart', 'diaryEntryFrequencyChart']; chartIds.forEach(id => { if (window[id + 'Instance']) window[id + 'Instance'].destroy(); }); const filteredPersonalTransactions = filterDataByRange(appData.personal.transactions, masterDateRange, 'date'); const filteredPersonalTasks = filterDataByRange(appData.personal.tasks, masterDateRange, 'datetime'); const filteredPersonalSplits = filterDataByRange(appData.personal.splitBills, masterDateRange, 'date'); const filteredBusinessTransactions = filterDataByRange(appData.business.transactions, masterDateRange, 'date'); const filteredBusinessTasks = filterDataByRange(appData.business.tasks, masterDateRange, 'datetime'); const filteredBusinessSplits = filterDataByRange(appData.business.splitBills, masterDateRange, 'date'); const filteredDiary = filterDataByRange(diaryNotes, masterDateRange, 'date'); const personalData = { finance: filteredPersonalTransactions.length, tasks: filteredPersonalTasks.length, splitBill: filteredPersonalSplits.length, diary: filteredDiary.length, }; const businessData = { finance: filteredBusinessTransactions.length, tasks: filteredBusinessTasks.length, splitBill: filteredBusinessSplits.length, diary: 0, }; const combinedCtx = document.getElementById('combinedAnalysisChart').getContext('2d'); window.combinedAnalysisChartInstance = new Chart(combinedCtx, { type: 'radar', data: { labels: ['Keuangan', 'Tugas', 'Split Bill', 'Catatan'], datasets: [ { label: 'Pribadi', data: [personalData.finance, personalData.tasks, personalData.splitBill, personalData.diary], backgroundColor: 'rgba(0, 136, 255, 0.2)', borderColor: '#0088ff', borderWidth: 2, pointBackgroundColor: '#0088ff', pointRadius: 4, }, { label: 'Bisnis', data: [businessData.finance, businessData.tasks, businessData.splitBill, businessData.diary], backgroundColor: 'rgba(255, 0, 110, 0.2)', borderColor: '#ff006e', borderWidth: 2, pointBackgroundColor: '#ff006e', pointRadius: 4, } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { size: 14 } } } }, scales: { r: { angleLines: { color: colors.gridColor }, grid: { color: colors.gridColor }, pointLabels: { font: { size: 14, weight: '600' }, color: colors.tickColor }, ticks: { backdropColor: 'rgba(0,0,0,0.5)', color: colors.tickColor, stepSize: 5 }, suggestedMin: 0 } } } }); const filteredFinance = filterDataByRange(modeData.transactions, masterDateRange, 'date'); const financialData = processTimeSeriesData(filteredFinance, 'date', masterDateRange); const incomeVsExpenseCtx = document.getElementById('incomeVsExpenseChart').getContext('2d'); window.incomeVsExpenseChartInstance = new Chart(incomeVsExpenseCtx, { type: 'bar', data: { labels: financialData.labels, datasets: [ { label: 'Pemasukan', data: financialData.income, backgroundColor: colors.incomeColor }, { label: 'Pengeluaran', data: financialData.expense, backgroundColor: colors.expenseColor } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: { color: colors.gridColor } } } } }); const spendingCtx = document.getElementById('spendingByCategoryChart').getContext('2d'); const { labels: categoryLabels, data: spendingData } = processSpendingByCategory(filteredFinance); window.spendingByCategoryChartInstance = new Chart(spendingCtx, { type: 'doughnut', data: { labels: categoryLabels, datasets: [{ data: spendingData, backgroundColor: ['#f472b6', '#60a5fa', '#fbbf24', '#4ade80', '#c084fc', '#a1a1aa', '#f87171', '#818cf8'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime'); const taskData = processTimeSeriesData(filteredTasks, 'datetime', masterDateRange); const taskTrendCtx = document.getElementById('taskCompletionTrendChart').getContext('2d'); window.taskCompletionTrendChartInstance = new Chart(taskTrendCtx, { type: 'line', data: { labels: taskData.labels, datasets: [ { label: 'Dibuat', data: taskData.created, borderColor: '#60a5fa', tension: 0.3 }, { label: 'Selesai', data: taskData.completed, borderColor: '#4ade80', tension: 0.3 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } } }); const taskPriorityCtx = document.getElementById('taskPriorityDistributionChart').getContext('2d'); const { labels: priorityLabels, data: priorityData } = processTaskPriorities(filteredTasks); window.taskPriorityDistributionChartInstance = new Chart(taskPriorityCtx, { type: 'pie', data: { labels: priorityLabels, datasets: [{ data: priorityData, backgroundColor: ['#f472b6', '#fbbf24', '#4ade80'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date'); const splitByUserCtx = document.getElementById('splitBillByUserChart').getContext('2d'); const { labels: userLabels, data: userSpendingData } = processSplitBillByUser(filteredSplits); window.splitBillByUserChartInstance = new Chart(splitByUserCtx, { type: 'bar', data: { labels: userLabels, datasets: [{ label: 'Total Pengeluaran', data: userSpendingData, backgroundColor: colors.incomeColor, borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { grid: { color: colors.gridColor } }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); const splitFreqData = processTimeSeriesData(filteredSplits, 'date', masterDateRange); const splitFreqCtx = document.getElementById('splitBillFrequencyChart').getContext('2d'); window.splitBillFrequencyChartInstance = new Chart(splitFreqCtx, { type: 'line', data: { labels: splitFreqData.labels, datasets: [{ label: 'Jumlah Split Bill', data: splitFreqData.count, borderColor: '#22d3ee', tension: 0.3, fill: true, backgroundColor: 'rgba(34, 211, 238, 0.2)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } } }); const diaryCtx = document.getElementById('diaryEntryFrequencyChart').getContext('2d'); const diaryData = processTimeSeriesData(filteredDiary, 'date', masterDateRange); window.diaryEntryFrequencyChartInstance = new Chart(diaryCtx, { type: 'bar', data: { labels: diaryData.labels, datasets: [{ label: 'Jumlah Entri', data: diaryData.count, backgroundColor: 'var(--primary-brand)', borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } } }); }
 function processTimeSeriesData(data, dateKey, range) { const { labels, dataPoints } = getTimeBuckets(range, data, dateKey); const isFinance = data.length > 0 && 'type' in data[0] && 'amount' in data[0]; const isTask = data.length > 0 && 'completed' in data[0]; let results = {}; if (isFinance) { results.income = new Array(labels.length).fill(0); results.expense = new Array(labels.length).fill(0); } else if (isTask) { results.created = new Array(labels.length).fill(0); results.completed = new Array(labels.length).fill(0); } else { results.count = new Array(labels.length).fill(0); } data.forEach(item => { if (!item[dateKey]) return; const itemDate = new Date(item[dateKey]); let bucketIndex = -1; for (let i = dataPoints.length - 1; i >= 0; i--) { if (itemDate >= dataPoints[i]) { bucketIndex = i; break; } } if (bucketIndex !== -1) { if (isFinance) { if (item.type === 'income') results.income[bucketIndex] += item.amount; else results.expense[bucketIndex] += item.amount; } else if (isTask) { results.created[bucketIndex]++; if (item.completed) results.completed[bucketIndex]++; } else { results.count[bucketIndex]++; } } }); return { labels, ...results }; } function processSpendingByCategory(transactions) { const spending = {}; transactions.filter(t => t.type === 'expense').forEach(t => { const categoryName = getCategoryName(t.category); spending[categoryName] = (spending[categoryName] || 0) + t.amount; }); const sortedSpending = Object.entries(spending).sort(([,a],[,b]) => b-a); return { labels: sortedSpending.map(([label]) => label), data: sortedSpending.map(([,data]) => data) }; } function processTaskPriorities(tasks) { const priorities = { high: 0, medium: 0, low: 0 }; tasks.filter(t => !t.completed).forEach(t => { priorities[t.priority]++; }); return { labels: ['Tinggi', 'Sedang', 'Rendah'], data: [priorities.high, priorities.medium, priorities.low] }; } function processSplitBillByUser(splitBills) { const userTotals = {}; splitBills.forEach(bill => { bill.results.forEach(person => { userTotals[person.name] = (userTotals[person.name] || 0) + person.amount; }); }); const sortedUsers = Object.entries(userTotals).sort(([,a],[,b]) => b-a); return { labels: sortedUsers.map(([label]) => label), data: sortedUsers.map(([,data]) => data) }; } function getGroupingUnit(range) { if (typeof range === 'object' && range.type === 'custom') { const diffTime = Math.abs(new Date(range.end) - new Date(range.start)); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); if (diffDays > 90) return 'month'; if (diffDays > 30) return 'week'; return 'day'; } if (['7d', '1m'].includes(range)) return 'day'; if (range === '3m') return 'week'; if (['1y', 'all'].includes(range)) return 'month'; return 'day'; } function getTimeBuckets(range, data, dateKey) { const labels = []; const dataPoints = []; const now = new Date(); const unit = getGroupingUnit(range); let startDate, endDate = new Date(now); if (typeof range === 'object' && range.type === 'custom') { startDate = new Date(range.start + 'T00:00:00Z'); endDate = new Date(range.end + 'T23:59:59Z'); } else if (range === 'all') { const validData = data.filter(d => d[dateKey]); if (validData.length === 0) { startDate = new Date(); startDate.setMonth(startDate.getMonth() - 1); } else { startDate = new Date(validData.reduce((min, p) => (p[dateKey] < min) ? p[dateKey] : min, validData[0][dateKey])); } } else { startDate = new Date(now); if (range === '7d') startDate.setDate(now.getDate() - 6); else if (range === '1m') startDate.setDate(now.getDate() - 29); else if (range === '3m') startDate.setMonth(now.getMonth() - 3); else if (range === '1y') startDate.setFullYear(now.getFullYear() - 1); } startDate.setHours(0, 0, 0, 0); let current = new Date(startDate); while (current <= endDate) { dataPoints.push(new Date(current)); if (unit === 'day') { labels.push(current.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })); current.setDate(current.getDate() + 1); } else if (unit === 'week') { labels.push(`W${getWeekNumber(current)}`); current.setDate(current.getDate() + 7); } else { labels.push(current.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' })); current.setMonth(current.getMonth() + 1); } } return { labels, dataPoints }; } function getWeekNumber(d) { d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7)); var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1)); var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7); return weekNo; }
 function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); } function formatCurrency(amount) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount); } 
-// PERUBAHAN FORMAT TANGGAL 2: Fungsi diubah untuk menghasilkan format dd/mm/yyyy
 function formatDate(dateString) { return dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''; } 
 function formatDateTime(dateString) { return dateString ? new Date(dateString).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; } 
 
-// PERUBAHAN IKON: Mengganti ikon untuk kategori 'other'
 function getTransactionIcon(category) {
     const icons = {
-        food: 'fa-utensils',
-        transport: 'fa-car',
-        entertainment: 'fa-gamepad',
-        shopping: 'fa-shopping-bag',
-        bills: 'fa-file-invoice',
-        salary: 'fa-money-bill-wave',
-        business: 'fa-briefcase',
-        investment: 'fa-chart-line',
-        health: 'fa-heart-pulse',
-        education: 'fa-graduation-cap',
-        subscription: 'fa-rss',
-        household: 'fa-house-chimney',
-        personal_care: 'fa-spa',
-        gift: 'fa-gift',
-        other: 'fa-shapes' // Ikon baru yang lebih menarik
+        food: 'fa-utensils', transport: 'fa-car', entertainment: 'fa-gamepad', shopping: 'fa-shopping-bag', bills: 'fa-file-invoice', salary: 'fa-money-bill-wave', business: 'fa-briefcase', investment: 'fa-chart-line', health: 'fa-heart-pulse', education: 'fa-graduation-cap', subscription: 'fa-rss', household: 'fa-house-chimney', personal_care: 'fa-spa', gift: 'fa-gift', other: 'fa-shapes'
     };
     return icons[category] || 'fa-shapes';
 }
 
-// PERUBAHAN KATEGORI 4: Kategori baru ditambahkan
 function getCategoryName(category = null) { const names = { food: 'Makanan & Minuman', transport: 'Transportasi', entertainment: 'Hiburan', shopping: 'Belanja', bills: 'Tagihan & Utilitas', salary: 'Gaji', business: 'Bisnis', investment: 'Investasi', health: 'Kesehatan', education: 'Pendidikan', subscription: 'Langganan', household: 'Rumah Tangga', personal_care: 'Perawatan Diri', gift: 'Hadiah & Donasi', other: 'Lainnya' }; return category ? names[category] : names; }
 function showModal(content) { const modal = document.getElementById('mainModal'); modal.querySelector('.modal-content').innerHTML = content; modal.classList.add('show'); modal.querySelectorAll('.closeModal').forEach(btn => btn.addEventListener('click', closeModal)); } function closeModal() { document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('show')); } function showConfirm(title, message, onConfirm) { const modal = document.getElementById('confirmModal'); document.getElementById('confirmTitle').textContent = title; document.getElementById('confirmMessage').textContent = message; modal.classList.add('show'); const yesBtn = document.getElementById('confirmYes'); const noBtn = document.getElementById('confirmNo'); const yesHandler = () => { onConfirm(); closeModal(); cleanup(); }; const noHandler = () => { closeModal(); cleanup(); }; const cleanup = () => { yesBtn.removeEventListener('click', yesHandler); noBtn.removeEventListener('click', noHandler); }; yesBtn.addEventListener('click', yesHandler); noBtn.addEventListener('click', noHandler); } function showMessage(message, type = 'info') { const isLight = document.body.classList.contains('light-mode'); const colors = { info: '#60a5fa', success: '#4ade80', error: '#f472b6' }; const msgDiv = document.createElement('div'); Object.assign(msgDiv.style, { position: 'fixed', bottom: '20px', right: '20px', padding: '15px', backgroundColor: isLight ? '#ffffff' : 'rgba(15, 10, 32, 0.8)', backdropFilter: 'blur(10px)', color: colors[type], border: `1px solid ${colors[type]}`, borderRadius: '8px', boxShadow: `0 4px 15px rgba(0,0,0,0.1)`, zIndex: '9999', transition: 'opacity 0.5s' }); msgDiv.textContent = message; document.body.appendChild(msgDiv); setTimeout(() => { msgDiv.style.opacity = '0'; setTimeout(() => msgDiv.remove(), 500); }, 3000); } 
 
@@ -1885,14 +1941,10 @@ function applyDateRange() { const startDate = document.getElementById('startDate
 
 function setupMasterRangeSelector() { document.querySelectorAll('#master-range-selector .range-btn').forEach(btn => { btn.addEventListener('click', (e) => { const range = e.currentTarget.dataset.range; if (range === 'custom') { showDateRangeModal('dashboard'); } else { updateActiveButton('master-range-selector', range); masterDateRange = range; refreshDashboardData(); } }); }); } function updateActiveButton(selectorId, activeRange) { document.querySelectorAll(`#${selectorId} .range-btn`).forEach(b => b.classList.remove('active')); document.querySelector(`#${selectorId} .range-btn[data-range="${activeRange}"]`).classList.add('active'); } function filterDataByRange(data, range, dateKey) { if (range === 'all') return data.filter(item => item[dateKey]); let startDate, endDate = new Date(); if (typeof range === 'object' && range.type === 'custom') { startDate = new Date(range.start + 'T00:00:00Z'); endDate = new Date(range.end + 'T23:59:59Z'); } else { startDate = new Date(); if (range === '7d') startDate.setDate(endDate.getDate() - 6); else if (range === '1m') startDate.setDate(endDate.getDate() - 29); else if (range === '3m') startDate.setMonth(endDate.getMonth() - 3); else if (range === '1y') startDate.setFullYear(endDate.getFullYear() - 1); startDate.setHours(0, 0, 0, 0); } return data.filter(item => { if (!item[dateKey]) return false; const itemDate = new Date(item[dateKey]); return itemDate >= startDate && itemDate <= endDate; }); }
 function saveToken(tokenResponse) { const expiresAt = Date.now() + (tokenResponse.expires_in * 1000); const tokenData = { access_token: tokenResponse.access_token, expires_at: expiresAt }; localStorage.setItem('googleAuthToken', JSON.stringify(tokenData)); } function loadToken() { const tokenStr = localStorage.getItem('googleAuthToken'); if (!tokenStr) return null; try { return JSON.parse(tokenStr); } catch (e) { return null; } } function clearToken() { localStorage.removeItem('googleAuthToken'); localStorage.removeItem('googleAuthLoggedIn'); } function initGisClient() { try { if (typeof google === 'undefined' || typeof google.accounts === 'undefined') { console.error("Google Identity Services script not loaded yet."); showMessage("Gagal memuat API Google. Coba refresh halaman.", "error"); return; } googleTokenClient = google.accounts.oauth2.initTokenClient({ client_id: GOOGLE_CLIENT_ID, scope: GOOGLE_SCOPES, callback: (tokenResponse) => { if (tokenResponse && tokenResponse.access_token) { googleAccessToken = tokenResponse.access_token; saveToken(tokenResponse); localStorage.setItem('googleAuthLoggedIn', 'true'); updateSigninStatus(true); } else { console.error("Gagal mendapatkan access token:", tokenResponse); showMessage("Gagal melakukan otentikasi.", "error"); clearToken(); } }, }); const savedToken = loadToken(); if (savedToken) { if (Date.now() < savedToken.expires_at) { googleAccessToken = savedToken.access_token; updateSigninStatus(true); verifyToken(googleAccessToken).then(valid => { if (!valid) { console.warn("Token invalid, refreshing..."); googleTokenClient.requestAccessToken({ prompt: '' }); } }); } else { console.log("Token expired, requesting new one..."); googleTokenClient.requestAccessToken({ prompt: '' }); } } else if (localStorage.getItem('googleAuthLoggedIn') === 'true') { googleTokenClient.requestAccessToken({ prompt: '' }); } } catch (error) { console.error("Google Identity Services client gagal dimuat.", error); showMessage("Gagal memuat API Google. Coba refresh halaman.", "error"); } } function handleAuthClick() { if (googleAccessToken) { google.accounts.oauth2.revoke(googleAccessToken, () => { googleAccessToken = null; clearToken(); updateSigninStatus(false); showMessage("Berhasil keluar dari akun Google.", "success"); }); } else { if (googleTokenClient) { googleTokenClient.requestAccessToken({ prompt: 'consent' }); } else { showMessage("Client otentikasi belum siap.", "error"); } } } async function verifyToken(token) { try { const res = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`); return res.ok; } catch (e) { console.error("Verifikasi token gagal:", e); return false; } }
-function handleBackupClick() { const lifeHubData = storage.getAppData(); const notesData = JSON.parse(localStorage.getItem('notes_v4.9.2') || '[]'); const allData = { lifeHubData, notesData, backupVersion: "5.1.0", backupDate: new Date().toISOString() }; if (Object.keys(lifeHubData.personal).every(key => lifeHubData.personal[key].length === 0) && Object.keys(lifeHubData.business).every(key => lifeHubData.business[key].length === 0) && notesData.length === 0) { showMessage("Tidak ada data untuk di-backup.", "error"); return; } backupDataToDrive(allData); } async function handleRestoreClick() { const restoredData = await restoreDataFromDrive(); if (restoredData) { showConfirm('Timpa Data Lokal?', 'Data dari Google Drive akan menimpa data lokal Anda. Operasi ini tidak dapat diurungkan. Lanjutkan?', () => { if (restoredData.lifeHubData) { storage.saveAppData(restoredData.lifeHubData); } if (restoredData.notesData) { localStorage.setItem('notes_v4.9.2', JSON.stringify(restoredData.notesData)); } showMessage("Restore berhasil! Memuat ulang aplikasi...", "success"); setTimeout(() => window.location.reload(), 1500); }); } } function updateSigninStatus(isSignedIn) { const authButton = document.getElementById('auth-button'); const backupButton = document.getElementById('backup-button'); const restoreButton = document.getElementById('restore-button'); const authStatus = document.getElementById('auth-status'); const fileListDiv = document.getElementById('file-list'); const authButtonText = authButton.querySelector('span'); if (isSignedIn) { authButtonText.innerText = 'Putuskan Hubungan Google'; authButton.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)'; backupButton.disabled = false; restoreButton.disabled = false; authStatus.innerText = "Terhubung ke Google Drive"; listFiles(); } else { authButtonText.innerText = 'Hubungkan ke Google'; authButton.style.background = 'linear-gradient(90deg, #3b82f6, #2563eb)'; backupButton.disabled = true; restoreButton.disabled = true; authStatus.innerText = "Belum terhubung."; fileListDiv.innerHTML = ''; } } async function backupDataToDrive(data) { if (!googleAccessToken) { showMessage("Otentikasi diperlukan.", "error"); return; } const authStatus = document.getElementById('auth-status'); authStatus.innerText = "Memulai proses backup..."; showMessage("Mengunggah data ke Google Drive...", "info"); try { const folderId = await findOrCreateFolder(DRIVE_FOLDER_NAME); if (!folderId) throw new Error("Tidak dapat membuat folder di Drive."); const fileContent = JSON.stringify(data, null, 2); const fileName = `uranuspace_backup_${new Date().toISOString().replace(/:/g, '-')}.txt`; const createdFile = await createFileInFolder(folderId, fileName, 'text/plain', fileContent); authStatus.innerText = `Backup berhasil! File: ${createdFile.name}`; showMessage("Backup ke Google Drive berhasil!", "success"); listFiles(); } catch (error) { console.error("Error saat backup ke Drive:", error); authStatus.innerText = "Backup gagal. Lihat konsol untuk detail."; showMessage(`Backup gagal: ${error.message}`, "error"); } } async function restoreDataFromDrive() { if (!googleAccessToken) { showMessage("Otentikasi diperlukan.", "error"); return null; } const authStatus = document.getElementById('auth-status'); authStatus.innerText = "Memulai proses restore..."; showMessage("Mencari file backup terbaru...", "info"); try { const folderId = await findFolderId(DRIVE_FOLDER_NAME); if (!folderId) throw new Error(`Folder '${DRIVE_FOLDER_NAME}' tidak ditemukan.`); const latestFile = await findLatestBackupFile(folderId); if (!latestFile) throw new Error("Tidak ada file backup yang ditemukan."); authStatus.innerText = `File terbaru ditemukan: ${latestFile.name}`; showMessage(`Mengunduh ${latestFile.name}...`, "info"); const fileContent = await getFileContent(latestFile.id); const restoredData = JSON.parse(fileContent); authStatus.innerText = "Restore berhasil! Konfirmasi untuk menimpa data."; return restoredData; } catch (error) { console.error("Error saat restore dari Drive:", error); authStatus.innerText = "Restore gagal. Lihat konsol untuk detail."; showMessage(`Restore gagal: ${error.message}`, "error"); return null; } }
+function handleBackupClick() { const lifeHubData = storage.getAppData(); const notesData = JSON.parse(localStorage.getItem('notes_v4.9.2') || '[]'); const allData = { lifeHubData, notesData, backupVersion: "5.2.0", backupDate: new Date().toISOString() }; if (Object.keys(lifeHubData.personal).every(key => lifeHubData.personal[key].length === 0) && Object.keys(lifeHubData.business).every(key => lifeHubData.business[key].length === 0) && notesData.length === 0) { showMessage("Tidak ada data untuk di-backup.", "error"); return; } backupDataToDrive(allData); } async function handleRestoreClick() { const restoredData = await restoreDataFromDrive(); if (restoredData) { showConfirm('Timpa Data Lokal?', 'Data dari Google Drive akan menimpa data lokal Anda. Operasi ini tidak dapat diurungkan. Lanjutkan?', () => { if (restoredData.lifeHubData) { storage.saveAppData(restoredData.lifeHubData); } if (restoredData.notesData) { localStorage.setItem('notes_v4.9.2', JSON.stringify(restoredData.notesData)); } showMessage("Restore berhasil! Memuat ulang aplikasi...", "success"); setTimeout(() => window.location.reload(), 1500); }); } } function updateSigninStatus(isSignedIn) { const authButton = document.getElementById('auth-button'); const backupButton = document.getElementById('backup-button'); const restoreButton = document.getElementById('restore-button'); const authStatus = document.getElementById('auth-status'); const fileListDiv = document.getElementById('file-list'); const authButtonText = authButton.querySelector('span'); if (isSignedIn) { authButtonText.innerText = 'Putuskan Hubungan Google'; authButton.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)'; backupButton.disabled = false; restoreButton.disabled = false; authStatus.innerText = "Terhubung ke Google Drive"; listFiles(); } else { authButtonText.innerText = 'Hubungkan ke Google'; authButton.style.background = 'linear-gradient(90deg, #3b82f6, #2563eb)'; backupButton.disabled = true; restoreButton.disabled = true; authStatus.innerText = "Belum terhubung."; fileListDiv.innerHTML = ''; } } async function backupDataToDrive(data) { if (!googleAccessToken) { showMessage("Otentikasi diperlukan.", "error"); return; } const authStatus = document.getElementById('auth-status'); authStatus.innerText = "Memulai proses backup..."; showMessage("Mengunggah data ke Google Drive...", "info"); try { const folderId = await findOrCreateFolder(DRIVE_FOLDER_NAME); if (!folderId) throw new Error("Tidak dapat membuat folder di Drive."); const fileContent = JSON.stringify(data, null, 2); const fileName = `uranuspace_backup_${new Date().toISOString().replace(/:/g, '-')}.txt`; const createdFile = await createFileInFolder(folderId, fileName, 'text/plain', fileContent); authStatus.innerText = `Backup berhasil! File: ${createdFile.name}`; showMessage("Backup ke Google Drive berhasil!", "success"); listFiles(); } catch (error) { console.error("Error saat backup ke Drive:", error); authStatus.innerText = "Backup gagal. Lihat konsol untuk detail."; showMessage(`Backup gagal: ${error.message}`, "error"); } } async function restoreDataFromDrive() { if (!googleAccessToken) { showMessage("Otentikasi diperlukan.", "error"); return null; } const authStatus = document.getElementById('auth-status'); authStatus.innerText = "Memulai proses restore..."; showMessage("Mencari file backup terbaru...", "info"); try { const folderId = await findFolderId(DRIVE_FOLDER_NAME); if (!folderId) throw new Error(`Folder '${DRIVE_FOLDER_NAME}' tidak ditemukan.`); const latestFile = await findLatestBackupFile(folderId); if (!latestFile) throw new Error("Tidak ada file backup yang ditemukan."); authStatus.innerText = `File terbaru ditemukan: ${latestFile.name}`; showMessage(`Mengunduh ${latestFile.name}...`, "info"); const fileContent = await getFileContent(latestFile.id); const restoredData = JSON.parse(fileContent); authStatus.innerText = "Restore berhasil! Konfirmasi untuk menimpa data."; return restoredData; } catch (error) { console.error("Error saat restore dari Drive:", error); authStatus.innerText = "Restore gagal. Lihat konsol untuk detail."; showMessage(`Restore gagal: ${error.message}`, "error"); return null; } }
 async function findOrCreateFolder(folderName) { let folderId = await findFolderId(folderName); if (folderId) return folderId; const fileMetadata = { 'name': folderName, 'mimeType': 'application/vnd.google-apps.folder' }; const response = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' }), body: JSON.stringify(fileMetadata) }); if (!response.ok) throw new Error("Gagal membuat folder."); const folder = await response.json(); return folder.id; } async function findFolderId(folderName) { const query = `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id, name)`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mencari folder."); const data = await response.json(); return data.files.length > 0 ? data.files[0].id : null; } async function createFileInFolder(folderId, fileName, mimeType, content) { const metadata = { 'name': fileName, 'mimeType': mimeType, 'parents': [folderId] }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', new Blob([content], { type: mimeType })); const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', { method: 'POST', headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }), body: form }); if (!response.ok) throw new Error("Gagal mengunggah file."); return await response.json(); } async function findLatestBackupFile(folderId) { const query = `'${folderId}' in parents and mimeType='text/plain' and name contains 'uranuspace_backup_' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&orderBy=createdTime desc&pageSize=1`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mencari file backup."); const data = await response.json(); return data.files.length > 0 ? data.files[0] : null; } async function getFileContent(fileId) { const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mengunduh konten file."); return await response.text(); } async function listFiles() { if (!googleAccessToken) return; const fileListDiv = document.getElementById('file-list'); fileListDiv.innerHTML = '<p class="text-gray-400">Memuat daftar file...</p>'; try { const folderId = await findFolderId(DRIVE_FOLDER_NAME); if (!folderId) { fileListDiv.innerHTML = '<p class="text-gray-500">Folder backup belum dibuat.</p>'; return; } const query = `'${folderId}' in parents and mimeType='text/plain' and name contains 'uranuspace_backup_' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&pageSize=5&orderBy=createdTime desc`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error(`Gagal memuat daftar file: ${response.statusText}`); const data = await response.json(); if (data.files && data.files.length > 0) { fileListDiv.innerHTML = "<strong class='block mb-1 text-purple-300'>Backup Terbaru:</strong>" + data.files.map(file => `<div class="p-1"><span>${file.name.substring(0, 35)}...</span><span class="block text-gray-500 text-xs">${new Date(file.createdTime).toLocaleString('id-ID')}</span></div>`).join(''); } else { fileListDiv.innerHTML = '<p class="text-gray-500">Belum ada file backup di Google Drive.</p>'; } } catch (error) { console.error('Error listing files:', error); fileListDiv.innerHTML = `<p class="text-red-500">Gagal memuat daftar file.</p>`; } }
 
-// === [BARU] FUNGSI-FUNGSI UNTUK FITUR PORTAL ===
-
-function loadPortalsPage() {
-    renderPortals();
-}
+// === [BARU] FUNGSI-FUNGSI UNTUK FITUR PORTAL DI SIDEBAR ===
 
 /**
  * Membuat konten HTML untuk modal tambah/edit portal dan menampilkannya.
@@ -1959,7 +2011,6 @@ function showPortalModal() {
     `;
     showModal(content);
 
-    // Tambahkan event listener spesifik untuk modal portal
     document.getElementById('portalForm').addEventListener('submit', handlePortalFormSubmit);
     document.getElementById('portal-icon').addEventListener('change', toggleCustomIconOptions);
     document.getElementById('icon-upload').addEventListener('change', (e) => handleImageUpload(e, document.getElementById('icon-preview')));
@@ -2010,54 +2061,47 @@ function addPortalToArray(name, url, icon, color, description) {
 }
 
 /**
- * Merender semua portal dari data ke dalam grid.
+ * Merender semua portal dari data ke dalam sidebar.
  */
 function renderPortals() {
-    const portalsGrid = document.getElementById('portals-grid');
+    const portalsContainer = document.getElementById('sidebar-portals-container');
     const appData = storage.getAppData();
     const portals = appData[currentMode].portals || [];
 
-    portalsGrid.innerHTML = '';
+    portalsContainer.innerHTML = '';
     if (portals.length === 0) {
-        portalsGrid.innerHTML = `<p class="text-center text-gray-500 col-span-full">Belum ada portal. Klik 'Tambah Portal Baru' untuk memulai.</p>`;
+        portalsContainer.innerHTML = `<p class="text-sm text-center text-gray-500 px-2 py-4">Belum ada portal.</p>`;
         return;
     }
 
-    portals.forEach((portal, index) => {
-        const portalElement = document.createElement('div');
-        portalElement.className = 'h-full';
-        
+    portals.forEach(portal => {
         const portalColor = portal.color || 'var(--primary-brand)';
         
         const iconHtml = portal.icon.startsWith('data:image') || portal.icon.startsWith('http')
-            ? `<img src="${portal.icon}" class="mx-auto h-12 w-12 mb-4 object-contain" alt="${portal.name} icon">`
-            : `<i class="${portal.icon} text-4xl mb-4" style="color: ${portalColor}; text-shadow: 0 0 5px ${portalColor}, 0 0 10px ${portalColor};"></i>`;
+            ? `<img src="${portal.icon}" alt="${portal.name} icon">`
+            : `<i class="${portal.icon}" style="color: ${portalColor};"></i>`;
 
-        portalElement.innerHTML = `
-            <div class="portal-card h-full" style="color: ${portalColor}; border-color: ${portalColor}; box-shadow: 0 0 5px ${portalColor}, inset 0 0 5px ${portalColor}, 0 0 10px ${portalColor};">
-                <a href="${portal.url}" target="_blank" class="block h-full p-6 rounded-lg text-center relative overflow-hidden backdrop-blur-sm bg-black/30 transition-all duration-300 flex flex-col">
-                    <div class="flex flex-col justify-center items-center flex-grow">
-                        ${iconHtml}
-                        <h3 class="font-bold uppercase tracking-wider break-words text-lg" style="font-family: 'Orbitron', sans-serif; color: ${portalColor}; text-shadow: 0 0 5px ${portalColor}, 0 0 10px ${portalColor};">${portal.name}</h3>
-                        <p class="text-sm text-gray-300 mt-2 leading-normal">${portal.description || ''}</p>
-                    </div>
-                    <button data-id="${portal.id}" class="delete-portal-btn absolute top-2 right-2 text-xs text-red-500 hover:text-red-400 opacity-50 hover:opacity-100 transition-opacity z-10">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </a>
-            </div>
+        const linkElement = document.createElement('a');
+        linkElement.href = portal.url;
+        linkElement.target = '_blank';
+        linkElement.className = 'sidebar-portal-item';
+        linkElement.title = portal.description || portal.name;
+
+        linkElement.innerHTML = `
+            <div class="portal-icon">${iconHtml}</div>
+            <span class="portal-name">${portal.name}</span>
+            <button data-id="${portal.id}" class="delete-portal-btn text-xs">
+                <i class="fas fa-times"></i>
+            </button>
         `;
         
-        portalsGrid.appendChild(portalElement);
-    });
+        portalsContainer.appendChild(linkElement);
 
-    // Tambahkan event listener untuk tombol hapus setelah semua kartu dirender
-    document.querySelectorAll('.delete-portal-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        linkElement.querySelector('.delete-portal-btn').addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const portalId = btn.dataset.id;
-            showConfirm('Hapus Portal?', 'Yakin ingin menghapus portal ini?', () => deletePortal(portalId));
+            const portalId = e.currentTarget.dataset.id;
+            showConfirm('Hapus Portal?', `Yakin ingin menghapus portal "${portal.name}"?`, () => deletePortal(portalId));
         });
     });
 }
@@ -2386,4 +2430,3 @@ async function exportAllToPdf(timeRange = 'all', customStartDate = null, customE
 
 </body>
 </html>
-
