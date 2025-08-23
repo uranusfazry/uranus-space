@@ -1229,8 +1229,8 @@
             <button id="notesClosePreviewBtn" class="custom-button mt-6">Tutup</button>
         </div>
     </div>
-
-<script>
+    
+    <script>
 // ===================================================================================
 // ======================= [BARU] FUNGSI HELPER UNTUK INDEXEDDB ======================
 // ===================================================================================
@@ -1747,7 +1747,7 @@ function setupEventListeners() {
     document.getElementById('cancelDateRange').addEventListener('click', () => document.getElementById('dateRangeModal').classList.remove('show')); 
     document.getElementById('auth-button').addEventListener('click', handleAuthClick); 
     document.getElementById('backup-button').addEventListener('click', handleBackupClick); 
-    document.getElementById('restore-button').addEventListener('click', handleRestoreClick); 
+    document.getElementById('restore-button').addEventListener('click', showRestoreOptionsModal); 
     document.getElementById('addNewPortalBtn').addEventListener('click', showPortalModal);
     // [BARU] Menambahkan event listener untuk ikon mata
     document.getElementById('toggle-email-visibility').addEventListener('click', toggleEmailVisibility);
@@ -2013,7 +2013,164 @@ function applyDateRange() { const startDate = document.getElementById('startDate
 
 function setupMasterRangeSelector() { document.querySelectorAll('#master-range-selector .range-btn').forEach(btn => { btn.addEventListener('click', (e) => { const range = e.currentTarget.dataset.range; if (range === 'custom') { showDateRangeModal('dashboard'); } else { updateActiveButton('master-range-selector', range); masterDateRange = range; refreshDashboardData(); } }); }); } function updateActiveButton(selectorId, activeRange) { document.querySelectorAll(`#${selectorId} .range-btn`).forEach(b => b.classList.remove('active')); document.querySelector(`#${selectorId} .range-btn[data-range="${activeRange}"]`).classList.add('active'); } function filterDataByRange(data, range, dateKey) { if (range === 'all') return data.filter(item => item[dateKey]); let startDate, endDate = new Date(); if (typeof range === 'object' && range.type === 'custom') { startDate = new Date(range.start + 'T00:00:00Z'); endDate = new Date(range.end + 'T23:59:59Z'); } else { startDate = new Date(); if (range === '7d') startDate.setDate(endDate.getDate() - 6); else if (range === '1m') startDate.setDate(endDate.getDate() - 29); else if (range === '3m') startDate.setMonth(endDate.getMonth() - 3); else if (range === '1y') startDate.setFullYear(endDate.getFullYear() - 1); startDate.setHours(0, 0, 0, 0); } return data.filter(item => { if (!item[dateKey]) return false; const itemDate = new Date(item[dateKey]); return itemDate >= startDate && itemDate <= endDate; }); }
 function saveToken(tokenResponse) { const expiresAt = Date.now() + (tokenResponse.expires_in * 1000); const tokenData = { access_token: tokenResponse.access_token, expires_at: expiresAt }; localStorage.setItem('googleAuthToken', JSON.stringify(tokenData)); } function loadToken() { const tokenStr = localStorage.getItem('googleAuthToken'); if (!tokenStr) return null; try { return JSON.parse(tokenStr); } catch (e) { return null; } } function clearToken() { localStorage.removeItem('googleAuthToken'); localStorage.removeItem('googleAuthLoggedIn'); } function initGisClient() { try { if (typeof google === 'undefined' || typeof google.accounts === 'undefined') { console.error("Google Identity Services script not loaded yet."); showMessage("Gagal memuat API Google. Coba refresh halaman.", "error"); return; } googleTokenClient = google.accounts.oauth2.initTokenClient({ client_id: GOOGLE_CLIENT_ID, scope: GOOGLE_SCOPES, callback: (tokenResponse) => { if (tokenResponse && tokenResponse.access_token) { googleAccessToken = tokenResponse.access_token; saveToken(tokenResponse); localStorage.setItem('googleAuthLoggedIn', 'true'); updateSigninStatus(true); } else { console.error("Gagal mendapatkan access token:", tokenResponse); showMessage("Gagal melakukan otentikasi.", "error"); clearToken(); } }, }); const savedToken = loadToken(); if (savedToken) { if (Date.now() < savedToken.expires_at) { googleAccessToken = savedToken.access_token; updateSigninStatus(true); verifyToken(googleAccessToken).then(valid => { if (!valid) { console.warn("Token invalid, refreshing..."); googleTokenClient.requestAccessToken({ prompt: '' }); } }); } else { console.log("Token expired, requesting new one..."); googleTokenClient.requestAccessToken({ prompt: '' }); } } else if (localStorage.getItem('googleAuthLoggedIn') === 'true') { googleTokenClient.requestAccessToken({ prompt: '' }); } } catch (error) { console.error("Google Identity Services client gagal dimuat.", error); showMessage("Gagal memuat API Google. Coba refresh halaman.", "error"); } } function handleAuthClick() { if (googleAccessToken) { google.accounts.oauth2.revoke(googleAccessToken, () => { googleAccessToken = null; clearToken(); updateSigninStatus(false); showMessage("Berhasil keluar dari akun Google.", "success"); }); } else { if (googleTokenClient) { googleTokenClient.requestAccessToken({ prompt: 'consent' }); } else { showMessage("Client otentikasi belum siap.", "error"); } } } async function verifyToken(token) { try { const res = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`); return res.ok; } catch (e) { console.error("Verifikasi token gagal:", e); return false; } }
-function handleBackupClick() { const lifeHubData = storage.getAppData(); const notesData = JSON.parse(localStorage.getItem('notes_v4.9.2') || '[]'); const allData = { lifeHubData, notesData, backupVersion: "5.3.0", backupDate: new Date().toISOString() }; if (Object.keys(lifeHubData.personal).every(key => lifeHubData.personal[key].length === 0) && Object.keys(lifeHubData.business).every(key => lifeHubData.business[key].length === 0) && notesData.length === 0) { showMessage("Tidak ada data untuk di-backup.", "error"); return; } backupDataToDrive(allData); } async function handleRestoreClick() { const restoredData = await restoreDataFromDrive(); if (restoredData) { showConfirm('Timpa Data Lokal?', 'Data dari Google Drive akan menimpa data lokal Anda. Operasi ini tidak dapat diurungkan. Lanjutkan?', () => { if (restoredData.lifeHubData) { storage.saveAppData(restoredData.lifeHubData); } if (restoredData.notesData) { localStorage.setItem('notes_v4.9.2', JSON.stringify(restoredData.notesData)); } showMessage("Restore berhasil! Memuat ulang aplikasi...", "success"); setTimeout(() => window.location.reload(), 1500); }); } }
+
+// ===================================================================================
+// =================== BAGIAN 3: FUNGSI GOOGLE DRIVE (BACKUP & RESTORE) ==============
+// ===================================================================================
+
+function handleBackupClick() { 
+    const lifeHubData = storage.getAppData(); 
+    const notesData = JSON.parse(localStorage.getItem('notes_v4.9.2') || '[]'); 
+    const allData = { lifeHubData, notesData, backupVersion: "5.3.0", backupDate: new Date().toISOString() }; 
+    if (Object.keys(lifeHubData.personal).every(key => lifeHubData.personal[key].length === 0) && Object.keys(lifeHubData.business).every(key => lifeHubData.business[key].length === 0) && notesData.length === 0) { 
+        showMessage("Tidak ada data untuk di-backup.", "error"); 
+        return; 
+    } 
+    backupDataToDrive(allData); 
+}
+
+/**
+ * [BARU] Menampilkan modal untuk memilih mode restore.
+ */
+function showRestoreOptionsModal() {
+    if (!googleAccessToken) {
+        showMessage("Otentikasi diperlukan untuk restore.", "error");
+        return;
+    }
+
+    const content = `
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-semibold text-purple-300">Pilih Mode Restore</h3>
+            <button class="closeModal text-gray-400 hover:text-purple-300"><i class="fas fa-times"></i></button>
+        </div>
+        <p class="text-gray-400 mb-6">Pilih cara Anda ingin memulihkan data dari Google Drive.</p>
+        <div class="space-y-4">
+            <button id="autoRestoreBtn" class="custom-button w-full text-left !p-4 flex items-center">
+                <i class="fas fa-magic mr-4 text-xl"></i>
+                <div>
+                    <strong class="block">Restore Otomatis (Cepat)</strong>
+                    <span class="text-xs font-normal opacity-80">Pulihkan data dari file cadangan terbaru.</span>
+                </div>
+            </button>
+            <button id="manualRestoreBtn" class="custom-button w-full text-left !p-4 flex items-center" style="background: linear-gradient(90deg, #10b981, #059669);">
+                <i class="fas fa-list-ul mr-4 text-xl"></i>
+                <div>
+                    <strong class="block">Restore Manual (Kontrol Penuh)</strong>
+                    <span class="text-xs font-normal opacity-80">Lihat semua file cadangan dan pilih satu untuk dipulihkan.</span>
+                </div>
+            </button>
+        </div>
+    `;
+    showModal(content);
+
+    document.getElementById('autoRestoreBtn').addEventListener('click', handleAutoRestore);
+    document.getElementById('manualRestoreBtn').addEventListener('click', handleManualRestore);
+}
+
+/**
+ * [BARU] Menangani logika restore otomatis (dari file terbaru).
+ */
+async function handleAutoRestore() {
+    closeModal(); // Tutup modal pilihan
+    const authStatus = document.getElementById('auth-status');
+    authStatus.innerText = "Memulai proses restore otomatis...";
+    showMessage("Mencari file backup terbaru...", "info");
+
+    try {
+        const folderId = await findFolderId(DRIVE_FOLDER_NAME);
+        if (!folderId) throw new Error(`Folder '${DRIVE_FOLDER_NAME}' tidak ditemukan.`);
+
+        const latestFile = await findLatestBackupFile(folderId);
+        if (!latestFile) throw new Error("Tidak ada file backup yang ditemukan.");
+
+        authStatus.innerText = `File terbaru ditemukan: ${latestFile.name}`;
+        showMessage(`Mengunduh ${latestFile.name}...`, "info");
+
+        const fileContent = await getFileContent(latestFile.id);
+        const restoredData = JSON.parse(fileContent);
+        
+        authStatus.innerText = "Restore berhasil! Konfirmasi untuk menimpa data.";
+        confirmAndApplyRestore(restoredData);
+
+    } catch (error) {
+        console.error("Error saat restore otomatis:", error);
+        authStatus.innerText = "Restore otomatis gagal.";
+        showMessage(`Restore otomatis gagal: ${error.message}`, "error");
+    }
+}
+
+/**
+ * [BARU] Menangani logika restore manual (memilih dari daftar).
+ */
+async function handleManualRestore() {
+    closeModal(); // Tutup modal pilihan
+    showMessage("Memuat daftar file dari Google Drive...", "info");
+
+    try {
+        const files = await listAllBackupFiles();
+        if (!files || files.length === 0) {
+            showMessage("Tidak ada file cadangan yang ditemukan di Google Drive.", "error");
+            return;
+        }
+
+        const fileListHTML = files.map(file => `
+            <div class="p-3 rounded-md flex justify-between items-center hover:bg-purple-500/10 cursor-pointer border-b border-purple-500/10" data-file-id="${file.id}">
+                <div>
+                    <strong class="block text-purple-300">${file.name}</strong>
+                    <p class="text-xs text-gray-400">Dibuat: ${new Date(file.createdTime).toLocaleString('id-ID')}</p>
+                </div>
+                <i class="fas fa-chevron-right text-gray-500"></i>
+            </div>
+        `).join('');
+
+        const content = `
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-purple-300">Pilih File untuk Restore</h3>
+                <button class="closeModal text-gray-400 hover:text-purple-300"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="text-sm text-gray-400 mb-4">Klik pada salah satu file di bawah ini untuk memulai proses pemulihan.</p>
+            <div class="max-h-96 overflow-y-auto">${fileListHTML}</div>
+        `;
+        showModal(content);
+
+        // Tambahkan event listener ke setiap item file
+        document.querySelectorAll('[data-file-id]').forEach(item => {
+            item.addEventListener('click', async (e) => {
+                const fileId = e.currentTarget.dataset.fileId;
+                closeModal();
+                showMessage(`Mengunduh file yang dipilih...`, "info");
+                try {
+                    const fileContent = await getFileContent(fileId);
+                    const restoredData = JSON.parse(fileContent);
+                    confirmAndApplyRestore(restoredData);
+                } catch (error) {
+                    showMessage(`Gagal memulihkan dari file yang dipilih: ${error.message}`, "error");
+                }
+            });
+        });
+
+    } catch (error) {
+        showMessage(`Gagal memuat daftar file: ${error.message}`, "error");
+    }
+}
+
+/**
+ * [BARU] Menampilkan konfirmasi dan menerapkan data yang di-restore.
+ * @param {object} restoredData - Objek data yang telah diunduh.
+ */
+function confirmAndApplyRestore(restoredData) {
+    showConfirm('Timpa Data Lokal?', 'Data dari Google Drive akan menimpa data lokal Anda. Operasi ini tidak dapat diurungkan. Lanjutkan?', () => {
+        if (restoredData.lifeHubData) {
+            storage.saveAppData(restoredData.lifeHubData);
+        }
+        if (restoredData.notesData) {
+            localStorage.setItem('notes_v4.9.2', JSON.stringify(restoredData.notesData));
+        }
+        showMessage("Restore berhasil! Memuat ulang aplikasi...", "success");
+        setTimeout(() => window.location.reload(), 1500);
+    });
+}
+
 
 // === [PERUBAHAN UTAMA] Fungsi untuk menampilkan status login, profil, dan avatar dinamis ===
 async function updateSigninStatus(isSignedIn) {
@@ -2095,8 +2252,33 @@ function toggleEmailVisibility() {
 }
 
 
-async function backupDataToDrive(data) { if (!googleAccessToken) { showMessage("Otentikasi diperlukan.", "error"); return; } const authStatus = document.getElementById('auth-status'); authStatus.innerText = "Memulai proses backup..."; showMessage("Mengunggah data ke Google Drive...", "info"); try { const folderId = await findOrCreateFolder(DRIVE_FOLDER_NAME); if (!folderId) throw new Error("Tidak dapat membuat folder di Drive."); const fileContent = JSON.stringify(data, null, 2); const fileName = `uranuspace_backup_${new Date().toISOString().replace(/:/g, '-')}.txt`; const createdFile = await createFileInFolder(folderId, fileName, 'text/plain', fileContent); authStatus.innerText = `Backup berhasil! File: ${createdFile.name}`; showMessage("Backup ke Google Drive berhasil!", "success"); listFiles(); } catch (error) { console.error("Error saat backup ke Drive:", error); authStatus.innerText = "Backup gagal. Lihat konsol untuk detail."; showMessage(`Backup gagal: ${error.message}`, "error"); } } async function restoreDataFromDrive() { if (!googleAccessToken) { showMessage("Otentikasi diperlukan.", "error"); return null; } const authStatus = document.getElementById('auth-status'); authStatus.innerText = "Memulai proses restore..."; showMessage("Mencari file backup terbaru...", "info"); try { const folderId = await findFolderId(DRIVE_FOLDER_NAME); if (!folderId) throw new Error(`Folder '${DRIVE_FOLDER_NAME}' tidak ditemukan.`); const latestFile = await findLatestBackupFile(folderId); if (!latestFile) throw new Error("Tidak ada file backup yang ditemukan."); authStatus.innerText = `File terbaru ditemukan: ${latestFile.name}`; showMessage(`Mengunduh ${latestFile.name}...`, "info"); const fileContent = await getFileContent(latestFile.id); const restoredData = JSON.parse(fileContent); authStatus.innerText = "Restore berhasil! Konfirmasi untuk menimpa data."; return restoredData; } catch (error) { console.error("Error saat restore dari Drive:", error); authStatus.innerText = "Restore gagal. Lihat konsol untuk detail."; showMessage(`Restore gagal: ${error.message}`, "error"); return null; } }
+async function backupDataToDrive(data) { if (!googleAccessToken) { showMessage("Otentikasi diperlukan.", "error"); return; } const authStatus = document.getElementById('auth-status'); authStatus.innerText = "Memulai proses backup..."; showMessage("Mengunggah data ke Google Drive...", "info"); try { const folderId = await findOrCreateFolder(DRIVE_FOLDER_NAME); if (!folderId) throw new Error("Tidak dapat membuat folder di Drive."); const fileContent = JSON.stringify(data, null, 2); const fileName = `uranuspace_backup_${new Date().toISOString().replace(/:/g, '-')}.txt`; const createdFile = await createFileInFolder(folderId, fileName, 'text/plain', fileContent); authStatus.innerText = `Backup berhasil! File: ${createdFile.name}`; showMessage("Backup ke Google Drive berhasil!", "success"); listFiles(); } catch (error) { console.error("Error saat backup ke Drive:", error); authStatus.innerText = "Backup gagal. Lihat konsol untuk detail."; showMessage(`Backup gagal: ${error.message}`, "error"); } }
 async function findOrCreateFolder(folderName) { let folderId = await findFolderId(folderName); if (folderId) return folderId; const fileMetadata = { 'name': folderName, 'mimeType': 'application/vnd.google-apps.folder' }; const response = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' }), body: JSON.stringify(fileMetadata) }); if (!response.ok) throw new Error("Gagal membuat folder."); const folder = await response.json(); return folder.id; } async function findFolderId(folderName) { const query = `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id, name)`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mencari folder."); const data = await response.json(); return data.files.length > 0 ? data.files[0].id : null; } async function createFileInFolder(folderId, fileName, mimeType, content) { const metadata = { 'name': fileName, 'mimeType': mimeType, 'parents': [folderId] }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', new Blob([content], { type: mimeType })); const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', { method: 'POST', headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }), body: form }); if (!response.ok) throw new Error("Gagal mengunggah file."); return await response.json(); } async function findLatestBackupFile(folderId) { const query = `'${folderId}' in parents and mimeType='text/plain' and name contains 'uranuspace_backup_' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&orderBy=createdTime desc&pageSize=1`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mencari file backup."); const data = await response.json(); return data.files.length > 0 ? data.files[0] : null; } async function getFileContent(fileId) { const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mengunduh konten file."); return await response.text(); } async function listFiles() { if (!googleAccessToken) return; const fileListDiv = document.getElementById('file-list'); fileListDiv.innerHTML = '<p class="text-gray-400">Memuat daftar file...</p>'; try { const folderId = await findFolderId(DRIVE_FOLDER_NAME); if (!folderId) { fileListDiv.innerHTML = '<p class="text-gray-500">Folder backup belum dibuat.</p>'; return; } const query = `'${folderId}' in parents and mimeType='text/plain' and name contains 'uranuspace_backup_' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&pageSize=5&orderBy=createdTime desc`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error(`Gagal memuat daftar file: ${response.statusText}`); const data = await response.json(); if (data.files && data.files.length > 0) { fileListDiv.innerHTML = "<strong class='block mb-1 text-purple-300'>Backup Terbaru:</strong>" + data.files.map(file => `<div class="p-1"><span>${file.name.substring(0, 35)}...</span><span class="block text-gray-500 text-xs">${new Date(file.createdTime).toLocaleString('id-ID')}</span></div>`).join(''); } else { fileListDiv.innerHTML = '<p class="text-gray-500">Belum ada file backup di Google Drive.</p>'; } } catch (error) { console.error('Error listing files:', error); fileListDiv.innerHTML = `<p class="text-red-500">Gagal memuat daftar file.</p>`; } }
+
+/**
+ * [BARU] Mengambil semua file backup dari folder untuk mode restore manual.
+ * @returns {Promise<Array|null>} Array of file objects or null on error.
+ */
+async function listAllBackupFiles() {
+    if (!googleAccessToken) return null;
+    try {
+        const folderId = await findFolderId(DRIVE_FOLDER_NAME);
+        if (!folderId) return [];
+
+        const query = `'${folderId}' in parents and mimeType='text/plain' and name contains 'uranuspace_backup_' and trashed=false`;
+        const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime)&orderBy=createdTime desc`, {
+            headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken })
+        });
+
+        if (!response.ok) throw new Error(`Gagal memuat daftar file: ${response.statusText}`);
+        const data = await response.json();
+        return data.files || [];
+    } catch (error) {
+        console.error('Error listing all files:', error);
+        throw error;
+    }
+}
+
 
 // === [BARU] FUNGSI-FUNGSI UNTUK FITUR PORTAL DI SIDEBAR ===
 
@@ -2758,5 +2940,7 @@ async function exportAllToPdf(timeRange = 'all', customStartDate = null, customE
 }
 
 </script>
+
 </body>
 </html>
+
