@@ -20,14 +20,17 @@
     <!-- Memuat html2canvas untuk konversi HTML ke gambar (diperlukan untuk PDF) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+    <!-- Memuat PDF.js & JSZip untuk fitur ekspor gambar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+
     <!-- PENTING: Memuat Google Identity Services (GSI) untuk otentikasi -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
     <!-- Gaya Kustom -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        /* [PERUBAHAN] Mengganti semua impor font dengan satu baris yang efisien untuk memuat semua font baru */
+        @import url('https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Anton&family=Bebas+Neue&family=Bitter&family=Caveat&family=Cormorant+Garamond&family=Dancing+Script&family=EB+Garamond&family=Fira+Code&family=Indie+Flower&family=Inconsolata&family=JetBrains+Mono&family=Lato&family=Lobster&family=Lora&family=Merriweather&family=Montserrat&family=Nunito+Sans&family=Open+Sans&family=Orbitron&family=Oswald&family=Pacifico&family=Playfair+Display&family=Poppins&family=Raleway&family=Roboto&family=Shadows+Into+Light+Two&family=Source+Code+Pro&family=Space+Mono&family=Ubuntu&display=swap');
         
         :root {
             /* [DEFAULT] Dark Purple Theme */
@@ -406,77 +409,7 @@
             flex-direction: column;
             gap: 1.5rem;
         }
-
-        .editor-toolbar {
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-bottom: none;
-            border-radius: 0.5rem 0.5rem 0 0;
-            padding: 0.5rem;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        .editor-toolbar button, .editor-toolbar select {
-            background: transparent;
-            border: 1px solid transparent;
-            color: var(--text-secondary);
-            min-width: 36px;
-            height: 36px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 0.5rem;
-        }
-        .editor-toolbar button:hover, .editor-toolbar select:hover {
-            background: var(--hover-nav-bg);
-            color: var(--text-primary);
-        }
-        .editor-toolbar select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            padding-right: 1.5rem;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-        }
-        .toolbar-separator {
-            width: 1px;
-            height: 24px;
-            background-color: var(--input-border);
-            margin: 0 0.5rem;
-        }
         
-        #editorContent {
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            min-height: 300px;
-            padding: 1rem;
-            border-radius: 0 0 0.5rem 0.5rem;
-            color: var(--text-primary);
-            outline: none;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        #editorContent:focus {
-            border-color: var(--input-focus-border);
-        }
-        #editorContent.dragover {
-            border-color: var(--primary-brand);
-            box-shadow: 0 0 10px var(--primary-brand);
-        }
-        #editorContent[contenteditable="true"]:empty:before {
-            content: attr(placeholder);
-            color: var(--text-secondary);
-            pointer-events: none;
-            display: block;
-        }
         .note-item {
             border: 1px solid var(--card-border);
             transition: background-color 0.3s ease;
@@ -663,6 +596,215 @@
         .email-blur {
             filter: blur(5px);
             user-select: none;
+        }
+
+        /* === [BARU] GAYA UNTUK EDITOR TEKS PROFESIONAL === */
+        .pro-editor-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--input-border);
+            border-radius: 0.5rem;
+            background-color: var(--input-bg);
+            transition: all 0.3s ease;
+        }
+        .pro-editor-container:focus-within {
+            border-color: var(--input-focus-border);
+            box-shadow: 0 0 10px var(--input-focus-border, 0.3);
+        }
+
+        #editor-master-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        #editor-master-btn:hover {
+            color: var(--primary-brand);
+            border-color: var(--primary-brand);
+            transform: scale(1.1);
+        }
+
+        .pro-toolbar {
+            display: none; /* Akan diubah menjadi 'flex' oleh JS */
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--input-border);
+            background-color: var(--sidebar-bg);
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        .pro-toolbar.visible {
+            display: flex;
+        }
+
+        .pro-toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 0.2rem;
+            padding: 0 0.5rem;
+            border-right: 1px solid var(--input-border);
+        }
+        .pro-toolbar-group:last-child {
+            border-right: none;
+        }
+        @media (max-width: 768px) {
+            .pro-toolbar-group {
+                border-right: none;
+                padding: 0.25rem;
+                background: rgba(0,0,0,0.1);
+                border-radius: 6px;
+            }
+        }
+
+
+        .pro-toolbar-button, .pro-toolbar-select, .pro-toolbar-color-wrapper {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            min-width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 0.5rem;
+            font-size: 0.9rem;
+        }
+        .pro-toolbar-button:hover, .pro-toolbar-select:hover {
+            background-color: var(--hover-nav-bg);
+            color: var(--text-primary);
+        }
+        .pro-toolbar-button.active {
+            background-color: var(--active-nav-bg);
+            color: var(--primary-brand);
+        }
+        .pro-toolbar-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.25rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25em 1.25em;
+            padding-right: 1.5rem;
+        }
+        .pro-toolbar-color-wrapper {
+            position: relative;
+            padding: 0;
+        }
+        .pro-toolbar-color-wrapper input[type="color"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        /* [BARU] GAYA UNTUK PASTE DROPDOWN */
+        .paste-dropdown-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .paste-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 110%;
+            left: 0;
+            z-index: 20;
+            background-color: var(--sidebar-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            padding: 0.5rem;
+            width: max-content;
+        }
+        .paste-dropdown-container:hover .paste-dropdown-menu {
+            display: block;
+        }
+        .paste-dropdown-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.5rem 0.75rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .paste-dropdown-menu button:hover {
+            background-color: var(--hover-nav-bg);
+            color: var(--text-primary);
+        }
+
+        .pro-editor-content {
+            min-height: 400px;
+            max-height: 65vh;
+            padding: 1.5rem;
+            overflow-y: auto;
+            outline: none;
+            color: var(--text-primary);
+            line-height: 1.7;
+            caret-color: var(--primary-brand);
+        }
+        .pro-editor-content[contenteditable="true"]:empty:before {
+            content: attr(placeholder);
+            color: var(--text-secondary);
+            pointer-events: none;
+            display: block;
+        }
+        /* Styling konten di dalam editor */
+        .pro-editor-content h1, .pro-editor-content h2, .pro-editor-content h3 { border-bottom: 1px solid var(--input-border); padding-bottom: 0.3em; margin-bottom: 0.5em; }
+        .pro-editor-content blockquote { border-left: 3px solid var(--primary-brand); margin-left: 0; padding-left: 1rem; color: var(--text-secondary); font-style: italic; }
+        .pro-editor-content code { background: var(--card-bg); padding: 0.2em 0.4em; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.9em; }
+        .pro-editor-content pre { background: #000; color: #f8f8f2; padding: 1rem; border-radius: 0.5rem; white-space: pre-wrap; font-family: 'Fira Code', monospace; }
+        .pro-editor-content table { width: 100%; border-collapse: collapse; }
+        .pro-editor-content th, .pro-editor-content td { border: 1px solid var(--input-border); padding: 0.5rem; }
+        .pro-editor-content th { background-color: var(--card-bg); }
+
+        .pro-editor-statusbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--input-border);
+            background-color: var(--sidebar-bg);
+            border-radius: 0 0 0.5rem 0.5rem;
+            flex-wrap: wrap;
+        }
+        .pro-statusbar-segment {
+            cursor: default;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .pro-statusbar-segment:hover {
+            background-color: var(--hover-nav-bg);
+        }
+        .pro-statusbar-segment i {
+            margin-right: 0.5em;
         }
 
     </style>
@@ -854,11 +996,24 @@
                             </div>
                         </div>
                         
+                        <!-- [PERUBAHAN] Bagian Analisis Catatan diubah menjadi grid 2 kolom -->
                         <div class="glass-effect p-6">
-                             <h3 class="text-xl font-semibold mb-4 text-blue-400">Analisis Catatan</h3>
-                             <p class="text-md font-medium text-purple-300 mb-2">Frekuensi Entri Catatan</p>
-                             <div class="chart-container h-72">
-                                <canvas id="diaryEntryFrequencyChart"></canvas>
+                            <h3 class="text-xl font-semibold mb-4 text-blue-400">Analisis Catatan</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Grafik 1: Frekuensi Entri Catatan -->
+                                <div>
+                                    <p class="text-md font-medium text-purple-300 mb-2 text-center">Frekuensi Entri Catatan</p>
+                                    <div class="chart-container h-64">
+                                        <canvas id="diaryEntryFrequencyChart"></canvas>
+                                    </div>
+                                </div>
+                                <!-- Grafik 2: Analisis Mood (Grafik Baru) -->
+                                <div>
+                                    <p class="text-md font-medium text-purple-300 mb-2 text-center">Analisis Mood</p>
+                                    <div class="chart-container h-64">
+                                        <canvas id="noteMoodAnalysisChart"></canvas>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -974,50 +1129,179 @@
                 <!-- Notes Section -->
                 <div id="notes-section" class="section hidden">
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
-                         <h2 class="text-3xl font-bold text-purple-300">Catatan</h2>
-                         <button id="notesAddNewBtn" class="custom-button"><i class="fas fa-plus mr-2"></i>Catatan Baru</button>
+                         <h2 class="text-3xl font-bold text-purple-300">Catatan Profesional</h2>
+                         <div class="flex gap-2">
+                              <button id="notesAddNewBtn" class="custom-button"><i class="fas fa-plus mr-2"></i>Catatan Baru</button>
+                         </div>
                     </div>
                     <div class="notes-container">
+                        <!-- ===== [START] EDITOR PROFESIONAL BARU ===== -->
                         <div id="notesEditorSection" class="glass-effect p-4">
-                            <input type="text" id="notesTitleInput" class="custom-input mb-4" placeholder="Judul Catatan...">
-                            <div class="editor-toolbar">
-                                <button data-command="undo" title="Undo"><i class="fas fa-undo"></i></button>
-                                <button data-command="redo" title="Redo"><i class="fas fa-redo"></i></button>
-                                <div class="toolbar-separator"></div>
-                                <button data-command="copy" title="Copy"><i class="fas fa-copy"></i></button>
-                                <button data-command="cut" title="Cut"><i class="fas fa-cut"></i></button>
-                                <div class="toolbar-separator"></div>
-                                <select id="formatBlock" class="toolbar-select" title="Gaya Teks">
-                                    <option value="p">Normal</option>
-                                    <option value="h1">Heading 1</option>
-                                    <option value="h2">Heading 2</option>
-                                    <option value="h3">Heading 3</option>
-                                    <option value="blockquote">Quote</option>
-                                </select>
-                                <div class="toolbar-separator"></div>
-                                <button data-command="bold" title="Bold"><i class="fas fa-bold"></i></button>
-                                <button data-command="italic" title="Italic"><i class="fas fa-italic"></i></button>
-                                <button data-command="underline" title="Underline"><i class="fas fa-underline"></i></button>
-                                <button data-command="strikeThrough" title="Strikethrough"><i class="fas fa-strikethrough"></i></button>
-                                <div class="toolbar-separator"></div>
-                                <button data-command="justifyLeft" title="Rata Kiri"><i class="fas fa-align-left"></i></button>
-                                <button data-command="justifyCenter" title="Rata Tengah"><i class="fas fa-align-center"></i></button>
-                                <button data-command="justifyRight" title="Rata Kanan"><i class="fas fa-align-right"></i></button>
-                                <button data-command="justifyFull" title="Rata Kanan Kiri"><i class="fas fa-align-justify"></i></button>
-                                <div class="toolbar-separator"></div>
-                                <button data-command="insertOrderedList" title="Numbered List"><i class="fas fa-list-ol"></i></button>
-                                <button data-command="insertUnorderedList" title="Bullet List"><i class="fas fa-list-ul"></i></button>
-                                <div class="toolbar-separator"></div>
-                                <button data-command="createLink" title="Sisipkan Tautan"><i class="fas fa-link"></i></button>
-                                <button id="notesEmbedYouTubeBtn" title="Sematkan Video YouTube"><i class="fab fa-youtube"></i></button>
-                                <button id="notesEmbedTikTokBtn" title="Sematkan Video TikTok"><i class="fab fa-tiktok"></i></button>
-                                <button id="notesUploadFileBtn" title="Unggah File"><i class="fas fa-upload"></i></button>
-                                <input type="file" id="notesFileUpload" class="hidden" accept=".txt,.json,.md,.pdf,image/*,video/*">
-                                <div class="toolbar-separator"></div>
-                                <button data-command="removeFormat" title="Clear Formatting"><i class="fas fa-eraser"></i></button>
-                            </div>
-                            <div id="editorContent" contenteditable="true" class="prose max-w-none" placeholder="Mulai menulis atau jatuhkan file di sini..."></div>
+                            <input type="text" id="notesTitleInput" class="custom-input mb-4 text-xl" placeholder="Judul Catatan...">
                             
+                            <div class="pro-editor-container">
+                                <!-- Tombol Induk untuk Menampilkan Toolbar -->
+                                <button id="editor-master-btn" title="Tampilkan Opsi Pemformatan">
+                                    <span class="font-bold">A</span><i class="fas fa-ellipsis-v ml-1"></i>
+                                </button>
+                
+                                <!-- Toolbar Pemformatan Lengkap (Awalnya tersembunyi) -->
+                                <div id="pro-toolbar" class="pro-toolbar">
+                                    <!-- Grup Undo/Redo & Clear -->
+                                    <div class="pro-toolbar-group">
+                                        <button class="pro-toolbar-button" data-command="undo" title="Undo (Ctrl+Z)"><i class="fas fa-undo"></i></button>
+                                        <button class="pro-toolbar-button" data-command="redo" title="Redo (Ctrl+Y)"><i class="fas fa-redo"></i></button>
+                                        <button class="pro-toolbar-button" data-command="cut" title="Gunting (Ctrl+X)"><i class="fas fa-cut"></i></button>
+                                        <button class="pro-toolbar-button" data-command="copy" title="Salin (Ctrl+C)"><i class="fas fa-copy"></i></button>
+                                        <!-- Smart Paste Dropdown -->
+                                        <div class="paste-dropdown-container">
+                                            <button class="pro-toolbar-button" data-command="paste" title="Tempel (Ctrl+V)"><i class="fas fa-paste"></i></button>
+                                            <div class="paste-dropdown-menu">
+                                                <button data-command="pasteKeepFormatting">Tempel dengan Format</button>
+                                                <button data-command="pasteAsPlainText">Tempel Teks Biasa</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                
+                                    <!-- [PERBAIKAN] Grup Font & Ukuran dengan daftar lengkap -->
+                                    <div class="pro-toolbar-group">
+                                        <select class="pro-toolbar-select" data-command="fontName" title="Jenis Font">
+                                            <optgroup label="Default & Web Safe">
+                                                <option value="'Poppins', sans-serif">Poppins</option>
+                                                <option value="Arial, Helvetica, sans-serif">Arial</option>
+                                                <option value="Verdana, Geneva, sans-serif">Verdana</option>
+                                                <option value="'Times New Roman', Times, serif">Times New Roman</option>
+                                                <option value="Georgia, serif">Georgia</option>
+                                                <option value="'Courier New', Courier, monospace">Courier New</option>
+                                            </optgroup>
+                                            <optgroup label="Serif (Formal)">
+                                                <option value="'Merriweather', serif">Merriweather</option>
+                                                <option value="'Lora', serif">Lora</option>
+                                                <option value="'Playfair Display', serif">Playfair Display</option>
+                                                <option value="'EB Garamond', serif">EB Garamond</option>
+                                                <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
+                                                <option value="'Bitter', serif">Bitter</option>
+                                            </optgroup>
+                                            <optgroup label="Sans-Serif (Modern)">
+                                                <option value="'Roboto', sans-serif">Roboto</option>
+                                                <option value="'Open Sans', sans-serif">Open Sans</option>
+                                                <option value="'Lato', sans-serif">Lato</option>
+                                                <option value="'Montserrat', sans-serif">Montserrat</option>
+                                                <option value="'Nunito Sans', sans-serif">Nunito Sans</option>
+                                                <option value="'Raleway', sans-serif">Raleway</option>
+                                                <option value="'Ubuntu', sans-serif">Ubuntu</option>
+                                            </optgroup>
+                                            <optgroup label="Display (Judul)">
+                                                <option value="'Oswald', sans-serif">Oswald</option>
+                                                <option value="'Bebas Neue', cursive">Bebas Neue</option>
+                                                <option value="'Lobster', cursive">Lobster</option>
+                                                <option value="'Alfa Slab One', cursive">Alfa Slab One</option>
+                                                <option value="'Anton', sans-serif">Anton</option>
+                                                <option value="'Orbitron', sans-serif">Orbitron</option>
+                                            </optgroup>
+                                            <optgroup label="Handwriting (Tulisan Tangan)">
+                                                <option value="'Dancing Script', cursive">Dancing Script</option>
+                                                <option value="'Caveat', cursive">Caveat</option>
+                                                <option value="'Indie Flower', cursive">Indie Flower</option>
+                                                <option value="'Pacifico', cursive">Pacifico</option>
+                                                <option value="'Shadows Into Light Two', cursive">Shadows Into Light</option>
+                                            </optgroup>
+                                            <optgroup label="Monospace (Teknis)">
+                                                <option value="'Fira Code', monospace">Fira Code</option>
+                                                <option value="'Source Code Pro', monospace">Source Code Pro</option>
+                                                <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
+                                                <option value="'Space Mono', monospace">Space Mono</option>
+                                                <option value="'Inconsolata', monospace">Inconsolata</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                
+                                    <!-- Grup Gaya Teks -->
+                                    <div class="pro-toolbar-group">
+                                        <button class="pro-toolbar-button" data-command="bold" title="Bold (Ctrl+B)"><i class="fas fa-bold"></i></button>
+                                        <button class="pro-toolbar-button" data-command="italic" title="Italic (Ctrl+I)"><i class="fas fa-italic"></i></button>
+                                        <button class="pro-toolbar-button" data-command="underline" title="Underline (Ctrl+U)"><i class="fas fa-underline"></i></button>
+                                        <button class="pro-toolbar-button" data-command="strikeThrough" title="Strikethrough"><i class="fas fa-strikethrough"></i></button>
+                                        <button class="pro-toolbar-button" data-command="subscript" title="Subskrip"><i class="fas fa-subscript"></i></button>
+                                        <button class="pro-toolbar-button" data-command="superscript" title="Superskrip"><i class="fas fa-superscript"></i></button>
+                                    </div>
+                                    
+                                    <!-- Grup Warna -->
+                                    <div class="pro-toolbar-group">
+                                        <div class="pro-toolbar-color-wrapper" title="Warna Teks">
+                                            <i class="fas fa-font"></i>
+                                            <input type="color" data-command="foreColor">
+                                        </div>
+                                        <div class="pro-toolbar-color-wrapper" title="Warna Sorot (Highlight)">
+                                            <i class="fas fa-highlighter"></i>
+                                            <input type="color" data-command="backColor">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Grup Heading & Block -->
+                                    <div class="pro-toolbar-group">
+                                        <select class="pro-toolbar-select" data-command="formatBlock" title="Gaya Paragraf">
+                                            <option value="p">Paragraf</option>
+                                            <option value="h1">Heading 1</option>
+                                            <option value="h2">Heading 2</option>
+                                            <option value="h3">Heading 3</option>
+                                            <option value="blockquote">Kutipan</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Grup Perataan -->
+                                    <div class="pro-toolbar-group">
+                                        <button class="pro-toolbar-button" data-command="justifyLeft" title="Rata Kiri"><i class="fas fa-align-left"></i></button>
+                                        <button class="pro-toolbar-button" data-command="justifyCenter" title="Rata Tengah"><i class="fas fa-align-center"></i></button>
+                                        <button class="pro-toolbar-button" data-command="justifyRight" title="Rata Kanan"><i class="fas fa-align-right"></i></button>
+                                        <button class="pro-toolbar-button" data-command="justifyFull" title="Rata Kanan Kiri"><i class="fas fa-align-justify"></i></button>
+                                    </div>
+                
+                                    <!-- Grup Daftar -->
+                                    <div class="pro-toolbar-group">
+                                        <button class="pro-toolbar-button" data-command="insertUnorderedList" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+                                        <button class="pro-toolbar-button" data-command="insertOrderedList" title="Numbered List"><i class="fas fa-list-ol"></i></button>
+                                        <button class="pro-toolbar-button" data-command="outdent" title="Kurangi Indentasi"><i class="fas fa-outdent"></i></button>
+                                        <button class="pro-toolbar-button" data-command="indent" title="Tambah Indentasi"><i class="fas fa-indent"></i></button>
+                                    </div>
+                
+                                    <!-- Grup Sisipkan -->
+                                    <div class="pro-toolbar-group">
+                                        <button class="pro-toolbar-button" data-command="createLink" title="Sisipkan Tautan"><i class="fas fa-link"></i></button>
+                                        <button class="pro-toolbar-button" data-command="insertImage" title="Sisipkan Gambar"><i class="fas fa-image"></i></button>
+                                        <button class="pro-toolbar-button" data-command="embedYouTube" title="Sematkan Video YouTube"><i class="fab fa-youtube"></i></button>
+                                        <button class="pro-toolbar-button" data-command="embedTikTok" title="Sematkan Video TikTok"><i class="fab fa-tiktok"></i></button>
+                                        <button class="pro-toolbar-button" data-command="uploadFile" title="Unggah File"><i class="fas fa-upload"></i></button>
+                                        <button class="pro-toolbar-button" data-command="insertHorizontalRule" title="Garis Horizontal"><i class="fas fa-minus"></i></button>
+                                    </div>
+                
+                                    <!-- Grup Lainnya -->
+                                    <div class="pro-toolbar-group">
+                                         <button class="pro-toolbar-button" data-command="clearFormatting" title="Hapus Format"><i class="fas fa-eraser"></i></button>
+                                         <button class="pro-toolbar-button" data-command="findAndReplace" title="Cari & Ganti"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+                
+                                <!-- Area Konten Editor -->
+                                <div id="pro-editor-content" class="pro-editor-content" contenteditable="true" placeholder="Mulai menulis atau jatuhkan file di sini...">
+                                    <!-- Konten akan diisi oleh pengguna -->
+                                </div>
+                
+                                <!-- Status Bar Profesional -->
+                                <div class="pro-editor-statusbar">
+                                    <div class="flex items-center gap-4">
+                                        <span id="word-count" class="pro-statusbar-segment" title="Jumlah Kata"><i class="fas fa-file-word"></i>0 Kata</span>
+                                        <span id="char-count" class="pro-statusbar-segment" title="Jumlah Karakter"><i class="fas fa-keyboard"></i>0 Karakter</span>
+                                        <span id="reading-time" class="pro-statusbar-segment" title="Waktu Baca"><i class="fas fa-clock"></i>0 mnt</span>
+                                    </div>
+                                    <div class="flex items-center gap-4">
+                                        <span id="save-status" class="pro-statusbar-segment" title="Status Penyimpanan"><i class="fas fa-cloud"></i>Tersimpan</span>
+                                        <span id="sync-status" class="pro-statusbar-segment" title="Status Sinkronisasi"><i class="fas fa-sync"></i>Tersinkronisasi</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Input Tambahan untuk Catatan (Tanggal, Tags, Mood) -->
                             <div class="flex flex-wrap gap-4 mt-4">
                                 <input type="date" id="notesDateFilter" class="custom-input flex-1">
                                 <select id="notesMoodSelector" class="custom-input flex-1">
@@ -1030,15 +1314,17 @@
                                 <input type="text" id="notesTagsInput" class="custom-input flex-1" placeholder="Tags, pisahkan koma">
                             </div>
 
+                            <!-- Tombol Aksi Utama untuk Catatan -->
                             <div class="flex flex-wrap gap-2 mt-4">
                                 <button id="notesSaveBtn" class="custom-button flex-grow"><i class="fas fa-save mr-2"></i>Simpan</button>
                                 <button id="notesSetPasswordBtn" class="custom-button flex-grow" style="background: linear-gradient(90deg, #f59e0b, #d97706);"><i class="fas fa-lock mr-2"></i>Kunci</button>
                                 <button id="notesClearEditorBtn" class="custom-button custom-button-danger"><i class="fas fa-eraser mr-2"></i>Bersihkan</button>
                             </div>
                         </div>
-
-                        <div class="glass-effect p-4 space-y-4">
-                            <h3 class="font-semibold text-lg text-pink-400">Kontrol & Filter</h3>
+                        <!-- ===== [END] EDITOR PROFESIONAL BARU ===== -->
+                        
+                        <div class="glass-effect p-4 space-y-4 mt-6">
+                            <h3 class="font-semibold text-lg text-pink-400">Kontrol & Filter Catatan</h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <input type="search" id="notesSearchInput" class="custom-input" placeholder="Cari berdasarkan judul, isi, atau tag...">
                                 <select id="notesMoodFilter" class="custom-input">
@@ -1052,11 +1338,11 @@
                             </div>
                         </div>
                         
-                        <div class="glass-effect p-4">
+                        <div class="glass-effect p-4 mt-6">
                             <h3 class="font-semibold text-lg text-pink-400 mb-2">Daftar Catatan</h3>
                             <div id="notesList" class="space-y-2 max-h-96 overflow-y-auto"></div>
                         </div>
-
+        
                     </div>
                 </div>
                 
@@ -1068,7 +1354,7 @@
                             <div class="space-y-4">
                                 
                                 <div class="p-4 rounded-lg border border-purple-500/20 space-y-3">
-                                    <label for="pdf-time-range" class="block text-sm font-medium text-purple-300">Download Laporan Lengkap (PDF)</label>
+                                    <label for="pdf-time-range" class="block text-sm font-medium text-purple-300">Download Laporan Lengkap</label>
                                     <select id="pdf-time-range" class="custom-select">
                                         <option value="all">Selamanya</option>
                                         <option value="last7days">7 Hari Terakhir</option>
@@ -1083,6 +1369,10 @@
                                     </div>
                                     <button id="export-pdf-btn" class="custom-button w-full" style="background: linear-gradient(90deg, #10b981, #059669);">
                                         <i class="fas fa-file-pdf mr-2"></i>Ekspor ke PDF
+                                    </button>
+                                    <!-- [BARU] Tombol untuk ekspor gambar -->
+                                    <button id="export-images-btn" class="custom-button w-full" style="background: linear-gradient(90deg, #3b82f6, #2563eb);">
+                                        <i class="fas fa-file-archive mr-2"></i>Ekspor Gambar (ZIP)
                                     </button>
                                 </div>
 
@@ -1162,7 +1452,7 @@
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Informasi Aplikasi</h3>
                                 <div class="space-y-2 text-sm">
                                     <p><strong>Nama:</strong> LifeHub v5 (Uranus Space)</p>
-                                    <p><strong>Versi:</strong> 5.4.0-Refactor</p>
+                                    <p><strong>Versi:</strong> 5.5.0-Fix</p>
                                     <p><strong>Fitur:</strong> Editor Teks Modern, Google Drive Backup & Restore, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Portal Tautan, Custom BG (Persisten), Preview Mode, Kunci Catatan, Keamanan Lanjutan, Laporan PDF Komprehensif dengan Tema Custom.</p>
                                     <p><strong>Storage:</strong> LocalStorage, IndexedDB & Google Drive (Data terenkripsi di terminal Anda)</p>
                                 </div>
@@ -1229,8 +1519,11 @@
             <button id="notesClosePreviewBtn" class="custom-button mt-6">Tutup</button>
         </div>
     </div>
-    
-    <script>
+
+    <!-- [PERBAIKAN] Menambahkan elemen audio untuk suara kunci -->
+    <audio id="lockSound" src="https://c.top4top.io/m_35235kd2e1.m4a" preload="auto"></audio>
+
+<script>
 // ===================================================================================
 // ======================= [BARU] FUNGSI HELPER UNTUK INDEXEDDB ======================
 // ===================================================================================
@@ -1311,23 +1604,28 @@ async function deleteBackgroundFromDB(id) {
 
 /**
  * NotesApp Class
- * Logika untuk aplikasi catatan dengan keamanan lanjutan.
+ * Logika untuk aplikasi catatan dengan editor profesional dan keamanan lanjutan.
  */
 class NotesApp {
     constructor() {
         this.notes = [];
         this.currentNoteId = null;
+        this.lastSelection = null; // Menyimpan selection range terakhir
     }
 
     init() {
         this.cacheDOMElements();
         this.bindEvents();
         this.loadNotes();
-        setInterval(() => this.autoSave(), 30000);
+        setInterval(() => this.autoSave(), 30000); // Autosave setiap 30 detik
     }
 
     cacheDOMElements() {
         this.dom = {
+            // [PERBAIKAN] Menambahkan elemen audio ke cache
+            lockSound: document.getElementById('lockSound'),
+
+            // Elemen Umum & Keamanan
             passwordModal: document.getElementById('notesPasswordModal'),
             passwordInput: document.getElementById('notesPasswordInput'),
             checkPasswordBtn: document.getElementById('notesCheckPasswordBtn'),
@@ -1336,55 +1634,81 @@ class NotesApp {
             hackOverlay: document.getElementById('hack-overlay'),
             hackText: document.getElementById('hack-text'),
             
+            // Kontrol Utama
             addNewNoteBtn: document.getElementById('notesAddNewBtn'),
             searchInput: document.getElementById('notesSearchInput'),
             moodFilter: document.getElementById('notesMoodFilter'),
-            dateFilter: document.getElementById('notesDateFilter'),
+            
+            // Editor Profesional
             editorSection: document.getElementById('notesEditorSection'),
             titleInput: document.getElementById('notesTitleInput'),
-            editorToolbar: document.querySelector('#notesEditorSection .editor-toolbar'),
-            editorContent: document.getElementById('editorContent'),
-            embedYouTubeBtn: document.getElementById('notesEmbedYouTubeBtn'),
-            embedTikTokBtn: document.getElementById('notesEmbedTikTokBtn'),
-            uploadFileBtn: document.getElementById('notesUploadFileBtn'),
-            fileUpload: document.getElementById('notesFileUpload'),
+            masterBtn: document.getElementById('editor-master-btn'),
+            toolbar: document.getElementById('pro-toolbar'),
+            editorContent: document.getElementById('pro-editor-content'),
+            
+            // Status Bar
+            wordCountEl: document.getElementById('word-count'),
+            charCountEl: document.getElementById('char-count'),
+            readingTimeEl: document.getElementById('reading-time'),
+            saveStatusEl: document.getElementById('save-status'),
+            
+            // Input Tambahan & Tombol Aksi
+            dateFilter: document.getElementById('notesDateFilter'),
             moodSelector: document.getElementById('notesMoodSelector'),
             tagsInput: document.getElementById('notesTagsInput'),
             saveNoteBtn: document.getElementById('notesSaveBtn'),
             setPasswordBtn: document.getElementById('notesSetPasswordBtn'),
             clearEditorBtn: document.getElementById('notesClearEditorBtn'),
+            
+            // Daftar Catatan & Pratinjau
             notesList: document.getElementById('notesList'),
             previewModal: document.getElementById('notesPreviewModal'),
             previewContent: document.getElementById('notesPreviewContent'),
             closePreviewBtn: document.getElementById('notesClosePreviewBtn'),
-            formatBlockSelect: document.getElementById('formatBlock'),
         };
     }
 
     bindEvents() {
         this.dom.addNewNoteBtn.addEventListener('click', () => this.addNewNote());
-        this.dom.searchInput.addEventListener('input', () => this.filterNotes());
-        this.dom.moodFilter.addEventListener('change', () => this.filterNotes());
-        this.dom.dateFilter.addEventListener('change', () => this.saveNote());
-        this.dom.editorToolbar.addEventListener('click', (e) => {
-            const button = e.target.closest('button');
-            if (button && button.dataset.command) {
-                e.preventDefault();
-                this.handleCommand(button.dataset.command);
-            }
-        });
-        this.dom.formatBlockSelect.addEventListener('change', (e) => this.formatText('formatBlock', e.target.value));
-        this.dom.embedYouTubeBtn.addEventListener('click', () => this.embedYouTube());
-        this.dom.embedTikTokBtn.addEventListener('click', () => this.embedTikTok());
-        this.dom.uploadFileBtn.addEventListener('click', () => this.dom.fileUpload.click());
-        this.dom.fileUpload.addEventListener('change', (e) => this.handleFileUpload(e.target.files));
-        this.dom.editorContent.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); this.dom.editorContent.classList.add('dragover'); });
-        this.dom.editorContent.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); this.dom.editorContent.classList.remove('dragover'); });
-        this.dom.editorContent.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); this.dom.editorContent.classList.remove('dragover'); this.handleFileUpload(e.dataTransfer.files); });
         this.dom.saveNoteBtn.addEventListener('click', () => this.saveNote(true));
         this.dom.setPasswordBtn.addEventListener('click', () => this.setPasswordForCurrentNote());
         this.dom.clearEditorBtn.addEventListener('click', () => this.clearEditor());
+        this.dom.searchInput.addEventListener('input', () => this.filterNotes());
+        this.dom.moodFilter.addEventListener('change', () => this.filterNotes());
+
+        // Event untuk Editor Profesional
+        this.dom.masterBtn.addEventListener('click', () => this.toggleToolbar());
+
+        // [PERBAIKAN FONT] Memisahkan event listener untuk tombol dan select/input
+        this.dom.toolbar.addEventListener('click', (e) => {
+            const button = e.target.closest('button');
+            if (!button) return; // Hanya proses jika yang diklik adalah tombol
+
+            const command = button.dataset.command;
+            if (command) {
+                e.preventDefault(); // Cegah aksi default HANYA untuk tombol
+                this.handleCommand(command);
+            }
+        });
+
+        // [PERBAIKAN FONT] Menambahkan event listener 'change' untuk elemen select dan input
+        this.dom.toolbar.querySelectorAll('select, input[type="color"]').forEach(input => {
+            input.addEventListener('change', (e) => {
+                const command = e.target.dataset.command;
+                if (command) {
+                    this.handleCommand(command, e.target.value);
+                }
+            });
+        });
         
+        this.dom.editorContent.addEventListener('input', () => this.updateStatusBar());
+        this.dom.editorContent.addEventListener('blur', () => this.saveSelection());
+        this.dom.editorContent.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); this.dom.editorContent.classList.add('dragover'); });
+        this.dom.editorContent.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); this.dom.editorContent.classList.remove('dragover'); });
+        this.dom.editorContent.addEventListener('drop', (e) => { e.preventDefault(); e.stopPropagation(); this.dom.editorContent.classList.remove('dragover'); this.handleFileUpload(e.dataTransfer.files); });
+        this.dom.editorContent.addEventListener('paste', (e) => this.handlePaste(e));
+
+        // Event untuk Daftar Catatan
         this.dom.notesList.addEventListener('click', (e) => {
             const target = e.target.closest('button, .note-item-clickable');
             if (!target) return;
@@ -1397,225 +1721,246 @@ class NotesApp {
         this.dom.closePreviewBtn.addEventListener('click', () => this.closePreview());
     }
     
-    // --- LOGIKA KATA SANDI & KEAMANAN LANJUTAN ---
+    // --- LOGIKA EDITOR PROFESIONAL ---
 
-    handleNoteClick(id) {
-        const note = this.notes.find(n => n.id === id);
-        if (note) {
-            const lockdownKey = `lockdown_${id}`;
-            const lockdownUntil = parseInt(localStorage.getItem(lockdownKey) || '0');
-
-            if (Date.now() < lockdownUntil) {
-                const remaining = Math.ceil((lockdownUntil - Date.now()) / 1000);
-                showMessage(`❌ Akses ditolak. Coba lagi dalam ${remaining} detik.`, 'error');
-                this.triggerHackEffect(true); // Tampilkan kembali efek jika masih dalam masa lockdown
-                return;
-            }
-
-            if (note.isLocked) {
-                this.promptForPassword(id);
-            } else {
-                this.editNote(id);
+    toggleToolbar() {
+        this.dom.toolbar.classList.toggle('visible');
+    }
+    
+    saveSelection() {
+        if (window.getSelection) {
+            const sel = window.getSelection();
+            if (sel.getRangeAt && sel.rangeCount) {
+                this.lastSelection = sel.getRangeAt(0);
             }
         }
     }
 
-    promptForPassword(id) {
-        this.dom.passwordModal.classList.add('show');
-        this.dom.passwordInput.value = '';
-        this.dom.passwordInput.focus();
-        this.dom.passwordPromptMessage.textContent = 'Masukkan kata sandi untuk membuka.';
-
-        let attempts = 0;
-        const attemptKey = `attempts_${id}`;
-
-        const checkHandler = () => {
-            const note = this.notes.find(n => n.id === id);
-            if (note && this.dom.passwordInput.value === note.password) {
-                this.editNote(id);
-                this.dom.passwordModal.classList.remove('show');
-                showMessage('Catatan terbuka!', 'success');
-                localStorage.removeItem(attemptKey);
-                cleanup();
-            } else {
-                attempts = parseInt(localStorage.getItem(attemptKey) || '0') + 1;
-                localStorage.setItem(attemptKey, attempts);
-                
-                if (attempts === 1) {
-                    this.dom.passwordPromptMessage.textContent = '😕 Hmm, coba lagi.';
-                } else if (attempts === 2) {
-                    this.dom.passwordPromptMessage.textContent = '😡 Masih salah, hati-hati!';
-                } else if (attempts >= 3) {
-                    this.dom.passwordModal.classList.remove('show');
-                    this.triggerLockdown(id);
-                    cleanup();
-                    return;
-                }
-                this.dom.passwordInput.value = '';
-                this.dom.passwordInput.focus();
+    restoreSelection() {
+        if (this.lastSelection) {
+            if (window.getSelection) {
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(this.lastSelection);
             }
-        };
-
-        const cancelHandler = () => {
-            this.dom.passwordModal.classList.remove('show');
-            cleanup();
-        };
-
-        const cleanup = () => {
-            this.dom.checkPasswordBtn.removeEventListener('click', checkHandler);
-            this.dom.cancelPasswordBtn.removeEventListener('click', cancelHandler);
-        };
-
-        this.dom.checkPasswordBtn.addEventListener('click', checkHandler);
-        this.dom.cancelPasswordBtn.addEventListener('click', cancelHandler);
+        }
     }
+    
+    // [SOLUSI FONT] Fungsi baru untuk menerapkan gaya secara manual
+    applyStyle(styleProperty, styleValue) {
+        this.restoreSelection();
+        this.dom.editorContent.focus();
 
-    triggerLockdown(id) {
-        const lockdownDuration = 30000; // 30 detik
-        const lockdownKey = `lockdown_${id}`;
-        localStorage.setItem(lockdownKey, Date.now() + lockdownDuration);
-        localStorage.removeItem(`attempts_${id}`);
-        this.triggerHackEffect();
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
 
-        setTimeout(() => {
-            localStorage.removeItem(lockdownKey);
-        }, lockdownDuration);
-    }
-
-    triggerHackEffect(isResuming = false) {
-        this.dom.hackOverlay.style.display = 'flex';
-        const text = "Access Denied!\nSystem Lockdown Initiated...\nPlease wait 30 seconds...";
-        let i = 0;
-        this.dom.hackText.innerHTML = '';
+        const range = selection.getRangeAt(0);
         
-        const type = () => {
-            if (i < text.length) {
-                this.dom.hackText.innerHTML += text.charAt(i);
-                i++;
-                setTimeout(type, 50);
-            } else {
-                this.dom.hackText.innerHTML += '<span class="typewriter-cursor"></span>';
-                setInterval(() => { this.dom.hackText.classList.toggle('glitch'); }, 200);
-            }
-        };
-        type();
-
-        setTimeout(() => {
-            this.dom.hackOverlay.style.display = 'none';
-            this.dom.hackText.classList.remove('glitch');
-        }, isResuming ? 5000 : 30000); // Tampilkan lebih singkat jika hanya melanjutkan
+        // Menggunakan execCommand untuk membungkus teks dengan elemen sementara
+        // Ini adalah trik untuk menangani teks yang sudah memiliki gaya lain
+        document.execCommand('styleWithCSS', false, true);
+        document.execCommand('fontName', false, 'placeholder-font');
+        document.execCommand('styleWithCSS', false, false);
+        
+        // Cari semua elemen sementara yang baru dibuat
+        const fontElements = this.dom.editorContent.querySelectorAll('font[face="placeholder-font"]');
+        
+        // Ganti elemen sementara dengan elemen <span> yang memiliki gaya yang benar
+        fontElements.forEach(fontElement => {
+            const span = document.createElement('span');
+            span.style[styleProperty] = styleValue;
+            span.innerHTML = fontElement.innerHTML;
+            fontElement.parentNode.replaceChild(span, fontElement);
+        });
+        
+        // Membersihkan jika ada sisa-sisa yang tidak diinginkan
+        this.dom.editorContent.normalize();
     }
 
-    setPasswordForCurrentNote() {
-        if (!this.currentNoteId) {
-            showMessage('Simpan catatan terlebih dahulu sebelum menguncinya.', 'error');
-            return;
-        }
 
-        const note = this.notes.find(n => n.id === this.currentNoteId);
-        if (!note) return;
-
-        const currentPassword = note.isLocked ? prompt('Masukkan kata sandi saat ini untuk mengubah atau menghapus:') : '';
-
-        if (note.isLocked && currentPassword !== note.password) {
-            if (currentPassword !== null) showMessage('Kata sandi saat ini salah.', 'error');
-            return;
-        }
-
-        const newPassword = prompt('Masukkan kata sandi baru (kosongkan untuk membuka kunci):');
-
-        if (newPassword === null) return;
-
-        if (newPassword) {
-            note.isLocked = true;
-            note.password = newPassword;
-            showMessage('Catatan berhasil dikunci!', 'success');
+    // [SOLUSI FONT] Fungsi handleCommand yang dimodifikasi
+    handleCommand(command, value = null) {
+        const simpleCommands = ['undo', 'redo', 'cut', 'copy', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'insertHorizontalRule'];
+        
+        if (simpleCommands.includes(command)) {
+            document.execCommand(command, false, value);
+        } else if (command === 'clearFormatting') {
+             document.execCommand('removeFormat', false, null);
+        } else if (command === 'fontName') {
+            // Ini adalah perubahan kunci: panggil fungsi applyStyle baru kita
+            this.applyStyle('fontFamily', value);
+        } else if (command === 'formatBlock' || command === 'foreColor' || command === 'backColor') {
+            document.execCommand(command, false, value);
+        } else if (command === 'createLink') {
+            const url = prompt('Masukkan URL:', 'https://');
+            if (url) document.execCommand('createLink', false, url);
+        } else if (command === 'embedYouTube') {
+            this.embedYouTube();
+        } else if (command === 'embedTikTok') {
+            this.embedTikTok();
+        } else if (command === 'uploadFile' || command === 'insertImage') {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*,video/*,application/pdf,.txt,.md,.json';
+            input.onchange = (e) => this.handleFileUpload(e.target.files);
+            input.click();
+        } else if (command === 'pasteKeepFormatting') {
+            navigator.clipboard.read().then(items => {
+                for (const item of items) {
+                    if (item.types.includes('text/html')) {
+                        item.getType('text/html').then(blob => {
+                            blob.text().then(html => document.execCommand('insertHTML', false, html));
+                        });
+                        return;
+                    }
+                }
+                // Fallback to plain text if no HTML
+                navigator.clipboard.readText().then(text => document.execCommand('insertText', false, text));
+            });
+        } else if (command === 'pasteAsPlainText') {
+            navigator.clipboard.readText().then(text => {
+                document.execCommand('insertText', false, text);
+            });
         } else {
-            note.isLocked = false;
-            delete note.password;
-            showMessage('Kunci catatan berhasil dibuka.', 'success');
+            console.warn(`Perintah tidak dikenal: ${command}`);
+        }
+        this.dom.editorContent.focus();
+    }
+
+    handlePaste(e) {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        document.execCommand('insertText', false, text);
+    }
+
+    updateStatusBar() {
+        const text = this.dom.editorContent.innerText || '';
+        const wordCount = text.trim().split(/\s+/).filter(Boolean).length;
+        const charCount = text.length;
+        const readingTime = Math.ceil(wordCount / 200);
+
+        this.dom.wordCountEl.innerHTML = `<i class="fas fa-file-word"></i>${wordCount} Kata`;
+        this.dom.charCountEl.innerHTML = `<i class="fas fa-keyboard"></i>${charCount} Karakter`;
+        this.dom.readingTimeEl.innerHTML = `<i class="fas fa-clock"></i>${readingTime} mnt`;
+        
+        this.dom.saveStatusEl.innerHTML = `<i class="fas fa-edit"></i>Belum disimpan`;
+        this.dom.saveStatusEl.style.color = '#fbbf24';
+    }
+
+    // --- LOGIKA KATA SANDI & KEAMANAN LANJUTAN ---
+    handleNoteClick(id) { const note = this.notes.find(n => n.id === id); if (note) { const lockdownKey = `lockdown_${id}`; const lockdownUntil = parseInt(localStorage.getItem(lockdownKey) || '0'); if (Date.now() < lockdownUntil) { const remaining = Math.ceil((lockdownUntil - Date.now()) / 1000); showMessage(`❌ Akses ditolak. Coba lagi dalam ${remaining} detik.`, 'error'); this.triggerHackEffect(true); return; } if (note.isLocked) { this.promptForPassword(id); } else { this.editNote(id); } } }
+    
+    promptForPassword(id) { 
+        this.dom.passwordModal.classList.add('show'); 
+        this.dom.passwordInput.value = ''; 
+        this.dom.passwordInput.focus(); 
+        this.dom.passwordPromptMessage.textContent = 'Masukkan kata sandi untuk membuka.'; 
+        let attempts = 0; 
+        const attemptKey = `attempts_${id}`; 
+        const checkHandler = () => { 
+            const note = this.notes.find(n => n.id === id); 
+            if (note && this.dom.passwordInput.value === note.password) { 
+                this.editNote(id); 
+                this.dom.passwordModal.classList.remove('show'); 
+                showMessage('Catatan terbuka!', 'success'); 
+                localStorage.removeItem(attemptKey); 
+                cleanup(); 
+            } else { 
+                attempts = parseInt(localStorage.getItem(attemptKey) || '0') + 1; 
+                localStorage.setItem(attemptKey, attempts); 
+                if (attempts === 1) { 
+                    this.dom.passwordPromptMessage.textContent = '😕 Hmm, coba lagi.'; 
+                } else if (attempts === 2) { 
+                    this.dom.passwordPromptMessage.textContent = '😡 Masih salah, hati-hati!'; 
+                } else if (attempts >= 3) { 
+                    this.dom.passwordModal.classList.remove('show'); 
+                    this.triggerLockdown(id); 
+                    cleanup(); 
+                    return; 
+                } 
+                this.dom.passwordInput.value = ''; 
+                this.dom.passwordInput.focus(); 
+            } 
+        }; 
+        const cancelHandler = () => { 
+            this.dom.passwordModal.classList.remove('show'); 
+            cleanup(); 
+        }; 
+        const cleanup = () => { 
+            this.dom.checkPasswordBtn.removeEventListener('click', checkHandler); 
+            this.dom.cancelPasswordBtn.removeEventListener('click', cancelHandler); 
+        }; 
+        this.dom.checkPasswordBtn.addEventListener('click', checkHandler); 
+        this.dom.cancelPasswordBtn.addEventListener('click', cancelHandler); 
+    }
+
+    triggerLockdown(id) { 
+        const lockdownDuration = 30000; 
+        const lockdownKey = `lockdown_${id}`; 
+        localStorage.setItem(lockdownKey, Date.now() + lockdownDuration); 
+        localStorage.removeItem(`attempts_${id}`); 
+        this.triggerHackEffect(); 
+        setTimeout(() => { 
+            localStorage.removeItem(lockdownKey); 
+        }, lockdownDuration); 
+    }
+    
+    // [PERBAIKAN] Fungsi ini sekarang menghentikan suara setelah selesai.
+    triggerHackEffect(isResuming = false) { 
+        this.dom.hackOverlay.style.display = 'flex'; 
+
+        // Memutar suara satu kali
+        if (this.dom.lockSound) {
+            this.dom.lockSound.currentTime = 0; // Selalu mulai dari awal
+            this.dom.lockSound.play().catch(e => console.error("Gagal memutar audio:", e));
         }
 
-        this.saveToStorage();
-        this.displayNotes();
+        const text = "Access Denied!\nSystem Lockdown Initiated...\nPlease wait 30 seconds..."; 
+        let i = 0; 
+        this.dom.hackText.innerHTML = ''; 
+        const type = () => { 
+            if (i < text.length) { 
+                this.dom.hackText.innerHTML += text.charAt(i); 
+                i++; 
+                setTimeout(type, 50); 
+            } else { 
+                this.dom.hackText.innerHTML += '<span class="typewriter-cursor"></span>'; 
+                setInterval(() => { 
+                    this.dom.hackText.classList.toggle('glitch'); 
+                }, 200); 
+            } 
+        }; 
+        type(); 
+        
+        setTimeout(() => { 
+            this.dom.hackOverlay.style.display = 'none'; 
+            this.dom.hackText.classList.remove('glitch'); 
+            // [PERBAIKAN] Hentikan dan reset audio saat efek visual selesai
+            if (this.dom.lockSound) {
+                this.dom.lockSound.pause();
+                this.dom.lockSound.currentTime = 0;
+            }
+        }, isResuming ? 5000 : 30000); 
     }
+
+    setPasswordForCurrentNote() { if (!this.currentNoteId) { showMessage('Simpan catatan terlebih dahulu sebelum menguncinya.', 'error'); return; } const note = this.notes.find(n => n.id === this.currentNoteId); if (!note) return; const currentPassword = note.isLocked ? prompt('Masukkan kata sandi saat ini untuk mengubah atau menghapus:') : ''; if (note.isLocked && currentPassword !== note.password) { if (currentPassword !== null) showMessage('Kata sandi saat ini salah.', 'error'); return; } const newPassword = prompt('Masukkan kata sandi baru (kosongkan untuk membuka kunci):'); if (newPassword === null) return; if (newPassword) { note.isLocked = true; note.password = newPassword; showMessage('Catatan berhasil dikunci!', 'success'); } else { note.isLocked = false; delete note.password; showMessage('Kunci catatan berhasil dibuka.', 'success'); } this.saveToStorage(); this.displayNotes(); }
 
     // --- FUNGSI INTI ---
-    
-    handleCommand(command) {
-        const simpleCommands = ['bold', 'italic', 'underline', 'strikeThrough', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'undo', 'redo', 'removeFormat', 'copy', 'cut'];
-        if (simpleCommands.includes(command)) { this.formatText(command); }
-        else if (command === 'createLink') { const url = prompt('Masukkan URL:', 'https://'); if (url) this.formatText(command, url); }
-    }
-    formatText(command, value = null) { document.execCommand(command, false, value); this.dom.editorContent.focus(); }
-    embedYouTube() {
-        const url = prompt("Masukkan URL video YouTube:");
-        if (!url) return;
-        let videoId = null;
-        const regexes = [/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/];
-        for (const regex of regexes) { const match = url.match(regex); if (match && match[1]) { videoId = match[1]; break; } }
-        if (videoId) { const embedHTML = `<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 1rem 0;"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;"></iframe></div><p><br></p>`; this.formatText('insertHTML', embedHTML); }
-        else { showMessage("URL YouTube tidak valid.", "error"); }
-    }
-    embedTikTok() {
-        const url = prompt("Masukkan URL video TikTok:");
-        if (!url) return;
-        const regex = /tiktok\.com\/.*\/video\/(\d+)/;
-        const match = url.match(regex);
-        const videoId = match && match[1] ? match[1] : null;
-        if (videoId) { const embedHTML = `<div style="position: relative; padding-bottom: 177.78%; height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"><iframe src="https://www.tiktok.com/embed/v2/${videoId}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div><p><br></p>`; this.formatText('insertHTML', embedHTML); showMessage("Video TikTok berhasil disematkan!", "success"); }
-        else { showMessage("URL TikTok tidak valid. Pastikan URL berisi '/video/...' dan ID video.", "error"); }
-    }
-    handleFileUpload(files) {
-        if (!files || files.length === 0) return;
-        const file = files[0];
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const result = e.target.result;
-            let elementHTML = '';
-            if (file.type.startsWith('image/')) { elementHTML = `<img src="${result}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;" />`; }
-            else if (file.type.startsWith('video/')) { elementHTML = `<video controls src="${result}" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;"></video>`; }
-            else if (file.type === 'application/pdf') { elementHTML = `<embed src="${result}" type="application/pdf" width="100%" height="500px" style="border-radius: 8px; margin: 1rem 0;" />`; }
-            else if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) { const escapedText = result.replace(/</g, "&lt;").replace(/>/g, "&gt;"); elementHTML = `<pre style="background: rgba(0,0,0,0.2); border: 1px solid var(--input-border); padding: 1rem; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"><code>${escapedText}</code></pre>`; }
-            else { showMessage(`Tipe file ${file.type} tidak didukung untuk pratinjau.`, 'error'); return; }
-            this.formatText('insertHTML', elementHTML + "<p><br></p>");
-        };
-        if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) { reader.readAsText(file); } else { reader.readAsDataURL(file); }
-    }
-    saveNote(isManual = false) {
-        const title = this.dom.titleInput.value.trim();
-        const content = this.dom.editorContent.innerHTML;
-        const tags = this.dom.tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag);
-        const mood = this.dom.moodSelector.value;
-        const date = this.dom.dateFilter.value || new Date().toISOString().split('T')[0];
-        if (!title && !content.trim()) { if (isManual) showMessage('Judul atau isi tidak boleh kosong.', 'error'); return; }
-        if (this.currentNoteId) {
-            const index = this.notes.findIndex(n => n.id === this.currentNoteId);
-            const existingNote = this.notes[index];
-            existingNote.title = title; existingNote.content = content; existingNote.tags = tags; existingNote.mood = mood; existingNote.date = new Date(date).toISOString(); existingNote.lastModified = new Date().toISOString(); existingNote.wordCount = this.countWords(content);
-        } else {
-            const note = { id: Date.now(), title: title, content: content, tags: tags, mood: mood, date: new Date(date).toISOString(), lastModified: new Date().toISOString(), wordCount: this.countWords(content), isLocked: false };
-            this.notes.unshift(note);
-            this.currentNoteId = note.id;
-        }
-        this.saveToStorage(); this.displayNotes(); if (isManual) showMessage('Catatan disimpan!', 'success');
-    }
-    autoSave() { const title = this.dom.titleInput.value.trim(); const content = this.dom.editorContent.innerHTML; if ((title || content.trim()) && this.currentNoteId) { this.saveNote(); showMessage('Tersimpan otomatis', 'info'); } }
-    loadNotes() { const saved = localStorage.getItem('notes_v4.9.2'); if (saved) { this.notes = JSON.parse(saved); this.displayNotes(); } }
-    saveToStorage() { localStorage.setItem('notes_v4.9.2', JSON.stringify(this.notes)); }
-    displayNotes(filteredNotes = null) {
-        const notesToShow = (filteredNotes || this.notes).sort((a, b) => new Date(b.date) - new Date(a.date));
-        if (notesToShow.length === 0) { this.dom.notesList.innerHTML = '<div class="text-center text-gray-500 py-4">Tidak ada catatan.</div>'; return; }
-        this.dom.notesList.innerHTML = notesToShow.map(note => { const lockIcon = note.isLocked ? '<i class="fas fa-lock text-yellow-500 text-xs ml-2"></i>' : ''; return `<div class="note-item p-3 rounded-lg mb-2 cursor-pointer note-item-clickable" data-action="click-to-edit" data-id="${note.id}"><div class="flex items-start justify-between mb-1"><div><strong class="text-md text-purple-300">${note.title || 'Tanpa Judul'}${lockIcon}</strong><span class="block text-xs text-gray-400">${this.formatDate(note.date)}</span></div><div class="flex gap-2"><button data-action="preview" data-id="${note.id}" class="text-green-400 hover:text-green-300"><i class="fas fa-eye"></i></button><button data-action="delete" data-id="${note.id}" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button></div></div><div class="text-sm text-gray-400">${note.isLocked ? '<em>Konten terkunci...</em>' : this.truncateContent(note.content, 80)}</div></div>`; }).join('');
-    }
-    editNote(id) { const note = this.notes.find(n => n.id === id); if (note) { this.currentNoteId = id; this.dom.titleInput.value = note.title; this.dom.editorContent.innerHTML = note.content; this.dom.tagsInput.value = note.tags.join(', '); this.dom.moodSelector.value = note.mood; this.dom.dateFilter.value = note.date.split('T')[0]; this.dom.titleInput.focus(); showMessage('Catatan dimuat untuk diedit', 'info'); } }
+    embedYouTube() { const url = prompt("Masukkan URL video YouTube:"); if (!url) return; let videoId = null; const regexes = [/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/]; for (const regex of regexes) { const match = url.match(regex); if (match && match[1]) { videoId = match[1]; break; } } if (videoId) { const embedHTML = `<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 1rem 0;"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;"></iframe></div><p><br></p>`; document.execCommand('insertHTML', false, embedHTML); } else { showMessage("URL YouTube tidak valid.", "error"); } }
+    embedTikTok() { const url = prompt("Masukkan URL video TikTok:"); if (!url) return; const regex = /tiktok\.com\/.*\/video\/(\d+)/; const match = url.match(regex); const videoId = match && match[1] ? match[1] : null; if (videoId) { const embedHTML = `<div style="position: relative; padding-bottom: 177.78%; height: 0; overflow: hidden; max-width: 325px; margin: 1rem auto; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"><iframe src="https://www.tiktok.com/embed/v2/${videoId}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe></div><p><br></p>`; document.execCommand('insertHTML', false, embedHTML); showMessage("Video TikTok berhasil disematkan!", "success"); } else { showMessage("URL TikTok tidak valid. Pastikan URL berisi '/video/...' dan ID video.", "error"); } }
+    handleFileUpload(files) { if (!files || files.length === 0) return; const file = files[0]; const reader = new FileReader(); reader.onload = (e) => { const result = e.target.result; let elementHTML = ''; if (file.type.startsWith('image/')) { elementHTML = `<img src="${result}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0;" />`; } else if (file.type.startsWith('video/')) { elementHTML = `<video controls src="${result}" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;"></video>`; } else if (file.type === 'application/pdf') { elementHTML = `<embed src="${result}" type="application/pdf" width="100%" height="500px" style="border-radius: 8px; margin: 1rem 0;" />`; } else if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) { const escapedText = result.replace(/</g, "&lt;").replace(/>/g, "&gt;"); elementHTML = `<pre style="background: rgba(0,0,0,0.2); border: 1px solid var(--input-border); padding: 1rem; border-radius: 8px; white-space: pre-wrap; word-wrap: break-word;"><code>${escapedText}</code></pre>`; } else { showMessage(`Tipe file ${file.type} tidak didukung untuk pratinjau.`, 'error'); return; } document.execCommand('insertHTML', false, elementHTML + "<p><br></p>"); }; if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.json')) { reader.readAsText(file); } else { reader.readAsDataURL(file); } }
+    saveNote(isManual = false) { const title = this.dom.titleInput.value.trim(); const content = this.dom.editorContent.innerHTML; const tags = this.dom.tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag); const mood = this.dom.moodSelector.value; const date = this.dom.dateFilter.value || new Date().toISOString().split('T')[0]; if (!title && !content.trim()) { if (isManual) showMessage('Judul atau isi tidak boleh kosong.', 'error'); return; } if (this.currentNoteId) { const index = this.notes.findIndex(n => n.id === this.currentNoteId); const existingNote = this.notes[index]; existingNote.title = title; existingNote.content = content; existingNote.tags = tags; existingNote.mood = mood; existingNote.date = new Date(date).toISOString(); existingNote.lastModified = new Date().toISOString(); } else { const note = { id: Date.now(), title: title, content: content, tags: tags, mood: mood, date: new Date(date).toISOString(), lastModified: new Date().toISOString(), isLocked: false }; this.notes.unshift(note); this.currentNoteId = note.id; } this.saveToStorage(); this.displayNotes(); if (isManual) { showMessage('Catatan disimpan!', 'success'); this.dom.saveStatusEl.innerHTML = `<i class="fas fa-cloud"></i>Disimpan`; this.dom.saveStatusEl.style.color = 'var(--text-secondary)'; } }
+    autoSave() { const title = this.dom.titleInput.value.trim(); const content = this.dom.editorContent.innerHTML; if ((title || content.trim()) && this.currentNoteId) { this.saveNote(); showMessage('Tersimpan otomatis', 'info'); this.dom.saveStatusEl.innerHTML = `<i class="fas fa-cloud"></i>Disimpan`; this.dom.saveStatusEl.style.color = 'var(--text-secondary)'; } }
+    loadNotes() { const saved = localStorage.getItem('notes_v5.5.0'); if (saved) { this.notes = JSON.parse(saved); this.displayNotes(); } }
+    saveToStorage() { localStorage.setItem('notes_v5.5.0', JSON.stringify(this.notes)); }
+    displayNotes(filteredNotes = null) { const notesToShow = (filteredNotes || this.notes).sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified)); if (notesToShow.length === 0) { this.dom.notesList.innerHTML = '<div class="text-center text-gray-500 py-4">Tidak ada catatan.</div>'; return; } this.dom.notesList.innerHTML = notesToShow.map(note => { const lockIcon = note.isLocked ? '<i class="fas fa-lock text-yellow-500 text-xs ml-2"></i>' : ''; return `<div class="note-item p-3 rounded-lg mb-2 cursor-pointer note-item-clickable" data-action="click-to-edit" data-id="${note.id}"><div class="flex items-start justify-between mb-1"><div><strong class="text-md text-purple-300">${note.title || 'Tanpa Judul'}${lockIcon}</strong><span class="block text-xs text-gray-400">${this.formatDate(note.lastModified)}</span></div><div class="flex gap-2"><button data-action="preview" data-id="${note.id}" class="text-green-400 hover:text-green-300"><i class="fas fa-eye"></i></button><button data-action="delete" data-id="${note.id}" class="text-red-400 hover:text-red-300"><i class="fas fa-trash"></i></button></div></div><div class="text-sm text-gray-400">${note.isLocked ? '<em>Konten terkunci...</em>' : this.truncateContent(note.content, 80)}</div></div>`; }).join(''); }
+    editNote(id) { const note = this.notes.find(n => n.id === id); if (note) { this.currentNoteId = id; this.dom.titleInput.value = note.title; this.dom.editorContent.innerHTML = note.content; this.dom.tagsInput.value = note.tags.join(', '); this.dom.moodSelector.value = note.mood; this.dom.dateFilter.value = note.date.split('T')[0]; this.dom.titleInput.focus(); this.updateStatusBar(); showMessage('Catatan dimuat untuk diedit', 'info'); } }
     deleteNote(id) { showConfirm('Hapus Catatan?', 'Yakin ingin menghapus catatan ini secara permanen?', () => { this.notes = this.notes.filter(n => n.id !== id); this.saveToStorage(); this.displayNotes(); if (this.currentNoteId === id) { this.clearEditor(); } showMessage('Catatan dihapus!', 'success'); }); }
-    previewNote(id) { const note = this.notes.find(n => n.id === id); if (note) { if (note.isLocked) { showMessage('Catatan ini terkunci. Buka kunci untuk melihat pratinjau.', 'error'); return; } this.dom.previewContent.innerHTML = `<h2 class="font-bold text-2xl mb-2 text-purple-300">${note.title || 'Tanpa Judul'}</h2><p class="text-sm text-gray-400 mb-4">${this.formatDate(note.date)}</p><div class="prose max-w-none">${note.content}</div>`; this.dom.previewModal.classList.add('show'); } }
+    previewNote(id) { const note = this.notes.find(n => n.id === id); if (note) { if (note.isLocked) { showMessage('Catatan ini terkunci. Buka kunci untuk melihat pratinjau.', 'error'); return; } this.dom.previewContent.innerHTML = `<h2 class="font-bold text-2xl mb-2 text-purple-300">${note.title || 'Tanpa Judul'}</h2><p class="text-sm text-gray-400 mb-4">${this.formatDate(note.lastModified)}</p><div class="pro-editor-content max-w-none">${note.content}</div>`; this.dom.previewModal.classList.add('show'); } }
     closePreview() { this.dom.previewModal.classList.remove('show'); }
-    clearEditor() { this.dom.titleInput.value = ''; this.dom.editorContent.innerHTML = ''; this.dom.tagsInput.value = ''; this.dom.moodSelector.value = 'neutral'; this.dom.dateFilter.value = new Date().toISOString().split('T')[0]; this.currentNoteId = null; }
+    clearEditor() { this.dom.titleInput.value = ''; this.dom.editorContent.innerHTML = ''; this.dom.tagsInput.value = ''; this.dom.moodSelector.value = 'neutral'; this.dom.dateFilter.value = new Date().toISOString().split('T')[0]; this.currentNoteId = null; this.updateStatusBar(); }
     addNewNote() { this.clearEditor(); this.dom.titleInput.focus(); showMessage('Editor siap untuk catatan baru.', 'info'); }
     filterNotes() { const query = this.dom.searchInput.value.toLowerCase(); const mood = this.dom.moodFilter.value; let filtered = this.notes; if (query) { filtered = filtered.filter(note => (note.title && note.title.toLowerCase().includes(query)) || (!note.isLocked && note.content.toLowerCase().includes(query)) || note.tags.some(tag => tag.toLowerCase().includes(query))); } if (mood) { filtered = filtered.filter(note => note.mood === mood); } this.displayNotes(filtered); }
-    countWords(html) { const text = html.replace(/<[^>]*>/g, ''); return text.trim().split(/\s+/).filter(Boolean).length; }
     formatDate(dateString) { return dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''; }
     truncateContent(html, length) { const text = html.replace(/<[^>]*>/g, ''); if (text.length <= length) return text; return text.substring(0, length) + '...'; }
 }
@@ -1654,7 +1999,7 @@ const storage = {
         localStorage.setItem(key, JSON.stringify(value)); 
     }, 
     getAppData: () => { 
-        return storage.get('lifeHubData_v5.3.0', { 
+        return storage.get('lifeHubData_v5.5.0', { 
             currentMode: 'personal', 
             theme: 'dark', 
             isVideoMuted: true, 
@@ -1663,7 +2008,7 @@ const storage = {
         }); 
     }, 
     saveAppData: (data) => { 
-        storage.set('lifeHubData_v5.3.0', data); 
+        storage.set('lifeHubData_v5.5.0', data); 
     } 
 };
 
@@ -1752,6 +2097,13 @@ function setupEventListeners() {
     // [BARU] Menambahkan event listener untuk ikon mata
     document.getElementById('toggle-email-visibility').addEventListener('click', toggleEmailVisibility);
     
+    // [PERBAIKAN] Menambahkan event listener untuk mematikan suara saat tab tidak aktif
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            document.getElementById('lockSound')?.pause();
+        }
+    });
+
     const exportPdfBtn = document.getElementById('export-pdf-btn');
     const pdfTimeRangeSelector = document.getElementById('pdf-time-range');
     const pdfCustomRangeInputs = document.getElementById('pdf-custom-range-inputs');
@@ -1778,9 +2130,43 @@ function setupEventListeners() {
             exportAllToPdf(selectedRange);
         }
     });
+    
+    // [BARU] Event listener untuk tombol ekspor gambar
+    document.getElementById('export-images-btn').addEventListener('click', () => {
+        const selectedRange = document.getElementById('pdf-time-range').value;
+        if (selectedRange === 'custom') {
+            const startDate = document.getElementById('pdf-start-date').value;
+            const endDate = document.getElementById('pdf-end-date').value;
+            if (!startDate || !endDate) {
+                showMessage('Harap pilih tanggal mulai dan selesai untuk rentang kustom.', 'error');
+                return;
+            }
+            exportAllToImages('custom', startDate, endDate);
+        } else {
+            exportAllToImages(selectedRange);
+        }
+    });
 }
 function enterPreviewMode() { document.body.classList.add('preview-mode'); } function handleGestureEnd() { const swipeThreshold = 70; const deltaX = touchEndX - touchStartX; if (document.querySelector('.modal.show')) return; if (deltaX < -swipeThreshold) { document.body.classList.remove('preview-mode'); } } function handleTouchStart(e) { touchStartX = e.changedTouches[0].screenX; } function handleTouchEnd(e) { touchEndX = e.changedTouches[0].screenX; handleGestureEnd(); } function handleMouseDown(e) { if (e.button !== 0 || e.target.closest('button, input, select, textarea, a, .modal')) return; isDragging = true; touchStartX = e.screenX; } function handleMouseUp(e) { if (!isDragging) return; isDragging = false; touchEndX = e.screenX; handleGestureEnd(); }
-function switchSection(section) { document.querySelectorAll('.section').forEach(s => s.classList.add('hidden')); document.getElementById(section + '-section').classList.remove('hidden'); document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active')); document.querySelector(`[data-section="${section}"]`).classList.add('active'); currentSection = section; switch(section) { case 'dashboard': loadDashboard(); break; case 'finance': loadFinancePage(); break; case 'tasks': loadTasksPage(); break; case 'split': loadSplitPage(); break; case 'notes': break; case 'settings': break; } closeMobileMenu(); }
+function switchSection(section) { 
+    // [PERBAIKAN] Hentikan suara terminal setiap kali berpindah section
+    document.getElementById('lockSound')?.pause();
+
+    document.querySelectorAll('.section').forEach(s => s.classList.add('hidden')); 
+    document.getElementById(section + '-section').classList.remove('hidden'); 
+    document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active')); 
+    document.querySelector(`[data-section="${section}"]`).classList.add('active'); 
+    currentSection = section; 
+    switch(section) { 
+        case 'dashboard': loadDashboard(); break; 
+        case 'finance': loadFinancePage(); break; 
+        case 'tasks': loadTasksPage(); break; 
+        case 'split': loadSplitPage(); break; 
+        case 'notes': break; 
+        case 'settings': break; 
+    } 
+    closeMobileMenu(); 
+}
 function switchMode(e) { currentMode = e.target.value; let appData = storage.getAppData(); appData.currentMode = currentMode; storage.saveAppData(appData); switchSection(currentSection); renderPortals(); } 
 
 function toggleTheme() {
@@ -1828,7 +2214,16 @@ function updateThemeUI(theme) {
     renderPortals();
 }
 
-function toggleMobileMenu() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); } function closeMobileMenu() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+// [FIX] Menambahkan kembali fungsi yang hilang untuk menu hamburger
+function toggleMobileMenu() { 
+    document.getElementById('sidebar').classList.toggle('open'); 
+    document.getElementById('overlay').classList.toggle('show'); 
+} 
+function closeMobileMenu() { 
+    document.getElementById('sidebar').classList.remove('open'); 
+    document.getElementById('overlay').classList.remove('show'); 
+}
+
 function loadDashboard() { const appData = storage.getAppData(); const modeData = appData[currentMode]; const balance = modeData.transactions.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0); const today = new Date().toISOString().split('T')[0]; const todayTasks = modeData.tasks.filter(p => p.datetime && p.datetime.startsWith(today) && !p.completed).length; const pendingTasks = modeData.tasks.filter(t => !t.completed).length; document.getElementById('totalBalance').textContent = formatCurrency(balance); document.getElementById('todayTasksCount').textContent = todayTasks; document.getElementById('pendingTasks').textContent = pendingTasks; document.getElementById('activeMode').textContent = currentMode === 'personal' ? 'Pribadi' : 'Bisnis'; refreshDashboardData(); }
 function refreshDashboardData() { updateDashboardCharts(); loadAnalysisCharts(); loadRecentActivities(); } function loadRecentActivities() { const appData = storage.getAppData(); const modeData = appData[currentMode]; const activities = []; const filteredTransactions = filterDataByRange(modeData.transactions, masterDateRange, 'date'); const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime'); const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date'); filteredTransactions.forEach(t => activities.push({ type: 'transaction', icon: t.type === 'income' ? 'fa-arrow-up text-green-500' : 'fa-arrow-down text-pink-500', text: `${t.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}: ${formatCurrency(t.amount)}`, time: t.date })); filteredTasks.forEach(p => activities.push({ type: 'task', icon: 'fa-calendar-check text-blue-500', text: `Tugas: ${p.title}`, time: p.datetime })); filteredSplits.forEach(s => activities.push({ type: 'split', icon: 'fa-receipt text-green-500', text: `Split Bill: ${formatCurrency(s.totalBill)}`, time: s.date })); activities.sort((a, b) => new Date(b.time) - new Date(a.time)); const container = document.getElementById('recentActivities'); container.innerHTML = activities.length > 0 ? activities.slice(0, 15).map(activity => `<div class="flex items-center justify-between p-2 hover:bg-purple-500/10 rounded"><div class="flex items-center"><i class="fas ${activity.icon} mr-3"></i><span>${activity.text}</span></div><span class="text-sm text-gray-400">${formatDate(activity.time)}</span></div>`).join('') : '<p class="text-gray-500">Tidak ada aktivitas dalam rentang waktu ini.</p>'; }
 function loadFinancePage() { populateFinanceFilters(); filterAndRenderTransactions(); updateFinanceSummary(); } function updateFinanceSummary() { const appData = storage.getAppData(); const transactions = appData[currentMode].transactions; const income = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0); const expense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0); document.getElementById('totalIncome').textContent = formatCurrency(income); document.getElementById('totalExpense').textContent = formatCurrency(expense); document.getElementById('balance').textContent = formatCurrency(income - expense); } 
@@ -1839,7 +2234,7 @@ function generateCalendar() { const calendar = document.getElementById('calendar
 function changeMonth(dir) { currentDate.setMonth(currentDate.getMonth() + dir); generateCalendar(); }
 function startTimer() { if (isTimerRunning) return; isTimerRunning = true; timerInterval = setInterval(() => { if (timerSeconds === 0) { if (timerMinutes === 0) { resetTimer(); showMessage("Pomodoro Selesai!", "success"); return; } timerMinutes--; timerSeconds = 59; } else { timerSeconds--; } updateTimerDisplay(); }, 1000); } function pauseTimer() { isTimerRunning = false; clearInterval(timerInterval); } function resetTimer() { pauseTimer(); timerMinutes = 25; timerSeconds = 0; updateTimerDisplay(); } function updateTimerDisplay() { document.getElementById('timerDisplay').textContent = `${String(timerMinutes).padStart(2, '0')}:${String(timerSeconds).padStart(2, '0')}`; }
 function loadSplitPage() { document.getElementById('splitBillDate').value = new Date().toISOString().split('T')[0]; renderSplitHistory(); } function calculateSplitBill(e) { e.preventDefault(); const totalBill = parseFloat(document.getElementById('totalBill').value); const billDate = document.getElementById('splitBillDate').value; const peopleNames = document.getElementById('peopleNames').value.split(',').map(name => name.trim()).filter(name => name); const percentagesStr = document.getElementById('splitPercentages').value; const percentages = percentagesStr ? percentagesStr.split(',').map(p => parseFloat(p.trim())) : []; if (peopleNames.length === 0) { showMessage('Harap masukkan setidaknya satu nama.', 'error'); return; } let results; if (percentages.length > 0) { if (percentages.length !== peopleNames.length) { showMessage('Jumlah nama dan persentase harus sama.', 'error'); return; } const totalPercentage = percentages.reduce((sum, p) => sum + p, 0); if (Math.round(totalPercentage) !== 100) { showMessage(`Total persentase harus 100%, bukan ${totalPercentage}%.`, 'error'); return; } if (percentages.some(isNaN)) { showMessage('Mohon masukkan persentase yang valid.', 'error'); return; } results = peopleNames.map((name, index) => ({ name, amount: (totalBill * percentages[index]) / 100, percentage: percentages[index] })); } else { const amountPerPerson = totalBill / peopleNames.length; results = peopleNames.map(name => ({ name, amount: amountPerPerson })); } const splitBill = { id: generateId(), totalBill, results, date: billDate, type: percentages.length > 0 ? 'custom' : 'equal' }; let appData = storage.getAppData(); appData[currentMode].splitBills.push(splitBill); storage.saveAppData(appData); displaySplitResults(results, totalBill, billDate); renderSplitHistory(); document.getElementById('splitBillForm').reset(); document.getElementById('splitBillDate').value = new Date().toISOString().split('T')[0]; } function displaySplitResults(results, totalBill, date) { const resultDiv = document.getElementById('splitResult'); resultDiv.innerHTML = `<h4 class="font-bold mb-2">Total: ${formatCurrency(totalBill)}</h4>` + results.map(r => `<div class="flex justify-between p-2 border-b border-purple-900/50"><span>${r.name} ${r.percentage ? `(${r.percentage}%)` : ''}</span><strong>${formatCurrency(r.amount)}</strong></div>`).join(''); document.getElementById('splitResultCard').classList.remove('hidden'); document.getElementById('exportSplitBtn').onclick = () => exportSplitBillPDF(results, totalBill, date); } function renderSplitHistory() { const appData = storage.getAppData(); const history = appData[currentMode].splitBills; const container = document.getElementById('splitHistory'); container.innerHTML = [...history].reverse().map(split => `<div class="p-3 rounded-md border border-purple-900/50 hover:bg-purple-500/10"><div class="flex justify-between items-center"><div><strong class="block text-blue-400">${formatCurrency(split.totalBill)}</strong><small class="text-gray-400">${formatDate(split.date)} | ${split.results.length} orang | <span class="font-semibold ${split.type === 'custom' ? 'text-pink-400' : 'text-green-400'}">${split.type === 'custom' ? 'Kustom' : 'Merata'}</span></small></div><button onclick="confirmDeleteSplit('${split.id}')" class="text-red-500 hover:text-red-400"><i class="fas fa-trash"></i></button></div></div>`).join('') || '<p class="text-gray-500 text-center">Tidak ada riwayat.</p>'; } function confirmDeleteSplit(id) { showConfirm('Hapus Riwayat?', 'Yakin ingin menghapus riwayat split bill ini?', () => deleteSplit(id)); } function deleteSplit(id) { let appData = storage.getAppData(); appData[currentMode].splitBills = appData[currentMode].splitBills.filter(s => s.id !== id); storage.saveAppData(appData); renderSplitHistory(); }
-function backupData() { const data = storage.get('lifeHubData_v5.3.0'); const notesData = storage.get('notes_v4.9.2', []); const allData = { lifeHub: data, notes: notesData }; if (!data && notesData.length === 0) { showMessage("Tidak ada data untuk di-backup.", "error"); return; } const dataStr = JSON.stringify(allData, null, 2); const blob = new Blob([dataStr], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `lifehub-backup-${new Date().toISOString().split('T')[0]}.txt`; a.click(); URL.revokeObjectURL(url); showMessage("Backup berhasil!", "success"); } function restoreData() { const file = document.getElementById('restoreFile').files[0]; if (!file) { showMessage("Pilih file untuk restore.", "error"); return; } const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (data.lifeHub && data.notes) { storage.saveAppData(data.lifeHub); storage.set('notes_v4.9.2', data.notes); initializeApp(); showMessage("Restore berhasil!", "success"); setTimeout(() => window.location.reload(), 1000); } else { throw new Error("Invalid file structure"); } } catch (err) { showMessage("File backup korup atau tidak valid.", "error"); } }; reader.readAsText(file); } function clearAllDataConfirmed() { localStorage.removeItem('lifeHubData_v5.3.0'); localStorage.removeItem('notes_v4.9.2'); localStorage.removeItem('customBackground'); deleteBackgroundFromDB('customBackground'); initializeApp(); showMessage("Semua data lokal telah dihapus.", "success"); setTimeout(() => window.location.reload(), 1000); }
+function backupData() { const data = storage.get('lifeHubData_v5.5.0'); const notesData = storage.get('notes_v5.5.0', []); const allData = { lifeHub: data, notes: notesData }; if (!data && notesData.length === 0) { showMessage("Tidak ada data untuk di-backup.", "error"); return; } const dataStr = JSON.stringify(allData, null, 2); const blob = new Blob([dataStr], { type: 'text/plain' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `lifehub-backup-${new Date().toISOString().split('T')[0]}.txt`; a.click(); URL.revokeObjectURL(url); showMessage("Backup berhasil!", "success"); } function restoreData() { const file = document.getElementById('restoreFile').files[0]; if (!file) { showMessage("Pilih file untuk restore.", "error"); return; } const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (data.lifeHub && data.notes) { storage.saveAppData(data.lifeHub); storage.set('notes_v5.5.0', data.notes); initializeApp(); showMessage("Restore berhasil!", "success"); setTimeout(() => window.location.reload(), 1000); } else { throw new Error("Invalid file structure"); } } catch (err) { showMessage("File backup korup atau tidak valid.", "error"); } }; reader.readAsText(file); } function clearAllDataConfirmed() { localStorage.removeItem('lifeHubData_v5.5.0'); localStorage.removeItem('notes_v5.5.0'); localStorage.removeItem('customBackground'); deleteBackgroundFromDB('customBackground'); initializeApp(); showMessage("Semua data lokal telah dihapus.", "success"); setTimeout(() => window.location.reload(), 1000); }
 
 async function loadAndApplyCustomBackground() {
     const bgInfo = await getBackgroundFromDB('customBackground');
@@ -1988,8 +2383,43 @@ function getChartColors() {
 }
 
 function updateDashboardCharts() { updateCashFlowChart(); updateProductivityChart(); } function updateCashFlowChart() { const ctx = document.getElementById('cashFlowChart')?.getContext('2d'); if (!ctx) return; if (window.cashFlowChartInstance) window.cashFlowChartInstance.destroy(); const colors = getChartColors(); const appData = storage.getAppData(); const transactions = filterDataByRange(appData[currentMode].transactions, masterDateRange, 'date'); const { labels, dataPoints } = getTimeBuckets(masterDateRange, transactions, 'date'); const incomeData = new Array(labels.length).fill(0); const expenseData = new Array(labels.length).fill(0); transactions.forEach(t => { const itemDate = new Date(t.date + 'T00:00:00Z'); let bucketIndex = -1; for (let i = dataPoints.length - 1; i >= 0; i--) { if (itemDate >= dataPoints[i]) { bucketIndex = i; break; } } if (bucketIndex !== -1) { if (t.type === 'income') incomeData[bucketIndex] += t.amount; else expenseData[bucketIndex] += t.amount; } }); window.cashFlowChartInstance = new Chart(ctx, { type: 'line', data: { labels, datasets: [ { label: 'Pemasukan', data: incomeData, borderColor: colors.incomeColor, backgroundColor: colors.incomeBg, tension: 0.3, fill: true }, { label: 'Pengeluaran', data: expenseData, borderColor: colors.expenseColor, backgroundColor: colors.expenseBg, tension: 0.3, fill: true } ] }, options: { responsive: true, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.tickColor } } }, plugins: { legend: { labels: { color: colors.legendColor } } } } }); } function updateProductivityChart() { const ctx = document.getElementById('productivityChart')?.getContext('2d'); if (!ctx) return; if (window.productivityChartInstance) window.productivityChartInstance.destroy(); const colors = getChartColors(); const appData = storage.getAppData(); const tasks = filterDataByRange(appData[currentMode].tasks, masterDateRange, 'datetime'); const { labels, dataPoints } = getTimeBuckets(masterDateRange, tasks, 'datetime'); const completedCounts = new Array(labels.length).fill(0); tasks.filter(t => t.completed && t.datetime).forEach(t => { const itemDate = new Date(t.datetime); let bucketIndex = -1; for (let i = dataPoints.length - 1; i >= 0; i--) { if (itemDate >= dataPoints[i]) { bucketIndex = i; break; } } if (bucketIndex !== -1) completedCounts[bucketIndex]++; }); window.productivityChartInstance = new Chart(ctx, { type: 'bar', data: { labels, datasets: [{ label: 'Tugas Selesai', data: completedCounts, backgroundColor: colors.taskBg, borderColor: colors.taskColor, borderWidth: 1, borderRadius: 5 }] }, options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1, color: colors.tickColor }, grid: { color: colors.gridColor } }, x: { ticks: { color: colors.tickColor }, grid: { color: colors.gridColor } } }, plugins: { legend: { labels: { color: colors.legendColor } } } } }); }
-function loadAnalysisCharts() { const appData = storage.getAppData(); const modeData = appData[currentMode]; const colors = getChartColors(); const diaryNotes = JSON.parse(localStorage.getItem('notes_v4.9.2') || '[]'); Chart.defaults.color = colors.legendColor; Chart.defaults.font.family = "'Poppins', 'sans-serif'"; const chartIds = ['combinedAnalysisChart', 'incomeVsExpenseChart', 'spendingByCategoryChart', 'taskCompletionTrendChart', 'taskPriorityDistributionChart', 'splitBillByUserChart', 'splitBillFrequencyChart', 'diaryEntryFrequencyChart']; chartIds.forEach(id => { if (window[id + 'Instance']) window[id + 'Instance'].destroy(); }); const filteredPersonalTransactions = filterDataByRange(appData.personal.transactions, masterDateRange, 'date'); const filteredPersonalTasks = filterDataByRange(appData.personal.tasks, masterDateRange, 'datetime'); const filteredPersonalSplits = filterDataByRange(appData.personal.splitBills, masterDateRange, 'date'); const filteredBusinessTransactions = filterDataByRange(appData.business.transactions, masterDateRange, 'date'); const filteredBusinessTasks = filterDataByRange(appData.business.tasks, masterDateRange, 'datetime'); const filteredBusinessSplits = filterDataByRange(appData.business.splitBills, masterDateRange, 'date'); const filteredDiary = filterDataByRange(diaryNotes, masterDateRange, 'date'); const personalData = { finance: filteredPersonalTransactions.length, tasks: filteredPersonalTasks.length, splitBill: filteredPersonalSplits.length, diary: filteredDiary.length, }; const businessData = { finance: filteredBusinessTransactions.length, tasks: filteredBusinessTasks.length, splitBill: filteredBusinessSplits.length, diary: 0, }; const combinedCtx = document.getElementById('combinedAnalysisChart').getContext('2d'); window.combinedAnalysisChartInstance = new Chart(combinedCtx, { type: 'radar', data: { labels: ['Keuangan', 'Tugas', 'Split Bill', 'Catatan'], datasets: [ { label: 'Pribadi', data: [personalData.finance, personalData.tasks, personalData.splitBill, personalData.diary], backgroundColor: 'rgba(0, 136, 255, 0.2)', borderColor: '#0088ff', borderWidth: 2, pointBackgroundColor: '#0088ff', pointRadius: 4, }, { label: 'Bisnis', data: [businessData.finance, businessData.tasks, businessData.splitBill, businessData.diary], backgroundColor: 'rgba(255, 0, 110, 0.2)', borderColor: '#ff006e', borderWidth: 2, pointBackgroundColor: '#ff006e', pointRadius: 4, } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { size: 14 } } } }, scales: { r: { angleLines: { color: colors.gridColor }, grid: { color: colors.gridColor }, pointLabels: { font: { size: 14, weight: '600' }, color: colors.tickColor }, ticks: { backdropColor: 'rgba(0,0,0,0.5)', color: colors.tickColor, stepSize: 5 }, suggestedMin: 0 } } } }); const filteredFinance = filterDataByRange(modeData.transactions, masterDateRange, 'date'); const financialData = processTimeSeriesData(filteredFinance, 'date', masterDateRange); const incomeVsExpenseCtx = document.getElementById('incomeVsExpenseChart').getContext('2d'); window.incomeVsExpenseChartInstance = new Chart(incomeVsExpenseCtx, { type: 'bar', data: { labels: financialData.labels, datasets: [ { label: 'Pemasukan', data: financialData.income, backgroundColor: colors.incomeColor }, { label: 'Pengeluaran', data: financialData.expense, backgroundColor: colors.expenseColor } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: { color: colors.gridColor } } } } }); const spendingCtx = document.getElementById('spendingByCategoryChart').getContext('2d'); const { labels: categoryLabels, data: spendingData } = processSpendingByCategory(filteredFinance); window.spendingByCategoryChartInstance = new Chart(spendingCtx, { type: 'doughnut', data: { labels: categoryLabels, datasets: [{ data: spendingData, backgroundColor: ['#f472b6', '#60a5fa', '#fbbf24', '#4ade80', '#c084fc', '#a1a1aa', '#f87171', '#818cf8'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime'); const taskData = processTimeSeriesData(filteredTasks, 'datetime', masterDateRange); const taskTrendCtx = document.getElementById('taskCompletionTrendChart').getContext('2d'); window.taskCompletionTrendChartInstance = new Chart(taskTrendCtx, { type: 'line', data: { labels: taskData.labels, datasets: [ { label: 'Dibuat', data: taskData.created, borderColor: '#60a5fa', tension: 0.3 }, { label: 'Selesai', data: taskData.completed, borderColor: '#4ade80', tension: 0.3 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } } }); const taskPriorityCtx = document.getElementById('taskPriorityDistributionChart').getContext('2d'); const { labels: priorityLabels, data: priorityData } = processTaskPriorities(filteredTasks); window.taskPriorityDistributionChartInstance = new Chart(taskPriorityCtx, { type: 'pie', data: { labels: priorityLabels, datasets: [{ data: priorityData, backgroundColor: ['#f472b6', '#fbbf24', '#4ade80'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date'); const splitByUserCtx = document.getElementById('splitBillByUserChart').getContext('2d'); const { labels: userLabels, data: userSpendingData } = processSplitBillByUser(filteredSplits); window.splitBillByUserChartInstance = new Chart(splitByUserCtx, { type: 'bar', data: { labels: userLabels, datasets: [{ label: 'Total Pengeluaran', data: userSpendingData, backgroundColor: colors.incomeColor, borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { grid: { color: colors.gridColor } }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); const splitFreqData = processTimeSeriesData(filteredSplits, 'date', masterDateRange); const splitFreqCtx = document.getElementById('splitBillFrequencyChart').getContext('2d'); window.splitBillFrequencyChartInstance = new Chart(splitFreqCtx, { type: 'line', data: { labels: splitFreqData.labels, datasets: [{ label: 'Jumlah Split Bill', data: splitFreqData.count, borderColor: '#22d3ee', tension: 0.3, fill: true, backgroundColor: 'rgba(34, 211, 238, 0.2)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } } }); const diaryCtx = document.getElementById('diaryEntryFrequencyChart').getContext('2d'); const diaryData = processTimeSeriesData(filteredDiary, 'date', masterDateRange); window.diaryEntryFrequencyChartInstance = new Chart(diaryCtx, { type: 'bar', data: { labels: diaryData.labels, datasets: [{ label: 'Jumlah Entri', data: diaryData.count, backgroundColor: 'var(--primary-brand)', borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } } }); }
-function processTimeSeriesData(data, dateKey, range) { const { labels, dataPoints } = getTimeBuckets(range, data, dateKey); const isFinance = data.length > 0 && 'type' in data[0] && 'amount' in data[0]; const isTask = data.length > 0 && 'completed' in data[0]; let results = {}; if (isFinance) { results.income = new Array(labels.length).fill(0); results.expense = new Array(labels.length).fill(0); } else if (isTask) { results.created = new Array(labels.length).fill(0); results.completed = new Array(labels.length).fill(0); } else { results.count = new Array(labels.length).fill(0); } data.forEach(item => { if (!item[dateKey]) return; const itemDate = new Date(item[dateKey]); let bucketIndex = -1; for (let i = dataPoints.length - 1; i >= 0; i--) { if (itemDate >= dataPoints[i]) { bucketIndex = i; break; } } if (bucketIndex !== -1) { if (isFinance) { if (item.type === 'income') results.income[bucketIndex] += item.amount; else results.expense[bucketIndex] += item.amount; } else if (isTask) { results.created[bucketIndex]++; if (item.completed) results.completed[bucketIndex]++; } else { results.count[bucketIndex]++; } } }); return { labels, ...results }; } function processSpendingByCategory(transactions) { const spending = {}; transactions.filter(t => t.type === 'expense').forEach(t => { const categoryName = getCategoryName(t.category); spending[categoryName] = (spending[categoryName] || 0) + t.amount; }); const sortedSpending = Object.entries(spending).sort(([,a],[,b]) => b-a); return { labels: sortedSpending.map(([label]) => label), data: sortedSpending.map(([,data]) => data) }; } function processTaskPriorities(tasks) { const priorities = { high: 0, medium: 0, low: 0 }; tasks.filter(t => !t.completed).forEach(t => { priorities[t.priority]++; }); return { labels: ['Tinggi', 'Sedang', 'Rendah'], data: [priorities.high, priorities.medium, priorities.low] }; } function processSplitBillByUser(splitBills) { const userTotals = {}; splitBills.forEach(bill => { bill.results.forEach(person => { userTotals[person.name] = (userTotals[person.name] || 0) + person.amount; }); }); const sortedUsers = Object.entries(userTotals).sort(([,a],[,b]) => b-a); return { labels: sortedUsers.map(([label]) => label), data: sortedUsers.map(([,data]) => data) }; } function getGroupingUnit(range) { if (typeof range === 'object' && range.type === 'custom') { const diffTime = Math.abs(new Date(range.end) - new Date(range.start)); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); if (diffDays > 90) return 'month'; if (diffDays > 30) return 'week'; return 'day'; } if (['7d', '1m'].includes(range)) return 'day'; if (range === '3m') return 'week'; if (['1y', 'all'].includes(range)) return 'month'; return 'day'; } function getTimeBuckets(range, data, dateKey) { const labels = []; const dataPoints = []; const now = new Date(); const unit = getGroupingUnit(range); let startDate, endDate = new Date(now); if (typeof range === 'object' && range.type === 'custom') { startDate = new Date(range.start + 'T00:00:00Z'); endDate = new Date(range.end + 'T23:59:59Z'); } else if (range === 'all') { const validData = data.filter(d => d[dateKey]); if (validData.length === 0) { startDate = new Date(); startDate.setMonth(startDate.getMonth() - 1); } else { startDate = new Date(validData.reduce((min, p) => (p[dateKey] < min) ? p[dateKey] : min, validData[0][dateKey])); } } else { startDate = new Date(now); if (range === '7d') startDate.setDate(now.getDate() - 6); else if (range === '1m') startDate.setDate(now.getDate() - 29); else if (range === '3m') startDate.setMonth(now.getMonth() - 3); else if (range === '1y') startDate.setFullYear(now.getFullYear() - 1); } startDate.setHours(0, 0, 0, 0); let current = new Date(startDate); while (current <= endDate) { dataPoints.push(new Date(current)); if (unit === 'day') { labels.push(current.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })); current.setDate(current.getDate() + 1); } else if (unit === 'week') { labels.push(`W${getWeekNumber(current)}`); current.setDate(current.getDate() + 7); } else { labels.push(current.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' })); current.setMonth(current.getMonth() + 1); } } return { labels, dataPoints }; } function getWeekNumber(d) { d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7)); var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1)); var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7); return weekNo; }
+function loadAnalysisCharts() { const appData = storage.getAppData(); const modeData = appData[currentMode]; const colors = getChartColors(); const diaryNotes = JSON.parse(localStorage.getItem('notes_v5.5.0') || '[]'); Chart.defaults.color = colors.legendColor; Chart.defaults.font.family = "'Poppins', 'sans-serif'"; const chartIds = ['combinedAnalysisChart', 'incomeVsExpenseChart', 'spendingByCategoryChart', 'taskCompletionTrendChart', 'taskPriorityDistributionChart', 'splitBillByUserChart', 'splitBillFrequencyChart', 'diaryEntryFrequencyChart', 'noteMoodAnalysisChart']; chartIds.forEach(id => { if (window[id + 'Instance']) window[id + 'Instance'].destroy(); }); const filteredPersonalTransactions = filterDataByRange(appData.personal.transactions, masterDateRange, 'date'); const filteredPersonalTasks = filterDataByRange(appData.personal.tasks, masterDateRange, 'datetime'); const filteredPersonalSplits = filterDataByRange(appData.personal.splitBills, masterDateRange, 'date'); const filteredBusinessTransactions = filterDataByRange(appData.business.transactions, masterDateRange, 'date'); const filteredBusinessTasks = filterDataByRange(appData.business.tasks, masterDateRange, 'datetime'); const filteredBusinessSplits = filterDataByRange(appData.business.splitBills, masterDateRange, 'date'); const filteredDiary = filterDataByRange(diaryNotes, masterDateRange, 'date'); const personalData = { finance: filteredPersonalTransactions.length, tasks: filteredPersonalTasks.length, splitBill: filteredPersonalSplits.length, diary: filteredDiary.length, }; const businessData = { finance: filteredBusinessTransactions.length, tasks: filteredBusinessTasks.length, splitBill: filteredBusinessSplits.length, diary: 0, }; const combinedCtx = document.getElementById('combinedAnalysisChart').getContext('2d'); window.combinedAnalysisChartInstance = new Chart(combinedCtx, { type: 'radar', data: { labels: ['Keuangan', 'Tugas', 'Split Bill', 'Catatan'], datasets: [ { label: 'Pribadi', data: [personalData.finance, personalData.tasks, personalData.splitBill, personalData.diary], backgroundColor: 'rgba(0, 136, 255, 0.2)', borderColor: '#0088ff', borderWidth: 2, pointBackgroundColor: '#0088ff', pointRadius: 4, }, { label: 'Bisnis', data: [businessData.finance, businessData.tasks, businessData.splitBill, businessData.diary], backgroundColor: 'rgba(255, 0, 110, 0.2)', borderColor: '#ff006e', borderWidth: 2, pointBackgroundColor: '#ff006e', pointRadius: 4, } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { size: 14 } } } }, scales: { r: { angleLines: { color: colors.gridColor }, grid: { color: colors.gridColor }, pointLabels: { font: { size: 14, weight: '600' }, color: colors.tickColor }, ticks: { backdropColor: 'rgba(0,0,0,0.5)', color: colors.tickColor, stepSize: 5 }, suggestedMin: 0 } } } }); const filteredFinance = filterDataByRange(modeData.transactions, masterDateRange, 'date'); const financialData = processTimeSeriesData(filteredFinance, 'date', masterDateRange); const incomeVsExpenseCtx = document.getElementById('incomeVsExpenseChart').getContext('2d'); window.incomeVsExpenseChartInstance = new Chart(incomeVsExpenseCtx, { type: 'bar', data: { labels: financialData.labels, datasets: [ { label: 'Pemasukan', data: financialData.income, backgroundColor: colors.incomeColor }, { label: 'Pengeluaran', data: financialData.expense, backgroundColor: colors.expenseColor } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid: { color: colors.gridColor } } } } }); const spendingCtx = document.getElementById('spendingByCategoryChart').getContext('2d'); const { labels: categoryLabels, data: spendingData } = processSpendingByCategory(filteredFinance); window.spendingByCategoryChartInstance = new Chart(spendingCtx, { type: 'doughnut', data: { labels: categoryLabels, datasets: [{ data: spendingData, backgroundColor: ['#f472b6', '#60a5fa', '#fbbf24', '#4ade80', '#c084fc', '#a1a1aa', '#f87171', '#818cf8'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); const filteredTasks = filterDataByRange(modeData.tasks, masterDateRange, 'datetime'); const taskData = processTimeSeriesData(filteredTasks, 'datetime', masterDateRange); const taskTrendCtx = document.getElementById('taskCompletionTrendChart').getContext('2d'); window.taskCompletionTrendChartInstance = new Chart(taskTrendCtx, { type: 'line', data: { labels: taskData.labels, datasets: [ { label: 'Dibuat', data: taskData.created, borderColor: '#60a5fa', tension: 0.3 }, { label: 'Selesai', data: taskData.completed, borderColor: '#4ade80', tension: 0.3 } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } } }); const taskPriorityCtx = document.getElementById('taskPriorityDistributionChart').getContext('2d'); const { labels: priorityLabels, data: priorityData } = processTaskPriorities(filteredTasks); window.taskPriorityDistributionChartInstance = new Chart(taskPriorityCtx, { type: 'pie', data: { labels: priorityLabels, datasets: [{ data: priorityData, backgroundColor: ['#f472b6', '#fbbf24', '#4ade80'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } }); const filteredSplits = filterDataByRange(modeData.splitBills, masterDateRange, 'date'); const splitByUserCtx = document.getElementById('splitBillByUserChart').getContext('2d'); const { labels: userLabels, data: userSpendingData } = processSplitBillByUser(filteredSplits); window.splitBillByUserChartInstance = new Chart(splitByUserCtx, { type: 'bar', data: { labels: userLabels, datasets: [{ label: 'Total Pengeluaran', data: userSpendingData, backgroundColor: colors.incomeColor, borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { grid: { color: colors.gridColor } }, y: { grid: { display: false } } }, plugins: { legend: { display: false } } } }); const splitFreqData = processTimeSeriesData(filteredSplits, 'date', masterDateRange); const splitFreqCtx = document.getElementById('splitBillFrequencyChart').getContext('2d'); window.splitBillFrequencyChartInstance = new Chart(splitFreqCtx, { type: 'line', data: { labels: splitFreqData.labels, datasets: [{ label: 'Jumlah Split Bill', data: splitFreqData.count, borderColor: '#22d3ee', tension: 0.3, fill: true, backgroundColor: 'rgba(34, 211, 238, 0.2)' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } } }); const diaryCtx = document.getElementById('diaryEntryFrequencyChart').getContext('2d'); const diaryData = processTimeSeriesData(filteredDiary, 'date', masterDateRange); window.diaryEntryFrequencyChartInstance = new Chart(diaryCtx, { type: 'bar', data: { labels: diaryData.labels, datasets: [{ label: 'Jumlah Entri', data: diaryData.count, backgroundColor: colors.taskBg, borderColor: colors.taskColor, borderWidth: 1, borderRadius: 5 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { stepSize: 1 } } } } }); const moodCtx = document.getElementById('noteMoodAnalysisChart').getContext('2d'); const moodData = processNoteMoods(filteredDiary); window.noteMoodAnalysisChartInstance = new Chart(moodCtx, { type: 'doughnut', data: { labels: moodData.labels, datasets: [{ data: moodData.data, backgroundColor: moodData.backgroundColors, borderColor: colors.gridColor, borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 10 } } } } }); }
+function processTimeSeriesData(data, dateKey, range) { const { labels, dataPoints } = getTimeBuckets(range, data, dateKey); const isFinance = data.length > 0 && 'type' in data[0] && 'amount' in data[0]; const isTask = data.length > 0 && 'completed' in data[0]; let results = {}; if (isFinance) { results.income = new Array(labels.length).fill(0); results.expense = new Array(labels.length).fill(0); } else if (isTask) { results.created = new Array(labels.length).fill(0); results.completed = new Array(labels.length).fill(0); } else { results.count = new Array(labels.length).fill(0); } data.forEach(item => { if (!item[dateKey]) return; const itemDate = new Date(item[dateKey]); let bucketIndex = -1; for (let i = dataPoints.length - 1; i >= 0; i--) { if (itemDate >= dataPoints[i]) { bucketIndex = i; break; } } if (bucketIndex !== -1) { if (isFinance) { if (item.type === 'income') results.income[bucketIndex] += item.amount; else results.expense[bucketIndex] += item.amount; } else if (isTask) { results.created[bucketIndex]++; if (item.completed) results.completed[bucketIndex]++; } else { results.count[bucketIndex]++; } } }); return { labels, ...results }; } function processSpendingByCategory(transactions) { const spending = {}; transactions.filter(t => t.type === 'expense').forEach(t => { const categoryName = getCategoryName(t.category); spending[categoryName] = (spending[categoryName] || 0) + t.amount; }); const sortedSpending = Object.entries(spending).sort(([,a],[,b]) => b-a); return { labels: sortedSpending.map(([label]) => label), data: sortedSpending.map(([,data]) => data) }; } function processTaskPriorities(tasks) { const priorities = { high: 0, medium: 0, low: 0 }; tasks.filter(t => !t.completed).forEach(t => { priorities[t.priority]++; }); return { labels: ['Tinggi', 'Sedang', 'Rendah'], data: [priorities.high, priorities.medium, priorities.low] }; } function processSplitBillByUser(splitBills) { const userTotals = {}; splitBills.forEach(bill => { bill.results.forEach(person => { userTotals[person.name] = (userTotals[person.name] || 0) + person.amount; }); }); const sortedUsers = Object.entries(userTotals).sort(([,a],[,b]) => b-a); return { labels: sortedUsers.map(([label]) => label), data: sortedUsers.map(([,data]) => data) }; }
+/**
+ * [BARU] Fungsi untuk memproses mood dari catatan untuk ditampilkan di grafik.
+ * @param {Array} notes - Array objek catatan yang telah difilter.
+ * @returns {Object} - Objek berisi labels, data, dan warna untuk grafik.
+ */
+function processNoteMoods(notes) {
+    const moodCounts = {};
+    const moodColors = {
+        happy: '#4ade80', // Green
+        sad: '#60a5fa',   // Blue
+        excited: '#facc15', // Yellow
+        angry: '#f472b6', // Pink
+        neutral: '#9ca3af' // Gray
+    };
+    const moodLabels = {
+        happy: 'Senang',
+        sad: 'Sedih',
+        excited: 'Bersemangat',
+        angry: 'Marah',
+        neutral: 'Netral'
+    };
+
+    notes.forEach(note => {
+        if (note.mood) {
+            moodCounts[note.mood] = (moodCounts[note.mood] || 0) + 1;
+        }
+    });
+
+    const labels = Object.keys(moodCounts).map(mood => moodLabels[mood] || mood);
+    const data = Object.values(moodCounts);
+    const backgroundColors = Object.keys(moodCounts).map(mood => moodColors[mood] || '#a1a1aa');
+
+    return { labels, data, backgroundColors };
+}
+function getGroupingUnit(range) { if (typeof range === 'object' && range.type === 'custom') { const diffTime = Math.abs(new Date(range.end) - new Date(range.start)); const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); if (diffDays > 90) return 'month'; if (diffDays > 30) return 'week'; return 'day'; } if (['7d', '1m'].includes(range)) return 'day'; if (range === '3m') return 'week'; if (['1y', 'all'].includes(range)) return 'month'; return 'day'; } function getTimeBuckets(range, data, dateKey) { const labels = []; const dataPoints = []; const now = new Date(); const unit = getGroupingUnit(range); let startDate, endDate = new Date(now); if (typeof range === 'object' && range.type === 'custom') { startDate = new Date(range.start + 'T00:00:00Z'); endDate = new Date(range.end + 'T23:59:59Z'); } else if (range === 'all') { const validData = data.filter(d => d[dateKey]); if (validData.length === 0) { startDate = new Date(); startDate.setMonth(startDate.getMonth() - 1); } else { startDate = new Date(validData.reduce((min, p) => (p[dateKey] < min) ? p[dateKey] : min, validData[0][dateKey])); } } else { startDate = new Date(now); if (range === '7d') startDate.setDate(now.getDate() - 6); else if (range === '1m') startDate.setDate(now.getDate() - 29); else if (range === '3m') startDate.setMonth(now.getMonth() - 3); else if (range === '1y') startDate.setFullYear(now.getFullYear() - 1); } startDate.setHours(0, 0, 0, 0); let current = new Date(startDate); while (current <= endDate) { dataPoints.push(new Date(current)); if (unit === 'day') { labels.push(current.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })); current.setDate(current.getDate() + 1); } else if (unit === 'week') { labels.push(`W${getWeekNumber(current)}`); current.setDate(current.getDate() + 7); } else { labels.push(current.toLocaleDateString('id-ID', { month: 'short', year: '2-digit' })); current.setMonth(current.getMonth() + 1); } } return { labels, dataPoints }; } function getWeekNumber(d) { d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7)); var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1)); var weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7); return weekNo; }
 function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); } function formatCurrency(amount) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount); } 
 function formatDate(dateString) { return dateString ? new Date(dateString).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''; } 
 function formatDateTime(dateString) { return dateString ? new Date(dateString).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''; } 
@@ -2011,7 +2441,7 @@ function showDateRangeModal(source = 'dashboard') {
 
 function applyDateRange() { const startDate = document.getElementById('startDate').value; const endDate = document.getElementById('endDate').value; if (!startDate || !endDate) { showMessage('Harap pilih tanggal mulai dan selesai.', 'error'); return; } if (new Date(startDate) > new Date(endDate)) { showMessage('Tanggal mulai tidak boleh setelah tanggal selesai.', 'error'); return; } const rangeObject = { type: 'custom', start: startDate, end: endDate }; if (dateRangeSource === 'dashboard') { masterDateRange = rangeObject; updateActiveButton('master-range-selector', 'custom'); refreshDashboardData(); } else if (dateRangeSource === 'finance') { financeDateRange = rangeObject; filterAndRenderTransactions(); } document.getElementById('dateRangeModal').classList.remove('show'); } 
 
-function setupMasterRangeSelector() { document.querySelectorAll('#master-range-selector .range-btn').forEach(btn => { btn.addEventListener('click', (e) => { const range = e.currentTarget.dataset.range; if (range === 'custom') { showDateRangeModal('dashboard'); } else { updateActiveButton('master-range-selector', range); masterDateRange = range; refreshDashboardData(); } }); }); } function updateActiveButton(selectorId, activeRange) { document.querySelectorAll(`#${selectorId} .range-btn`).forEach(b => b.classList.remove('active')); document.querySelector(`#${selectorId} .range-btn[data-range="${activeRange}"]`).classList.add('active'); } function filterDataByRange(data, range, dateKey) { if (range === 'all') return data.filter(item => item[dateKey]); let startDate, endDate = new Date(); if (typeof range === 'object' && range.type === 'custom') { startDate = new Date(range.start + 'T00:00:00Z'); endDate = new Date(range.end + 'T23:59:59Z'); } else { startDate = new Date(); if (range === '7d') startDate.setDate(endDate.getDate() - 6); else if (range === '1m') startDate.setDate(endDate.getDate() - 29); else if (range === '3m') startDate.setMonth(endDate.getMonth() - 3); else if (range === '1y') startDate.setFullYear(endDate.getFullYear() - 1); startDate.setHours(0, 0, 0, 0); } return data.filter(item => { if (!item[dateKey]) return false; const itemDate = new Date(item[dateKey]); return itemDate >= startDate && itemDate <= endDate; }); }
+function setupMasterRangeSelector() { document.querySelectorAll('#master-range-selector .range-btn').forEach(btn => { btn.addEventListener('click', (e) => { const range = e.currentTarget.dataset.range; if (range === 'custom') { showDateRangeModal('dashboard'); } else { updateActiveButton('master-range-selector', range); masterDateRange = range; refreshDashboardData(); } }); }); } function updateActiveButton(selectorId, activeRange) { document.querySelectorAll(`#${selectorId} .range-btn`).forEach(b => b.classList.remove('active')); document.querySelector(`#${selectorId} .range-btn[data-range="${activeRange}"]`).classList.add('active'); } function filterDataByRange(data, range, dateKey) { if (range === 'all') return data.filter(item => item[dateKey] || item.lastModified); let startDate, endDate = new Date(); if (typeof range === 'object' && range.type === 'custom') { startDate = new Date(range.start + 'T00:00:00Z'); endDate = new Date(range.end + 'T23:59:59Z'); } else { startDate = new Date(); if (range === '7d') startDate.setDate(endDate.getDate() - 6); else if (range === '1m') startDate.setDate(endDate.getDate() - 29); else if (range === '3m') startDate.setMonth(endDate.getMonth() - 3); else if (range === '1y') startDate.setFullYear(endDate.getFullYear() - 1); startDate.setHours(0, 0, 0, 0); } return data.filter(item => { const itemDateStr = item[dateKey] || item.lastModified; if (!itemDateStr) return false; const itemDate = new Date(itemDateStr); return itemDate >= startDate && itemDate <= endDate; }); }
 function saveToken(tokenResponse) { const expiresAt = Date.now() + (tokenResponse.expires_in * 1000); const tokenData = { access_token: tokenResponse.access_token, expires_at: expiresAt }; localStorage.setItem('googleAuthToken', JSON.stringify(tokenData)); } function loadToken() { const tokenStr = localStorage.getItem('googleAuthToken'); if (!tokenStr) return null; try { return JSON.parse(tokenStr); } catch (e) { return null; } } function clearToken() { localStorage.removeItem('googleAuthToken'); localStorage.removeItem('googleAuthLoggedIn'); } function initGisClient() { try { if (typeof google === 'undefined' || typeof google.accounts === 'undefined') { console.error("Google Identity Services script not loaded yet."); showMessage("Gagal memuat API Google. Coba refresh halaman.", "error"); return; } googleTokenClient = google.accounts.oauth2.initTokenClient({ client_id: GOOGLE_CLIENT_ID, scope: GOOGLE_SCOPES, callback: (tokenResponse) => { if (tokenResponse && tokenResponse.access_token) { googleAccessToken = tokenResponse.access_token; saveToken(tokenResponse); localStorage.setItem('googleAuthLoggedIn', 'true'); updateSigninStatus(true); } else { console.error("Gagal mendapatkan access token:", tokenResponse); showMessage("Gagal melakukan otentikasi.", "error"); clearToken(); } }, }); const savedToken = loadToken(); if (savedToken) { if (Date.now() < savedToken.expires_at) { googleAccessToken = savedToken.access_token; updateSigninStatus(true); verifyToken(googleAccessToken).then(valid => { if (!valid) { console.warn("Token invalid, refreshing..."); googleTokenClient.requestAccessToken({ prompt: '' }); } }); } else { console.log("Token expired, requesting new one..."); googleTokenClient.requestAccessToken({ prompt: '' }); } } else if (localStorage.getItem('googleAuthLoggedIn') === 'true') { googleTokenClient.requestAccessToken({ prompt: '' }); } } catch (error) { console.error("Google Identity Services client gagal dimuat.", error); showMessage("Gagal memuat API Google. Coba refresh halaman.", "error"); } } function handleAuthClick() { if (googleAccessToken) { google.accounts.oauth2.revoke(googleAccessToken, () => { googleAccessToken = null; clearToken(); updateSigninStatus(false); showMessage("Berhasil keluar dari akun Google.", "success"); }); } else { if (googleTokenClient) { googleTokenClient.requestAccessToken({ prompt: 'consent' }); } else { showMessage("Client otentikasi belum siap.", "error"); } } } async function verifyToken(token) { try { const res = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`); return res.ok; } catch (e) { console.error("Verifikasi token gagal:", e); return false; } }
 
 // ===================================================================================
@@ -2020,8 +2450,8 @@ function saveToken(tokenResponse) { const expiresAt = Date.now() + (tokenRespons
 
 function handleBackupClick() { 
     const lifeHubData = storage.getAppData(); 
-    const notesData = JSON.parse(localStorage.getItem('notes_v4.9.2') || '[]'); 
-    const allData = { lifeHubData, notesData, backupVersion: "5.3.0", backupDate: new Date().toISOString() }; 
+    const notesData = JSON.parse(localStorage.getItem('notes_v5.5.0') || '[]'); 
+    const allData = { lifeHubData, notesData, backupVersion: "5.5.0", backupDate: new Date().toISOString() }; 
     if (Object.keys(lifeHubData.personal).every(key => lifeHubData.personal[key].length === 0) && Object.keys(lifeHubData.business).every(key => lifeHubData.business[key].length === 0) && notesData.length === 0) { 
         showMessage("Tidak ada data untuk di-backup.", "error"); 
         return; 
@@ -2164,7 +2594,7 @@ function confirmAndApplyRestore(restoredData) {
             storage.saveAppData(restoredData.lifeHubData);
         }
         if (restoredData.notesData) {
-            localStorage.setItem('notes_v4.9.2', JSON.stringify(restoredData.notesData));
+            localStorage.setItem('notes_v5.5.0', JSON.stringify(restoredData.notesData));
         }
         showMessage("Restore berhasil! Memuat ulang aplikasi...", "success");
         setTimeout(() => window.location.reload(), 1500);
@@ -2663,8 +3093,23 @@ function rgbToHex(rgb) {
 // === AKHIR DARI FUNGSI-FUNGSI PORTAL ===
 
 
-async function exportAllToPdf(timeRange = 'all', customStartDate = null, customEndDate = null) {
-    showMessage('Memulai pembuatan laporan PDF komprehensif...', 'info');
+// ===================================================================================
+// =================== BAGIAN 4: FUNGSI EKSPOR PDF & GAMBAR BARU =====================
+// ===================================================================================
+
+/**
+ * [MODIFIKASI] Fungsi inti untuk mengekspor semua data ke PDF.
+ * Kini dapat mengembalikan Blob untuk diproses lebih lanjut atau langsung mengunduh.
+ * @param {string} timeRange - Rentang waktu yang dipilih ('all', 'last7days', dll.).
+ * @param {string|null} customStartDate - Tanggal mulai kustom.
+ * @param {string|null} customEndDate - Tanggal selesai kustom.
+ * @param {string} outputType - 'download' (default) atau 'blob'.
+ * @returns {Promise<Blob|void>} Mengembalikan Blob jika outputType adalah 'blob'.
+ */
+async function exportAllToPdf(timeRange = 'all', customStartDate = null, customEndDate = null, outputType = 'download') {
+    if (outputType === 'download') {
+        showMessage('Memulai pembuatan laporan PDF komprehensif...', 'info');
+    }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({
         orientation: 'p',
@@ -2748,7 +3193,7 @@ async function exportAllToPdf(timeRange = 'all', customStartDate = null, customE
 
     const filterByDate = (item) => {
         if (!startDate || !endDate) return true;
-        const itemDateStr = item.date || item.datetime;
+        const itemDateStr = item.date || item.datetime || item.lastModified;
         if (!itemDateStr) return false;
         const itemDate = new Date(itemDateStr);
         return itemDate >= startDate && itemDate <= endDate;
@@ -2757,7 +3202,7 @@ async function exportAllToPdf(timeRange = 'all', customStartDate = null, customE
     const filteredTransactions = modeData.transactions.filter(filterByDate);
     const filteredTasks = modeData.tasks.filter(filterByDate);
     const filteredSplitBills = modeData.splitBills.filter(filterByDate);
-    const allNotes = storage.get('notes_v4.9.2', []);
+    const allNotes = storage.get('notes_v5.5.0', []);
     const filteredNotes = allNotes.filter(note => !note.isLocked && filterByDate(note));
 
     const balance = filteredTransactions.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
@@ -2834,13 +3279,16 @@ async function exportAllToPdf(timeRange = 'all', customStartDate = null, customE
     yPos += chartHeight + 15;
     chartX = margin;
 
+    // [PERUBAHAN] Menambahkan dua grafik catatan berdampingan ke PDF
     if (checkPageEnd(chartHeight + 20)) { addHeader('Analisis Mendalam'); }
     addSectionTitle('Analisis Catatan');
-    const fullWidthChart = pageWidth - (margin * 2);
-    const fullWidthChartHeight = fullWidthChart * 0.5;
     let diaryEntryFrequencyImg = await addChartToPdf('diaryEntryFrequencyChart');
-    if(diaryEntryFrequencyImg) doc.addImage(diaryEntryFrequencyImg, 'PNG', chartX, yPos, fullWidthChart, fullWidthChartHeight);
-    yPos += fullWidthChartHeight + 10;
+    if(diaryEntryFrequencyImg) doc.addImage(diaryEntryFrequencyImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    chartX += chartWidth + margin;
+    let noteMoodAnalysisImg = await addChartToPdf('noteMoodAnalysisChart');
+    if(noteMoodAnalysisImg) doc.addImage(noteMoodAnalysisImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    yPos += chartHeight + 10;
+
 
     // Halaman 3: Keuangan
     doc.addPage(); addBackground(); addHeader('Keuangan'); addPageTitle('Laporan Keuangan');
@@ -2922,7 +3370,7 @@ async function exportAllToPdf(timeRange = 'all', customStartDate = null, customE
         filteredNotes.forEach(note => {
             if (checkPageEnd(30)) { addHeader('Catatan'); }
             doc.setFontSize(14); doc.setTextColor(pdfTheme.headerColor); doc.text(note.title || 'Tanpa Judul', margin, yPos); yPos += 6;
-            doc.setFontSize(9); doc.setTextColor(pdfTheme.subtleTextColor); doc.text(`Tanggal: ${formatDate(note.date)} | Mood: ${note.mood}`, margin, yPos); yPos += 8;
+            doc.setFontSize(9); doc.setTextColor(pdfTheme.subtleTextColor); doc.text(`Tanggal: ${formatDate(note.lastModified)} | Mood: ${note.mood}`, margin, yPos); yPos += 8;
             doc.setFontSize(11); doc.setTextColor(pdfTheme.textColor);
             const tempDiv = document.createElement('div'); tempDiv.innerHTML = note.content;
             const contentText = tempDiv.innerText || tempDiv.textContent || '';
@@ -2933,14 +3381,104 @@ async function exportAllToPdf(timeRange = 'all', customStartDate = null, customE
         });
     } else { doc.setTextColor(pdfTheme.textColor); doc.text('Tidak ada catatan pada rentang waktu yang dipilih.', margin, yPos); }
 
-    // Simpan PDF
-    const fileName = `Laporan_Uranuspace_${dateRangeLabel.replace(/ /g, '_')}.pdf`;
-    doc.save(fileName);
-    showMessage('Laporan PDF berhasil dibuat dan diunduh!', 'success');
+    // [MODIFIKASI] Bagian akhir fungsi
+    if (outputType === 'blob') {
+        return doc.output('blob');
+    } else {
+        // Simpan PDF
+        const fileName = `Laporan_Uranuspace_${dateRangeLabel.replace(/ /g, '_')}.pdf`;
+        doc.save(fileName);
+        showMessage('Laporan PDF berhasil dibuat dan diunduh!', 'success');
+    }
 }
 
-</script>
+/**
+ * [BARU] Fungsi untuk mengekspor laporan sebagai serangkaian gambar 4K dalam file ZIP.
+ * @param {string} timeRange - Rentang waktu yang dipilih.
+ * @param {string|null} customStartDate - Tanggal mulai kustom.
+ * @param {string|null} customEndDate - Tanggal selesai kustom.
+ */
+async function exportAllToImages(timeRange = 'all', customStartDate = null, customEndDate = null) {
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    const exportImagesBtn = document.getElementById('export-images-btn');
+    
+    // Nonaktifkan tombol selama proses
+    exportPdfBtn.disabled = true;
+    exportImagesBtn.disabled = true;
 
+    try {
+        showMessage('Memulai ekspor gambar... Menyiapkan PDF di memori.', 'info');
+
+        // 1. Hasilkan PDF di memori sebagai Blob
+        const pdfBlob = await exportAllToPdf(timeRange, customStartDate, customEndDate, 'blob');
+        if (!pdfBlob) {
+            throw new Error("Gagal menghasilkan data PDF di memori.");
+        }
+
+        showMessage('PDF berhasil dibuat. Merender halaman menjadi gambar...', 'info');
+
+        // 2. Inisialisasi PDF.js dan JSZip
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
+        const zip = new JSZip();
+
+        const pdfData = await pdfBlob.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+        const numPages = pdf.numPages;
+
+        // 3. Loop melalui setiap halaman untuk merendernya
+        for (let i = 1; i <= numPages; i++) {
+            showMessage(`Memproses halaman ${i} dari ${numPages}...`, 'info');
+            const page = await pdf.getPage(i);
+            
+            // Tentukan skala untuk resolusi 4K (lebar 3840px)
+            const viewport = page.getViewport({ scale: 1 });
+            const scale = 3840 / viewport.width;
+            const scaledViewport = page.getViewport({ scale: scale });
+
+            // Buat canvas dinamis
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = scaledViewport.width;
+            canvas.height = scaledViewport.height;
+
+            // Render halaman ke canvas
+            const renderContext = {
+                canvasContext: context,
+                viewport: scaledViewport
+            };
+            await page.render(renderContext).promise;
+
+            // 4. Konversi canvas ke Blob gambar dan tambahkan ke ZIP
+            const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
+            zip.file(`Halaman_${i}.png`, imageBlob);
+        }
+
+        // 5. Hasilkan file ZIP dan picu unduhan
+        showMessage('Semua halaman diproses. Membuat file ZIP...', 'success');
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        const dateRangeLabel = timeRange === 'custom' ? `${customStartDate}_to_${customEndDate}` : timeRange;
+        link.download = `Laporan_Gambar_Uranuspace_${dateRangeLabel}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+
+        showMessage('File ZIP berhasil dibuat dan diunduh!', 'success');
+
+    } catch (error) {
+        console.error("Gagal mengekspor gambar:", error);
+        showMessage(`Terjadi kesalahan saat mengekspor gambar: ${error.message}`, 'error');
+    } finally {
+        // Aktifkan kembali tombol
+        exportPdfBtn.disabled = false;
+        exportImagesBtn.disabled = false;
+    }
+}
+</script>
 </body>
 </html>
 
