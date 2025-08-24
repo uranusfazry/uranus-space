@@ -1131,10 +1131,25 @@
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                          <h2 class="text-3xl font-bold text-purple-300">Catatan Profesional</h2>
                          <div class="flex gap-2">
-                              <button id="notesAddNewBtn" class="custom-button"><i class="fas fa-plus mr-2"></i>Catatan Baru</button>
+                               <button id="notesAddNewBtn" class="custom-button"><i class="fas fa-plus mr-2"></i>Catatan Baru</button>
                          </div>
                     </div>
                     <div class="notes-container">
+                        <!-- [BARU] Kontrol untuk Manajemen Font Kustom -->
+                        <div class="glass-effect p-4 mb-6">
+                            <h3 class="font-semibold text-lg text-pink-400 mb-2">Manajemen Font Kustom</h3>
+                            <div class="flex items-center gap-4">
+                                <div class="flex-grow">
+                                    <label for="customFontUploader" class="block text-sm font-medium mb-1">Unggah Font Baru (.ttf, .otf, .woff)</label>
+                                    <input type="file" id="customFontUploader" class="custom-input !p-2" accept=".otf,.ttf,.woff,.woff2">
+                                </div>
+                                <button id="clearCustomFontsBtn" class="custom-button custom-button-danger" title="Hapus Semua Font Kustom">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Font yang diunggah akan tersimpan di browser Anda dan muncul di pilihan editor.</p>
+                        </div>
+
                         <!-- ===== [START] EDITOR PROFESIONAL BARU ===== -->
                         <div id="notesEditorSection" class="glass-effect p-4">
                             <input type="text" id="notesTitleInput" class="custom-input mb-4 text-xl" placeholder="Judul Catatan...">
@@ -1163,56 +1178,10 @@
                                         </div>
                                     </div>
                 
-                                    <!-- [PERBAIKAN] Grup Font & Ukuran dengan daftar lengkap -->
+                                    <!-- [PERUBAHAN] Grup Font & Ukuran dengan daftar KOSONG -->
                                     <div class="pro-toolbar-group">
                                         <select class="pro-toolbar-select" data-command="fontName" title="Jenis Font">
-                                            <optgroup label="Default & Web Safe">
-                                                <option value="'Poppins', sans-serif">Poppins</option>
-                                                <option value="Arial, Helvetica, sans-serif">Arial</option>
-                                                <option value="Verdana, Geneva, sans-serif">Verdana</option>
-                                                <option value="'Times New Roman', Times, serif">Times New Roman</option>
-                                                <option value="Georgia, serif">Georgia</option>
-                                                <option value="'Courier New', Courier, monospace">Courier New</option>
-                                            </optgroup>
-                                            <optgroup label="Serif (Formal)">
-                                                <option value="'Merriweather', serif">Merriweather</option>
-                                                <option value="'Lora', serif">Lora</option>
-                                                <option value="'Playfair Display', serif">Playfair Display</option>
-                                                <option value="'EB Garamond', serif">EB Garamond</option>
-                                                <option value="'Cormorant Garamond', serif">Cormorant Garamond</option>
-                                                <option value="'Bitter', serif">Bitter</option>
-                                            </optgroup>
-                                            <optgroup label="Sans-Serif (Modern)">
-                                                <option value="'Roboto', sans-serif">Roboto</option>
-                                                <option value="'Open Sans', sans-serif">Open Sans</option>
-                                                <option value="'Lato', sans-serif">Lato</option>
-                                                <option value="'Montserrat', sans-serif">Montserrat</option>
-                                                <option value="'Nunito Sans', sans-serif">Nunito Sans</option>
-                                                <option value="'Raleway', sans-serif">Raleway</option>
-                                                <option value="'Ubuntu', sans-serif">Ubuntu</option>
-                                            </optgroup>
-                                            <optgroup label="Display (Judul)">
-                                                <option value="'Oswald', sans-serif">Oswald</option>
-                                                <option value="'Bebas Neue', cursive">Bebas Neue</option>
-                                                <option value="'Lobster', cursive">Lobster</option>
-                                                <option value="'Alfa Slab One', cursive">Alfa Slab One</option>
-                                                <option value="'Anton', sans-serif">Anton</option>
-                                                <option value="'Orbitron', sans-serif">Orbitron</option>
-                                            </optgroup>
-                                            <optgroup label="Handwriting (Tulisan Tangan)">
-                                                <option value="'Dancing Script', cursive">Dancing Script</option>
-                                                <option value="'Caveat', cursive">Caveat</option>
-                                                <option value="'Indie Flower', cursive">Indie Flower</option>
-                                                <option value="'Pacifico', cursive">Pacifico</option>
-                                                <option value="'Shadows Into Light Two', cursive">Shadows Into Light</option>
-                                            </optgroup>
-                                            <optgroup label="Monospace (Teknis)">
-                                                <option value="'Fira Code', monospace">Fira Code</option>
-                                                <option value="'Source Code Pro', monospace">Source Code Pro</option>
-                                                <option value="'JetBrains Mono', monospace">JetBrains Mono</option>
-                                                <option value="'Space Mono', monospace">Space Mono</option>
-                                                <option value="'Inconsolata', monospace">Inconsolata</option>
-                                            </optgroup>
+                                            <!-- Opsi font kustom akan ditambahkan oleh JavaScript -->
                                         </select>
                                     </div>
                 
@@ -1342,7 +1311,7 @@
                             <h3 class="font-semibold text-lg text-pink-400 mb-2">Daftar Catatan</h3>
                             <div id="notesList" class="space-y-2 max-h-96 overflow-y-auto"></div>
                         </div>
-        
+                
                     </div>
                 </div>
                 
@@ -1452,8 +1421,8 @@
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Informasi Aplikasi</h3>
                                 <div class="space-y-2 text-sm">
                                     <p><strong>Nama:</strong> LifeHub v5 (Uranus Space)</p>
-                                    <p><strong>Versi:</strong> 5.5.0-Fix</p>
-                                    <p><strong>Fitur:</strong> Editor Teks Modern, Google Drive Backup & Restore, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Portal Tautan, Custom BG (Persisten), Preview Mode, Kunci Catatan, Keamanan Lanjutan, Laporan PDF Komprehensif dengan Tema Custom.</p>
+                                    <p><strong>Versi:</strong> 5.5.1-FeatureUpdate</p>
+                                    <p><strong>Fitur:</strong> Editor Teks Modern, Google Drive Backup & Restore, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Portal Tautan, Custom BG (Persisten), Preview Mode, Kunci Catatan, Keamanan Lanjutan, Laporan PDF Komprehensif dengan Tema Custom, Unggah Font Kustom.</p>
                                     <p><strong>Storage:</strong> LocalStorage, IndexedDB & Google Drive (Data terenkripsi di terminal Anda)</p>
                                 </div>
                             </div>
@@ -1517,6 +1486,24 @@
         <div class="modal-content glass-effect p-8 w-full max-w-3xl">
             <div id="notesPreviewContent" class="prose max-w-none"></div>
             <button id="notesClosePreviewBtn" class="custom-button mt-6">Tutup</button>
+        </div>
+    </div>
+
+    <!-- [BARU] Modal Kustom untuk Input Password -->
+    <div id="customPromptModal" class="modal">
+        <div class="modal-content glass-effect p-8 w-full max-w-sm">
+            <h3 id="customPromptTitle" class="text-xl font-semibold mb-4 text-pink-400">Atur Kata Sandi</h3>
+            <p id="customPromptMessage" class="mb-6 text-gray-300">Masukkan kata sandi baru (kosongkan untuk membuka kunci):</p>
+            
+            <div class="relative">
+                <input type="password" id="customPromptInput" class="custom-input pr-10" placeholder="Ketik kata sandi...">
+                <i id="customPromptToggle" class="fas fa-eye absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-gray-400 hover:text-white"></i>
+            </div>
+
+            <div class="flex gap-4 mt-6">
+                <button id="customPromptCancel" class="custom-button custom-button-danger flex-1">Batal</button>
+                <button id="customPromptOK" class="custom-button flex-1">Oke</button>
+            </div>
         </div>
     </div>
 
@@ -1601,6 +1588,82 @@ async function deleteBackgroundFromDB(id) {
     }
 }
 
+// ===================================================================================
+// ======================= [BARU] FUNGSI HELPER UNTUK MODAL KUSTOM ===================
+// ===================================================================================
+/**
+ * Menampilkan modal kustom sebagai pengganti window.prompt().
+ * @param {string} title - Judul modal.
+ * @param {string} message - Pesan instruksi untuk pengguna.
+ * @param {string} placeholder - Placeholder untuk input field.
+ * @returns {Promise<string|null>} Promise yang resolve dengan nilai input atau null jika dibatalkan.
+ */
+function showCustomPrompt(title, message, placeholder) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('customPromptModal');
+        const titleEl = document.getElementById('customPromptTitle');
+        const messageEl = document.getElementById('customPromptMessage');
+        const inputEl = document.getElementById('customPromptInput');
+        const okBtn = document.getElementById('customPromptOK');
+        const cancelBtn = document.getElementById('customPromptCancel');
+        const toggleBtn = document.getElementById('customPromptToggle');
+
+        // Reset state
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        inputEl.placeholder = placeholder;
+        inputEl.value = '';
+        inputEl.type = 'password';
+        toggleBtn.classList.remove('fa-eye-slash');
+        toggleBtn.classList.add('fa-eye');
+
+        modal.classList.add('show');
+        inputEl.focus();
+
+        const handleOK = () => {
+            cleanup();
+            resolve(inputEl.value);
+        };
+
+        const handleCancel = () => {
+            cleanup();
+            resolve(null);
+        };
+
+        const handleToggle = () => {
+            if (inputEl.type === 'password') {
+                inputEl.type = 'text';
+                toggleBtn.classList.remove('fa-eye');
+                toggleBtn.classList.add('fa-eye-slash');
+            } else {
+                inputEl.type = 'password';
+                toggleBtn.classList.remove('fa-eye-slash');
+                toggleBtn.classList.add('fa-eye');
+            }
+        };
+
+        const handleKeyup = (e) => {
+            if (e.key === 'Enter') handleOK();
+            if (e.key === 'Escape') handleCancel();
+        };
+
+        // Tambahkan event listeners
+        okBtn.addEventListener('click', handleOK);
+        cancelBtn.addEventListener('click', handleCancel);
+        toggleBtn.addEventListener('click', handleToggle);
+        modal.addEventListener('keyup', handleKeyup);
+
+        // Fungsi cleanup untuk menghapus listener setelah modal ditutup
+        function cleanup() {
+            modal.classList.remove('show');
+            okBtn.removeEventListener('click', handleOK);
+            cancelBtn.removeEventListener('click', handleCancel);
+            toggleBtn.removeEventListener('click', handleToggle);
+            modal.removeEventListener('keyup', handleKeyup);
+        }
+    });
+}
+
 
 /**
  * NotesApp Class
@@ -1611,12 +1674,14 @@ class NotesApp {
         this.notes = [];
         this.currentNoteId = null;
         this.lastSelection = null; // Menyimpan selection range terakhir
+        this.customFonts = []; // [BARU] Untuk menyimpan font kustom
     }
 
     init() {
         this.cacheDOMElements();
         this.bindEvents();
         this.loadNotes();
+        this.loadSavedFonts(); // [BARU] Memuat font saat inisialisasi
         setInterval(() => this.autoSave(), 30000); // Autosave setiap 30 detik
     }
 
@@ -1639,12 +1704,15 @@ class NotesApp {
             searchInput: document.getElementById('notesSearchInput'),
             moodFilter: document.getElementById('notesMoodFilter'),
             
-            // Editor Profesional
+            // Editor Profesional & Font
             editorSection: document.getElementById('notesEditorSection'),
             titleInput: document.getElementById('notesTitleInput'),
             masterBtn: document.getElementById('editor-master-btn'),
             toolbar: document.getElementById('pro-toolbar'),
             editorContent: document.getElementById('pro-editor-content'),
+            fontSelect: document.querySelector('#pro-toolbar select[data-command="fontName"]'), // [BARU]
+            fontUploader: document.getElementById('customFontUploader'), // [BARU]
+            clearFontsBtn: document.getElementById('clearCustomFontsBtn'), // [BARU]
             
             // Status Bar
             wordCountEl: document.getElementById('word-count'),
@@ -1676,22 +1744,24 @@ class NotesApp {
         this.dom.searchInput.addEventListener('input', () => this.filterNotes());
         this.dom.moodFilter.addEventListener('change', () => this.filterNotes());
 
+        // [BARU] Event listener untuk fitur font kustom
+        this.dom.fontUploader.addEventListener('change', (e) => this.handleFontUpload(e));
+        this.dom.clearFontsBtn.addEventListener('click', () => this.clearAllCustomFonts());
+
         // Event untuk Editor Profesional
         this.dom.masterBtn.addEventListener('click', () => this.toggleToolbar());
 
-        // [PERBAIKAN FONT] Memisahkan event listener untuk tombol dan select/input
         this.dom.toolbar.addEventListener('click', (e) => {
             const button = e.target.closest('button');
-            if (!button) return; // Hanya proses jika yang diklik adalah tombol
+            if (!button) return; 
 
             const command = button.dataset.command;
             if (command) {
-                e.preventDefault(); // Cegah aksi default HANYA untuk tombol
+                e.preventDefault(); 
                 this.handleCommand(command);
             }
         });
 
-        // [PERBAIKAN FONT] Menambahkan event listener 'change' untuk elemen select dan input
         this.dom.toolbar.querySelectorAll('select, input[type="color"]').forEach(input => {
             input.addEventListener('change', (e) => {
                 const command = e.target.dataset.command;
@@ -1721,6 +1791,96 @@ class NotesApp {
         this.dom.closePreviewBtn.addEventListener('click', () => this.closePreview());
     }
     
+    // --- [BARU] LOGIKA FONT KUSTOM ---
+
+    /** Memuat font yang sudah tersimpan saat aplikasi dimulai */
+    loadSavedFonts() {
+        this.customFonts = JSON.parse(localStorage.getItem('customFonts_v5.5.0')) || [];
+        let fontStyleSheet = document.getElementById('custom-font-styles');
+        if (!fontStyleSheet) {
+            fontStyleSheet = document.createElement('style');
+            fontStyleSheet.id = 'custom-font-styles';
+            document.head.appendChild(fontStyleSheet);
+        }
+        
+        this.customFonts.forEach(font => {
+            const newFontFace = `@font-face { font-family: "${font.name}"; src: url(${font.url}); font-display: swap; }`;
+            fontStyleSheet.innerHTML += newFontFace;
+        });
+
+        this.updateFontSelector();
+    }
+
+    /** Menangani file font yang diunggah oleh pengguna */
+    handleFontUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const fontUrl = e.target.result;
+            let fontName = file.name.split('.').slice(0, -1).join('.');
+            fontName = fontName.replace(/[^a-zA-Z0-9\s-]/g, '').trim();
+
+            if (!fontName) {
+                showMessage(`Nama file font tidak valid.`, 'error');
+                this.dom.fontUploader.value = '';
+                return;
+            }
+
+            if (this.customFonts.some(f => f.name.toLowerCase() === fontName.toLowerCase())) {
+                showMessage(`Font dengan nama "${fontName}" sudah ada.`, 'error');
+                this.dom.fontUploader.value = '';
+                return;
+            }
+            
+            const newFont = { name: fontName, url: fontUrl };
+            this.customFonts.push(newFont);
+            
+            const fontStyleSheet = document.getElementById('custom-font-styles');
+            const newFontFace = `@font-face { font-family: "${fontName}"; src: url(${fontUrl}); font-display: swap; }`;
+            fontStyleSheet.innerHTML += newFontFace;
+
+            localStorage.setItem('customFonts_v5.5.0', JSON.stringify(this.customFonts));
+            this.updateFontSelector();
+            showMessage(`Font "${fontName}" berhasil ditambahkan!`, 'success');
+            this.dom.fontUploader.value = '';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /** Memperbarui dropdown pilihan font di editor */
+    updateFontSelector() {
+        this.dom.fontSelect.innerHTML = '';
+
+        const fallbackOption = document.createElement('option');
+        fallbackOption.value = "'Poppins', sans-serif";
+        fallbackOption.textContent = 'Default (Poppins)';
+        this.dom.fontSelect.appendChild(fallbackOption);
+
+        this.customFonts.forEach(font => {
+            const option = document.createElement('option');
+            option.value = `"${font.name}", sans-serif`;
+            option.textContent = font.name;
+            option.style.fontFamily = `"${font.name}", sans-serif`;
+            this.dom.fontSelect.appendChild(option);
+        });
+    }
+    
+    /** Menghapus semua font kustom */
+    clearAllCustomFonts() {
+        showConfirm('Hapus Semua Font?', 'Anda yakin ingin menghapus semua font kustom yang telah diunggah?', () => {
+            this.customFonts = [];
+            localStorage.removeItem('customFonts_v5.5.0');
+            const fontStyleSheet = document.getElementById('custom-font-styles');
+            if (fontStyleSheet) {
+                fontStyleSheet.innerHTML = '';
+            }
+            this.updateFontSelector();
+            showMessage('Semua font kustom telah dihapus.', 'success');
+        });
+    }
+
     // --- LOGIKA EDITOR PROFESIONAL ---
 
     toggleToolbar() {
@@ -1746,7 +1906,6 @@ class NotesApp {
         }
     }
     
-    // [SOLUSI FONT] Fungsi baru untuk menerapkan gaya secara manual
     applyStyle(styleProperty, styleValue) {
         this.restoreSelection();
         this.dom.editorContent.focus();
@@ -1755,30 +1914,34 @@ class NotesApp {
         if (!selection.rangeCount) return;
 
         const range = selection.getRangeAt(0);
-        
-        // Menggunakan execCommand untuk membungkus teks dengan elemen sementara
-        // Ini adalah trik untuk menangani teks yang sudah memiliki gaya lain
+        if (range.collapsed) {
+             const span = document.createElement('span');
+            span.style[styleProperty] = styleValue;
+            span.innerHTML = '&#8203;'; 
+            range.insertNode(span);
+            
+            const newRange = document.createRange();
+            newRange.selectNodeContents(span);
+            newRange.collapse(false);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+            return;
+        }
+
         document.execCommand('styleWithCSS', false, true);
-        document.execCommand('fontName', false, 'placeholder-font');
+        document.execCommand('fontName', false, 'tmp-font');
         document.execCommand('styleWithCSS', false, false);
         
-        // Cari semua elemen sementara yang baru dibuat
-        const fontElements = this.dom.editorContent.querySelectorAll('font[face="placeholder-font"]');
-        
-        // Ganti elemen sementara dengan elemen <span> yang memiliki gaya yang benar
+        const fontElements = this.dom.editorContent.querySelectorAll('font[face="tmp-font"]');
         fontElements.forEach(fontElement => {
             const span = document.createElement('span');
             span.style[styleProperty] = styleValue;
             span.innerHTML = fontElement.innerHTML;
             fontElement.parentNode.replaceChild(span, fontElement);
         });
-        
-        // Membersihkan jika ada sisa-sisa yang tidak diinginkan
-        this.dom.editorContent.normalize();
     }
 
 
-    // [SOLUSI FONT] Fungsi handleCommand yang dimodifikasi
     handleCommand(command, value = null) {
         const simpleCommands = ['undo', 'redo', 'cut', 'copy', 'bold', 'italic', 'underline', 'strikeThrough', 'subscript', 'superscript', 'justifyLeft', 'justifyCenter', 'justifyRight', 'justifyFull', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent', 'insertHorizontalRule'];
         
@@ -1787,7 +1950,6 @@ class NotesApp {
         } else if (command === 'clearFormatting') {
              document.execCommand('removeFormat', false, null);
         } else if (command === 'fontName') {
-            // Ini adalah perubahan kunci: panggil fungsi applyStyle baru kita
             this.applyStyle('fontFamily', value);
         } else if (command === 'formatBlock' || command === 'foreColor' || command === 'backColor') {
             document.execCommand(command, false, value);
@@ -1814,7 +1976,6 @@ class NotesApp {
                         return;
                     }
                 }
-                // Fallback to plain text if no HTML
                 navigator.clipboard.readText().then(text => document.execCommand('insertText', false, text));
             });
         } else if (command === 'pasteAsPlainText') {
@@ -1943,7 +2104,40 @@ class NotesApp {
         }, isResuming ? 5000 : 30000); 
     }
 
-    setPasswordForCurrentNote() { if (!this.currentNoteId) { showMessage('Simpan catatan terlebih dahulu sebelum menguncinya.', 'error'); return; } const note = this.notes.find(n => n.id === this.currentNoteId); if (!note) return; const currentPassword = note.isLocked ? prompt('Masukkan kata sandi saat ini untuk mengubah atau menghapus:') : ''; if (note.isLocked && currentPassword !== note.password) { if (currentPassword !== null) showMessage('Kata sandi saat ini salah.', 'error'); return; } const newPassword = prompt('Masukkan kata sandi baru (kosongkan untuk membuka kunci):'); if (newPassword === null) return; if (newPassword) { note.isLocked = true; note.password = newPassword; showMessage('Catatan berhasil dikunci!', 'success'); } else { note.isLocked = false; delete note.password; showMessage('Kunci catatan berhasil dibuka.', 'success'); } this.saveToStorage(); this.displayNotes(); }
+    // [PERUBAHAN] Menggunakan modal kustom baru
+    async setPasswordForCurrentNote() {
+        if (!this.currentNoteId) {
+            showMessage('Simpan catatan terlebih dahulu sebelum menguncinya.', 'error');
+            return;
+        }
+        const note = this.notes.find(n => n.id === this.currentNoteId);
+        if (!note) return;
+
+        if (note.isLocked) {
+            const currentPassword = await showCustomPrompt('Ubah Kata Sandi', 'Masukkan kata sandi saat ini untuk melanjutkan.', 'Kata sandi saat ini');
+            if (currentPassword === null) return; // Pengguna membatalkan
+            if (currentPassword !== note.password) {
+                showMessage('Kata sandi saat ini salah.', 'error');
+                return;
+            }
+        }
+
+        const newPassword = await showCustomPrompt('Atur Kata Sandi Baru', 'Masukkan kata sandi baru (kosongkan untuk membuka kunci).', 'Kata sandi baru');
+        if (newPassword === null) return; // Pengguna membatalkan
+
+        if (newPassword) {
+            note.isLocked = true;
+            note.password = newPassword;
+            showMessage('Catatan berhasil dikunci!', 'success');
+        } else {
+            note.isLocked = false;
+            delete note.password;
+            showMessage('Kunci catatan berhasil dibuka.', 'success');
+        }
+
+        this.saveToStorage();
+        this.displayNotes();
+    }
 
     // --- FUNGSI INTI ---
     embedYouTube() { const url = prompt("Masukkan URL video YouTube:"); if (!url) return; let videoId = null; const regexes = [/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)/, /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)/, /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)/]; for (const regex of regexes) { const match = url.match(regex); if (match && match[1]) { videoId = match[1]; break; } } if (videoId) { const embedHTML = `<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; max-width: 100%; margin: 1rem 0;"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 8px;"></iframe></div><p><br></p>`; document.execCommand('insertHTML', false, embedHTML); } else { showMessage("URL YouTube tidak valid.", "error"); } }
@@ -2094,7 +2288,7 @@ function setupEventListeners() {
     document.getElementById('backup-button').addEventListener('click', handleBackupClick); 
     document.getElementById('restore-button').addEventListener('click', showRestoreOptionsModal); 
     document.getElementById('addNewPortalBtn').addEventListener('click', showPortalModal);
-    // [BARU] Menambahkan event listener untuk ikon mata
+    // [PERUBAHAN] Menambahkan event listener untuk ikon mata
     document.getElementById('toggle-email-visibility').addEventListener('click', toggleEmailVisibility);
     
     // [PERBAIKAN] Menambahkan event listener untuk mematikan suara saat tab tidak aktif
@@ -2631,7 +2825,6 @@ async function updateSigninStatus(isSignedIn) {
             }
             const profile = await response.json();
 
-            // [PERUBAHAN] Gunakan timestamp dan angka acak untuk seed agar avatar selalu baru
             const dynamicSeed = Date.now() + Math.random();
             const avatarUrl = `https://api.dicebear.com/8.x/lorelei/svg?seed=${dynamicSeed}&backgroundColor=transparent&hairColor=6a0dad,0d94ea,c084fc&clothingColor=1e1b4b,3b0764&glassesProbability=50`;
 
@@ -2639,7 +2832,7 @@ async function updateSigninStatus(isSignedIn) {
             document.getElementById('user-name').textContent = profile.name;
             userEmailEl.textContent = profile.email;
             
-            // [BARU] Atur status awal email menjadi blur
+            // Atur status awal email menjadi blur
             userEmailEl.classList.add('email-blur');
             toggleEmailIcon.classList.remove('fa-eye-slash');
             toggleEmailIcon.classList.add('fa-eye');
@@ -2663,14 +2856,14 @@ async function updateSigninStatus(isSignedIn) {
     }
 }
 
-// === [BARU] Fungsi untuk toggle visibilitas email ===
+// === [PERBAIKAN] Fungsi untuk toggle visibilitas email ===
 function toggleEmailVisibility() {
     const userEmailEl = document.getElementById('user-email');
     const toggleIcon = document.getElementById('toggle-email-visibility');
 
-    userEmailEl.classList.toggle('email-blur');
+    const isNowBlurred = userEmailEl.classList.toggle('email-blur');
 
-    if (userEmailEl.classList.contains('email-blur')) {
+    if (isNowBlurred) {
         toggleIcon.classList.remove('fa-eye-slash');
         toggleIcon.classList.add('fa-eye');
         toggleIcon.title = "Tampilkan Email";
@@ -2712,171 +2905,8 @@ async function listAllBackupFiles() {
 
 // === [BARU] FUNGSI-FUNGSI UNTUK FITUR PORTAL DI SIDEBAR ===
 
-// [BARU] Daftar ikon default yang telah direstrukturisasi.
-const defaultPortalIcons = [
-    {
-        label: "Ikon Universal",
-        icons: [
-            // E-commerce & Shopping
-            { value: "fas fa-shopping-cart", text: "Belanja: Keranjang" },
-            { value: "fas fa-shopping-bag", text: "Belanja: Tas" },
-            { value: "fas fa-store", text: "Belanja: Toko" },
-            { value: "fas fa-tags", text: "Belanja: Tag Harga" },
-            // Transportasi & Perjalanan
-            { value: "fas fa-car", text: "Transportasi: Mobil" },
-            { value: "fas fa-motorcycle", text: "Transportasi: Motor" },
-            { value: "fas fa-plane-departure", text: "Perjalanan: Pesawat" },
-            { value: "fas fa-ticket-alt", text: "Perjalanan: Tiket" },
-            { value: "fas fa-bed", text: "Perjalanan: Akomodasi" },
-            // Keuangan
-            { value: "fas fa-wallet", text: "Keuangan: Dompet" },
-            { value: "fas fa-credit-card", text: "Keuangan: Kartu Kredit" },
-            { value: "fas fa-landmark", text: "Keuangan: Bank" },
-            { value: "fas fa-coins", text: "Keuangan: Koin" },
-            // Makanan
-            { value: "fas fa-utensils", text: "Makanan: Peralatan Makan" },
-            { value: "fas fa-hamburger", text: "Makanan: Burger" },
-            // Produktivitas
-            { value: "fas fa-feather-alt", text: "Produktivitas: Tulis/Catatan" },
-            { value: "fas fa-check-double", text: "Produktivitas: Tugas Selesai" },
-            { value: "fas fa-chart-pie", text: "Produktivitas: Laporan" },
-            // Streaming & Hiburan
-            { value: "fas fa-film", text: "Hiburan: Film" },
-            { value: "fas fa-tv", text: "Hiburan: TV" },
-            { value: "fas fa-headphones", text: "Hiburan: Musik" },
-        ]
-    },
-    {
-        label: "Media Sosial (Logo Resmi)",
-        icons: [
-            { value: "fab fa-facebook", text: "Facebook" },
-            { value: "fab fa-instagram", text: "Instagram" },
-            { value: "fab fa-whatsapp", text: "WhatsApp" },
-            { value: "fab fa-x-twitter", text: "Twitter / X" },
-            { value: "fab fa-tiktok", text: "TikTok" },
-            { value: "fab fa-youtube", text: "YouTube" },
-            { value: "fab fa-telegram", text: "Telegram" },
-            { value: "fab fa-discord", text: "Discord" },
-            { value: "fab fa-linkedin", text: "LinkedIn" },
-            { value: "fab fa-pinterest", text: "Pinterest" },
-            { value: "fab fa-reddit", text: "Reddit" },
-            { value: "fab fa-snapchat", text: "Snapchat" },
-            { value: "fab fa-threads", text: "Threads" },
-            { value: "fab fa-line", text: "Line" },
-            { value: "fab fa-weixin", text: "WeChat" },
-            { value: "fab fa-tumblr", text: "Tumblr" },
-            { value: "fab fa-vk", text: "VK" },
-            { value: "fab fa-quora", text: "Quora" },
-            { value: "fab fa-medium", text: "Medium" },
-            { value: "fab fa-blogger", text: "Blogger" },
-            { value: "fab fa-wordpress", text: "WordPress" },
-            { value: "fab fa-deviantart", text: "DeviantArt" },
-            { value: "fab fa-dribbble", text: "Dribbble" },
-            { value: "fab fa-behance", text: "Behance" },
-            { value: "fab fa-flickr", text: "Flickr" },
-            { value: "fab fa-meetup", text: "Meetup" },
-            { value: "fab fa-mastodon", text: "Mastodon" },
-            { value: "fab fa-vimeo", text: "Vimeo" },
-            { value: "fab fa-mix", text: "Mix" },
-            { value: "fab fa-xing", text: "Xing" },
-            { value: "fab fa-goodreads", text: "GoodReads" },
-        ]
-    },
-    {
-        label: "Produktivitas & Kerja (Logo Resmi)",
-        icons: [
-            { value: "fab fa-google-drive", text: "Google Drive" },
-            { value: "fab fa-slack", text: "Slack" },
-            { value: "fab fa-trello", text: "Trello" },
-            { value: "fab fa-asana", text: "Asana" },
-            { value: "fab fa-evernote", text: "Evernote" },
-            { value: "fab fa-microsoft", text: "Microsoft" },
-            { value: "fab fa-skype", text: "Skype" },
-            { value: "fab fa-dropbox", text: "Dropbox" },
-            { value: "fab fa-confluence", text: "Confluence" },
-            { value: "fab fa-jira", text: "Jira" },
-            { value: "fab fa-figma", text: "Figma" },
-        ]
-    },
-    {
-        label: "E-commerce & Keuangan (Logo Resmi)",
-        icons: [
-            { value: "fab fa-amazon", text: "Amazon" },
-            { value: "fab fa-ebay", text: "eBay" },
-            { value: "fab fa-alibaba", text: "Alibaba" },
-            { value: "fab fa-etsy", text: "Etsy" },
-            { value: "fab fa-paypal", text: "PayPal" },
-            { value: "fab fa-stripe", text: "Stripe" },
-            { value: "fab fa-cc-wise", text: "Wise" },
-            { value: "fab fa-google-pay", text: "Google Pay" },
-            { value: "fab fa-apple-pay", text: "Apple Pay" },
-            { value: "fab fa-samsung-pay", text: "Samsung Pay" },
-            { value: "fab fa-bitcoin", text: "Bitcoin" },
-        ]
-    },
-    {
-        label: "Hiburan & Streaming (Logo Resmi)",
-        icons: [
-            { value: "fab fa-spotify", text: "Spotify" },
-            { value: "fab fa-soundcloud", text: "SoundCloud" },
-            { value: "fab fa-apple", text: "Apple" },
-            { value: "fab fa-deezer", text: "Deezer" },
-            { value: "fab fa-pandora", text: "Pandora" },
-            { value: "fab fa-bandcamp", text: "Bandcamp" },
-            { value: "fab fa-mixcloud", text: "Mixcloud" },
-            { value: "fab fa-twitch", text: "Twitch" },
-            { value: "fab fa-steam", text: "Steam" },
-        ]
-    },
-    {
-        label: "Teknologi & Tools (Logo Resmi)",
-        icons: [
-            { value: "fab fa-github", text: "GitHub" },
-            { value: "fab fa-gitlab", text: "GitLab" },
-            { value: "fab fa-bitbucket", text: "Bitbucket" },
-            { value: "fab fa-aws", text: "AWS" },
-            { value: "fab fa-google", text: "Google" },
-            { value: "fab fa-digital-ocean", text: "DigitalOcean" },
-            { value: "fab fa-linode", text: "Linode" },
-            { value: "fab fa-docker", text: "Docker" },
-            { value: "fab fa-npm", text: "NPM" },
-            { value: "fab fa-yarn", text: "Yarn" },
-            { value: "fab fa-android", text: "Android" },
-            { value: "fab fa-jenkins", text: "Jenkins" },
-        ]
-    },
-    {
-        label: "Utility / Umum (Lanjutan)",
-        icons: [
-            { value: "fas fa-home", text: "Home" },
-            { value: "fas fa-user", text: "User / Profile" },
-            { value: "fas fa-cog", text: "Settings" },
-            { value: "fas fa-phone", text: "Phone" },
-            { value: "fas fa-globe", text: "Globe / Website" },
-            { value: "fas fa-link", text: "Link (Default)" },
-            { value: "fas fa-envelope", text: "Email" },
-            { value: "fas fa-camera", text: "Camera" },
-            { value: "fas fa-image", text: "Gallery / Image" },
-            { value: "fas fa-file", text: "File" },
-            { value: "fas fa-folder", text: "Folder" },
-            { value: "fas fa-search", text: "Search" },
-            { value: "fas fa-map-marker-alt", text: "Location" },
-            { value: "fas fa-bookmark", text: "Bookmark" },
-            { value: "fas fa-star", text: "Star / Favorite" },
-            { value: "fas fa-heart", text: "Heart / Like" },
-            { value: "fas fa-bell", text: "Bell / Notification" },
-            { value: "fas fa-lock", text: "Lock / Private" },
-            { value: "fas fa-upload", text: "Upload" },
-            { value: "fas fa-download", text: "Download" },
-            { value: "fas fa-qrcode", text: "QR Code" },
-        ]
-    }
-];
+const defaultPortalIcons = [ { label: "Ikon Universal", icons: [ { value: "fas fa-shopping-cart", text: "Belanja: Keranjang" }, { value: "fas fa-shopping-bag", text: "Belanja: Tas" }, { value: "fas fa-store", text: "Belanja: Toko" }, { value: "fas fa-tags", text: "Belanja: Tag Harga" }, { value: "fas fa-car", text: "Transportasi: Mobil" }, { value: "fas fa-motorcycle", text: "Transportasi: Motor" }, { value: "fas fa-plane-departure", text: "Perjalanan: Pesawat" }, { value: "fas fa-ticket-alt", text: "Perjalanan: Tiket" }, { value: "fas fa-bed", text: "Perjalanan: Akomodasi" }, { value: "fas fa-wallet", text: "Keuangan: Dompet" }, { value: "fas fa-credit-card", text: "Keuangan: Kartu Kredit" }, { value: "fas fa-landmark", text: "Keuangan: Bank" }, { value: "fas fa-coins", text: "Keuangan: Koin" }, { value: "fas fa-utensils", text: "Makanan: Peralatan Makan" }, { value: "fas fa-hamburger", text: "Makanan: Burger" }, { value: "fas fa-feather-alt", text: "Produktivitas: Tulis/Catatan" }, { value: "fas fa-check-double", text: "Produktivitas: Tugas Selesai" }, { value: "fas fa-chart-pie", text: "Produktivitas: Laporan" }, { value: "fas fa-film", text: "Hiburan: Film" }, { value: "fas fa-tv", text: "Hiburan: TV" }, { value: "fas fa-headphones", text: "Hiburan: Musik" }, ] }, { label: "Media Sosial (Logo Resmi)", icons: [ { value: "fab fa-facebook", text: "Facebook" }, { value: "fab fa-instagram", text: "Instagram" }, { value: "fab fa-whatsapp", text: "WhatsApp" }, { value: "fab fa-x-twitter", text: "Twitter / X" }, { value: "fab fa-tiktok", text: "TikTok" }, { value: "fab fa-youtube", text: "YouTube" }, { value: "fab fa-telegram", text: "Telegram" }, { value: "fab fa-discord", text: "Discord" }, { value: "fab fa-linkedin", text: "LinkedIn" }, { value: "fab fa-pinterest", text: "Pinterest" }, { value: "fab fa-reddit", text: "Reddit" }, { value: "fab fa-snapchat", text: "Snapchat" }, { value: "fab fa-threads", text: "Threads" }, { value: "fab fa-line", text: "Line" }, { value: "fab fa-weixin", text: "WeChat" }, { value: "fab fa-tumblr", text: "Tumblr" }, { value: "fab fa-vk", text: "VK" }, { value: "fab fa-quora", text: "Quora" }, { value: "fab fa-medium", text: "Medium" }, { value: "fab fa-blogger", text: "Blogger" }, { value: "fab fa-wordpress", text: "WordPress" }, { value: "fab fa-deviantart", text: "DeviantArt" }, { value: "fab fa-dribbble", text: "Dribbble" }, { value: "fab fa-behance", text: "Behance" }, { value: "fab fa-flickr", text: "Flickr" }, { value: "fab fa-meetup", text: "Meetup" }, { value: "fab fa-mastodon", text: "Mastodon" }, { value: "fab fa-vimeo", text: "Vimeo" }, { value: "fab fa-mix", text: "Mix" }, { value: "fab fa-xing", text: "Xing" }, { value: "fab fa-goodreads", text: "GoodReads" }, ] }, { label: "Produktivitas & Kerja (Logo Resmi)", icons: [ { value: "fab fa-google-drive", text: "Google Drive" }, { value: "fab fa-slack", text: "Slack" }, { value: "fab fa-trello", text: "Trello" }, { value: "fab fa-asana", text: "Asana" }, { value: "fab fa-evernote", text: "Evernote" }, { value: "fab fa-microsoft", text: "Microsoft" }, { value: "fab fa-skype", text: "Skype" }, { value: "fab fa-dropbox", text: "Dropbox" }, { value: "fab fa-confluence", text: "Confluence" }, { value: "fab fa-jira", text: "Jira" }, { value: "fab fa-figma", text: "Figma" }, ] }, { label: "E-commerce & Keuangan (Logo Resmi)", icons: [ { value: "fab fa-amazon", text: "Amazon" }, { value: "fab fa-ebay", text: "eBay" }, { value: "fab fa-alibaba", text: "Alibaba" }, { value: "fab fa-etsy", text: "Etsy" }, { value: "fab fa-paypal", text: "PayPal" }, { value: "fab fa-stripe", text: "Stripe" }, { value: "fab fa-cc-wise", text: "Wise" }, { value: "fab fa-google-pay", text: "Google Pay" }, { value: "fab fa-apple-pay", text: "Apple Pay" }, { value: "fab fa-samsung-pay", text: "Samsung Pay" }, { value: "fab fa-bitcoin", text: "Bitcoin" }, ] }, { label: "Hiburan & Streaming (Logo Resmi)", icons: [ { value: "fab fa-spotify", text: "Spotify" }, { value: "fab fa-soundcloud", text: "SoundCloud" }, { value: "fab fa-apple", text: "Apple" }, { value: "fab fa-deezer", text: "Deezer" }, { value: "fab fa-pandora", text: "Pandora" }, { value: "fab fa-bandcamp", text: "Bandcamp" }, { value: "fab fa-mixcloud", text: "Mixcloud" }, { value: "fab fa-twitch", text: "Twitch" }, { value: "fab fa-steam", text: "Steam" }, ] }, { label: "Teknologi & Tools (Logo Resmi)", icons: [ { value: "fab fa-github", text: "GitHub" }, { value: "fab fa-gitlab", text: "GitLab" }, { value: "fab fa-bitbucket", text: "Bitbucket" }, { value: "fab fa-aws", text: "AWS" }, { value: "fab fa-google", text: "Google" }, { value: "fab fa-digital-ocean", text: "DigitalOcean" }, { value: "fab fa-linode", text: "Linode" }, { value: "fab fa-docker", text: "Docker" }, { value: "fab fa-npm", text: "NPM" }, { value: "fab fa-yarn", text: "Yarn" }, { value: "fab fa-android", text: "Android" }, { value: "fab fa-jenkins", text: "Jenkins" }, ] }, { label: "Utility / Umum (Lanjutan)", icons: [ { value: "fas fa-home", text: "Home" }, { value: "fas fa-user", text: "User / Profile" }, { value: "fas fa-cog", text: "Settings" }, { value: "fas fa-phone", text: "Phone" }, { value: "fas fa-globe", text: "Globe / Website" }, { value: "fas fa-link", text: "Link (Default)" }, { value: "fas fa-envelope", text: "Email" }, { value: "fas fa-camera", text: "Camera" }, { value: "fas fa-image", text: "Gallery / Image" }, { value: "fas fa-file", text: "File" }, { value: "fas fa-folder", text: "Folder" }, { value: "fas fa-search", text: "Search" }, { value: "fas fa-map-marker-alt", text: "Location" }, { value: "fas fa-bookmark", text: "Bookmark" }, { value: "fas fa-star", text: "Star / Favorite" }, { value: "fas fa-heart", text: "Heart / Like" }, { value: "fas fa-bell", text: "Bell / Notification" }, { value: "fas fa-lock", text: "Lock / Private" }, { value: "fas fa-upload", text: "Upload" }, { value: "fas fa-download", text: "Download" }, { value: "fas fa-qrcode", text: "QR Code" }, ] } ];
 
-/**
- * [MODIFIKASI] Membuat konten HTML untuk modal tambah/edit portal dan menampilkannya.
- * Menggunakan daftar ikon baru dan menghapus input deskripsi.
- */
 function showPortalModal() {
     const iconOptionsHTML = defaultPortalIcons.map(group => `
         <optgroup label="--- ${group.label} ---">
@@ -2944,9 +2974,6 @@ function showPortalModal() {
     document.getElementById('portal-custom-color').addEventListener('input', (e) => applyCustomPortalColor(e.target.value));
 }
 
-/**
- * [PERUBAHAN] Menangani submit form portal, membaca data (tanpa deskripsi), dan menyimpannya.
- */
 function handlePortalFormSubmit(e) {
     e.preventDefault();
     
@@ -2959,7 +2986,6 @@ function handlePortalFormSubmit(e) {
         const iconUrlInput = document.getElementById('icon-url');
         const iconPreview = document.getElementById('icon-preview');
 
-        // Prioritaskan gambar yang sudah di-preview (dari file upload)
         if (iconPreview.src && iconPreview.src !== '#' && iconPreview.src.startsWith('data:image')) {
             addPortalToArray(name, url, iconPreview.src, color);
         } else if (iconUrlInput.value) {
@@ -2972,9 +2998,6 @@ function handlePortalFormSubmit(e) {
     }
 }
 
-/**
- * [PERUBAHAN] Menambahkan data portal baru ke array utama (tanpa deskripsi), menyimpan, dan render ulang.
- */
 function addPortalToArray(name, url, icon, color) {
     let appData = storage.getAppData();
     const newPortal = { id: generateId(), name, url, icon, color };
@@ -2985,9 +3008,6 @@ function addPortalToArray(name, url, icon, color) {
     showMessage('Portal berhasil dibuat!', 'success');
 }
 
-/**
- * [PERUBAHAN] Merender semua portal dari data ke dalam sidebar (tanpa tooltip deskripsi).
- */
 function renderPortals() {
     const portalsContainer = document.getElementById('sidebar-portals-container');
     const appData = storage.getAppData();
@@ -3010,7 +3030,7 @@ function renderPortals() {
         linkElement.href = portal.url;
         linkElement.target = '_blank';
         linkElement.className = 'sidebar-portal-item';
-        linkElement.title = portal.name; // Hanya nama sebagai tooltip
+        linkElement.title = portal.name;
 
         linkElement.innerHTML = `
             <div class="portal-icon">${iconHtml}</div>
@@ -3031,9 +3051,6 @@ function renderPortals() {
     });
 }
 
-/**
- * Menghapus portal berdasarkan ID-nya.
- */
 function deletePortal(portalId) {
     let appData = storage.getAppData();
     appData[currentMode].portals = appData[currentMode].portals.filter(p => p.id !== portalId);
@@ -3053,7 +3070,6 @@ function toggleCustomIconOptions() {
 function handleImageUpload(event, previewElement) {
     const file = event.target.files[0];
     if (file) {
-        // Reset input URL jika pengguna memilih file
         document.getElementById('icon-url').value = ''; 
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -3479,6 +3495,4 @@ async function exportAllToImages(timeRange = 'all', customStartDate = null, cust
     }
 }
 </script>
-</body>
-</html>
 
