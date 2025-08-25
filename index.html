@@ -27,7 +27,7 @@
     <!-- PENTING: Memuat Google Identity Services (GSI) untuk otentikasi -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
-    <!-- [BARU] Memuat Google API Client Library (GAPI) untuk File Manager -->
+    <!-- [DIHAPUS] Referensi ke GAPI yang spesifik untuk File Manager tidak lagi diperlukan di sini -->
     <script src="https://apis.google.com/js/api.js" async defer></script>
 
 
@@ -812,204 +812,31 @@
         }
         
         /* =================================================================== */
-        /* ================== START: GAYA FILE MANAGER DRIVE ================= */
+        /* ================== [DIHAPUS] GAYA FILE MANAGER DRIVE ================ */
         /* =================================================================== */
 
-        /* Tombol Aksi & Navigasi */
-        .gdrive-nav-btn, .gdrive-action-btn, .gdrive-view-btn {
-            background-color: var(--input-bg);
-            border: 1px solid var(--input-border);
-            color: var(--text-secondary);
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem;
-            transition: all 0.2s ease;
-        }
-        .gdrive-nav-btn:hover:not(:disabled), .gdrive-action-btn:hover, .gdrive-view-btn:hover {
-            background-color: var(--hover-nav-bg);
-            border-color: var(--hover-nav-border);
-            color: var(--text-primary);
-        }
-        .gdrive-nav-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .gdrive-view-btn.active {
-            background-color: var(--primary-brand);
-            color: white;
-            box-shadow: 0 2px 10px rgba(192, 132, 252, 0.4);
-        }
-        .black-mode .gdrive-view-btn.active {
-            box-shadow: 0 2px 10px rgba(0, 240, 255, 0.4);
-        }
-
-        /* Breadcrumbs */
-        .gdrive-breadcrumb-item {
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .gdrive-breadcrumb-item:hover {
-            background-color: var(--hover-nav-bg);
-        }
-        .gdrive-breadcrumb-separator {
-            color: var(--text-secondary);
-        }
-
-        /* Container & Drag State */
-        #gdrive-file-list-container.drag-over {
-            border-color: var(--primary-brand);
-            box-shadow: inset 0 0 20px var(--primary-brand, 0.4);
-        }
-        #gdrive-file-list-container.drag-over #gdrive-drop-overlay {
-            display: flex;
-        }
-
-        /* Tampilan Grid */
-        #gdrive-file-list.view-grid {
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 1rem;
-        }
-        .gdrive-item.grid-view {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 0.75rem;
-            position: relative;
-        }
-        .grid-view .gdrive-item-icon {
-            font-size: 3rem; /* 48px */
-            margin-bottom: 0.5rem;
-        }
-        .grid-view .gdrive-item-name {
-            font-size: 0.875rem; /* 14px */
-            font-weight: 500;
-            word-break: break-all;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        /* Tampilan Daftar */
-        #gdrive-file-list.view-list {
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-        }
-        .gdrive-item.list-view {
-            display: grid;
-            grid-template-columns: 40px 1fr auto auto;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.5rem 0.75rem;
-            position: relative;
-        }
-        .list-view .gdrive-item-icon {
-            font-size: 1.5rem; /* 24px */
-            text-align: center;
-        }
-        .list-view .gdrive-item-name {
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .list-view .gdrive-item-details {
-            font-size: 0.75rem; /* 12px */
-            color: var(--text-secondary);
-            text-align: right;
-        }
-
-        /* Item Umum */
-        .gdrive-item {
-            background-color: transparent;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-            cursor: pointer;
-        }
-        .gdrive-item:hover {
-            background-color: var(--hover-nav-bg);
-            transform: translateY(-2px);
-        }
-        .gdrive-item-icon {
-            color: var(--primary-brand);
-        }
-        .gdrive-item-icon.folder {
-            color: #facc15; /* Yellow for folders */
-        }
-
-        .gdrive-context-toggle {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            color: var(--text-secondary);
-            padding: 0.25rem 0.5rem;
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.2s, background-color 0.2s;
-        }
-        .gdrive-item:hover .gdrive-context-toggle {
-            opacity: 1;
-        }
-        .gdrive-context-toggle:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        /* Context Menu */
-        .gdrive-context-item {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            padding: 0.5rem 0.75rem;
-            text-align: left;
-            font-size: 0.875rem;
-            border-radius: 0.375rem;
-            color: var(--text-primary);
-            background: none;
-            border: none;
-            cursor: pointer;
-        }
-        .gdrive-context-item:hover {
-            background-color: var(--hover-nav-bg);
-        }
-
-        /* Progress Bar Upload */
-        .gdrive-upload-item {
+        /* [BARU] Gaya untuk progress bar upload yang disederhanakan */
+        .upload-progress-item {
             background-color: var(--input-bg);
             padding: 0.75rem;
             border-radius: 0.5rem;
             border: 1px solid var(--input-border);
         }
-        .gdrive-progress-bar-bg {
+        .upload-progress-bar-bg {
             background-color: rgba(255, 255, 255, 0.1);
             border-radius: 9999px;
             overflow: hidden;
-            height: 8px;
+            height: 6px;
         }
-        .gdrive-progress-bar-fg {
+        .upload-progress-bar-fg {
             background: linear-gradient(90deg, #9333ea, #7e22ce);
             height: 100%;
             border-radius: 9999px;
             transition: width 0.3s ease;
         }
-        .black-mode .gdrive-progress-bar-fg {
+        .black-mode .upload-progress-bar-fg {
             background: linear-gradient(90deg, #00c3ff, #008cff);
         }
-        .gdrive-progress-action-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .gdrive-progress-action-btn:hover {
-            color: var(--text-primary);
-        }
-
-        /* ================================================================= */
-        /* =================== END: GAYA FILE MANAGER DRIVE ================== */
-        /* ================================================================= */
 
     </style>
 </head>
@@ -1335,7 +1162,7 @@
                     <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
                          <h2 class="text-3xl font-bold text-purple-300">Catatan Profesional</h2>
                          <div class="flex gap-2">
-                                 <button id="notesAddNewBtn" class="custom-button"><i class="fas fa-plus mr-2"></i>Catatan Baru</button>
+                               <button id="notesAddNewBtn" class="custom-button"><i class="fas fa-plus mr-2"></i>Catatan Baru</button>
                          </div>
                     </div>
                     <div class="notes-container">
@@ -1557,110 +1384,51 @@
                                     <button id="restoreData" class="custom-button custom-button-danger w-full mt-2"><i class="fas fa-upload mr-2"></i>Restore dari Lokal</button>
                                 </div>
                                 <hr class="border-purple-500/20">
-                                
-                                <h4 class="text-lg font-semibold text-purple-300 pt-2">Profil & Sinkronisasi Google Drive</h4>
-                                
-                                <div id="user-profile" class="hidden mb-6 text-center border-b border-purple-500/20 pb-6">
-                                    <div id="avatar-container" class="w-24 h-24 rounded-full p-1 border-2 border-purple-400 mx-auto mb-3">
-                                        <img id="user-picture" class="w-full h-full object-cover" alt="Avatar Pengguna" src="https://placehold.co/96x96/0F0A20/c084fc?text=?">
-                                    </div>
-                                    <p class="text-lg font-semibold text-purple-200" id="user-name"></p>
-                                    <!-- [PERUBAHAN] Struktur HTML untuk Privasi Email -->
-                                    <div class="flex items-center justify-center gap-2 mt-1">
-                                        <p class="text-sm text-gray-400" id="user-email"></p>
-                                        <i id="toggle-email-visibility" class="fas fa-eye cursor-pointer text-purple-300 hover:text-white transition-colors" title="Tampilkan/Sembunyikan Email"></i>
-                                    </div>
-                                </div>
-
-                                <div id="google-drive-ui" class="space-y-3">
-                                    <button id="auth-button" class="custom-button w-full" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"><i class="fab fa-google mr-2"></i><span>Hubungkan ke Google</span></button>
-                                    <button id="backup-button" class="custom-button w-full" disabled><i class="fab fa-google-drive mr-2"></i>Backup Data ke Drive</button>
-                                    <button id="restore-button" class="custom-button w-full bg-green-600 hover:bg-green-500" disabled><i class="fas fa-cloud-download-alt mr-2"></i>Restore Data dari Drive</button>
-                                    <div id="auth-status" class="text-center text-sm text-gray-400">Belum terhubung.</div>
-                                    <div id="file-list" class="text-xs text-gray-500 bg-black/20 p-2 rounded-md max-h-40 overflow-y-auto"></div>
-                                </div>
-                                
-                                <hr class="border-purple-500/20">
                                 <button id="clearAllData" class="custom-button custom-button-danger w-full mt-4"><i class="fas fa-trash mr-2"></i>Hapus Semua Data</button>
                             </div>
                         </div>
 
-                        <!-- =================================================================== -->
-                        <!-- ================= START: FITUR FILE MANAGER DRIVE ================== -->
-                        <!-- =================================================================== -->
-                        <div class="lg:col-span-2 glass-effect p-6 space-y-4">
+                        <!-- [PERUBAHAN] Blok Pengaturan Google Drive yang Disederhanakan -->
+                        <div class="glass-effect p-6 space-y-4">
                             <h3 class="text-xl font-semibold text-blue-400 mb-2">
-                                <i class="fab fa-google-drive mr-2"></i>File Manager Drive
+                                <i class="fab fa-google-drive mr-2"></i>Penyimpanan & Sinkronisasi Cloud
                             </h3>
                             <p class="text-sm text-gray-400 -mt-2 mb-4">
-                                Akses dan kelola file Google Drive Anda secara langsung. Cepat, aman, dan tanpa transit server.
+                                Simpan file, cadangkan, dan pulihkan data aplikasi Anda dengan aman menggunakan Google Drive.
                             </p>
 
-                            <!-- UI akan muncul di sini setelah login -->
-                            <div id="gdrive-manager-ui" class="hidden">
-                                <!-- Toolbar Atas -->
-                                <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-lg glass-effect mb-4">
-                                    <!-- Navigasi & Path -->
-                                    <div id="gdrive-nav" class="flex items-center gap-2 text-sm">
-                                        <button id="gdrive-back-btn" class="gdrive-nav-btn" disabled title="Kembali"><i class="fas fa-arrow-left"></i></button>
-                                        <div id="gdrive-breadcrumbs" class="flex items-center gap-1 flex-wrap">
-                                            <!-- Breadcrumbs dirender oleh JS -->
-                                        </div>
-                                    </div>
-
-                                    <!-- Aksi & Kontrol Tampilan -->
-                                    <div class="flex items-center gap-2">
-                                        <button id="gdrive-sort-btn" class="gdrive-action-btn" title="Urutkan"><i class="fas fa-sort-amount-down mr-2"></i><span id="gdrive-sort-label">Nama</span></button>
-                                        <div class="bg-gray-700/50 p-1 rounded-md flex">
-                                            <button id="gdrive-view-list-btn" class="gdrive-view-btn active" title="Tampilan Daftar"><i class="fas fa-list"></i></button>
-                                            <button id="gdrive-view-grid-btn" class="gdrive-view-btn" title="Tampilan Grid"><i class="fas fa-th-large"></i></button>
-                                        </div>
-                                        <button id="gdrive-create-folder-btn" class="custom-button !py-2 !px-3" title="Buat Folder Baru"><i class="fas fa-folder-plus"></i></button>
-                                        <label for="gdrive-file-upload" class="custom-button !py-2 !px-3 cursor-pointer" title="Unggah File">
-                                            <i class="fas fa-file-upload"></i>
-                                            <input type="file" id="gdrive-file-upload" class="hidden" multiple>
-                                        </label>
-                                         <label for="gdrive-folder-upload" class="custom-button !py-2 !px-3 cursor-pointer" style="background: linear-gradient(90deg, #10b981, #059669);" title="Unggah Folder">
-                                            <i class="fas fa-folder-upload"></i>
-                                            <input type="file" id="gdrive-folder-upload" class="hidden" webkitdirectory directory>
-                                        </label>
-                                    </div>
+                            <!-- Profil Pengguna (muncul setelah login) -->
+                            <div id="user-profile" class="hidden mb-6 text-center border-b border-purple-500/20 pb-6">
+                                <div id="avatar-container" class="w-24 h-24 rounded-full p-1 border-2 border-purple-400 mx-auto mb-3">
+                                    <img id="user-picture" class="w-full h-full object-cover" alt="Avatar Pengguna" src="https://placehold.co/96x96/0F0A20/c084fc?text=?">
                                 </div>
-
-                                <!-- Area File & Folder (Drag & Drop) -->
-                                <div id="gdrive-file-list-container" class="relative min-h-[400px] max-h-[60vh] overflow-y-auto p-2 rounded-lg border-2 border-dashed border-transparent transition-colors duration-300">
-                                    <div id="gdrive-file-list" class="grid grid-cols-1 gap-2">
-                                        <!-- Item file/folder dirender oleh JS -->
-                                    </div>
-                                    <!-- Overlay untuk Drag & Drop -->
-                                    <div id="gdrive-drop-overlay" class="absolute inset-0 bg-purple-500/20 backdrop-blur-sm rounded-lg flex-col items-center justify-center text-center hidden pointer-events-none">
-                                        <i class="fas fa-cloud-upload-alt text-5xl mb-4 text-purple-200"></i>
-                                        <p class="text-xl font-bold text-white">Jatuhkan file atau folder untuk diunggah</p>
-                                    </div>
-                                     <!-- Indikator Loading -->
-                                    <div id="gdrive-loading-indicator" class="absolute inset-0 bg-gray-900/50 flex items-center justify-center hidden">
-                                        <i class="fas fa-spinner fa-spin text-4xl text-purple-300"></i>
-                                    </div>
-                                </div>
-
-                                <!-- Area Progress Upload -->
-                                <div id="gdrive-upload-progress-area" class="mt-4 space-y-2">
-                                    <!-- Progress bar dirender oleh JS -->
+                                <p class="text-lg font-semibold text-purple-200" id="user-name"></p>
+                                <div class="flex items-center justify-center gap-2 mt-1">
+                                    <p class="text-sm text-gray-400" id="user-email"></p>
+                                    <i id="toggle-email-visibility" class="fas fa-eye cursor-pointer text-purple-300 hover:text-white transition-colors" title="Tampilkan/Sembunyikan Email"></i>
                                 </div>
                             </div>
 
-                            <!-- Context Menu (Tersembunyi) -->
-                            <div id="gdrive-context-menu" class="absolute z-50 glass-effect p-2 rounded-md shadow-lg hidden w-40">
-                                <button data-action="download" class="gdrive-context-item"><i class="fas fa-download fa-fw mr-2"></i>Unduh</button>
-                                <button data-action="rename" class="gdrive-context-item"><i class="fas fa-edit fa-fw mr-2"></i>Ganti Nama</button>
-                                <button data-action="delete" class="gdrive-context-item text-pink-400"><i class="fas fa-trash fa-fw mr-2"></i>Hapus</button>
+                            <!-- Menu Kontrol Google Drive -->
+                            <div id="google-drive-ui" class="space-y-3">
+                                <button id="auth-button" class="custom-button w-full" style="background: linear-gradient(90deg, #3b82f6, #2563eb);"><i class="fab fa-google mr-2"></i><span>Hubungkan ke Google</span></button>
+                                
+                                <!-- Tombol-tombol ini akan muncul setelah login -->
+                                <input type="file" id="smart-upload-input" multiple hidden>
+                                <button id="smart-upload-button" class="custom-button w-full hidden" style="background: linear-gradient(90deg, #10b981, #059669);"><i class="fas fa-cloud-upload-alt mr-2"></i>Unggah File ke Drive</button>
+                                <button id="backup-button" class="custom-button w-full hidden"><i class="fas fa-save mr-2"></i>Backup Aplikasi ke Drive</button>
+                                <button id="restore-button" class="custom-button w-full hidden" style="background: linear-gradient(90deg, #f59e0b, #d97706);"><i class="fas fa-cloud-download-alt mr-2"></i>Restore Aplikasi dari Drive</button>
+                                
+                                <div id="auth-status" class="text-center text-sm text-gray-400 pt-2">Belum terhubung.</div>
+                                
+                                <!-- [BARU] Area untuk menampilkan progress upload -->
+                                <div id="upload-progress-container" class="space-y-2 pt-2"></div>
+
+                                <div id="file-list" class="text-xs text-gray-500 bg-black/20 p-2 rounded-md max-h-40 overflow-y-auto"></div>
                             </div>
                         </div>
-                        <!-- ================================================================= -->
-                        <!-- ================== END: FITUR FILE MANAGER DRIVE ================== -->
-                        <!-- ================================================================= -->
-                        
-                        <div class="space-y-6">
+
+                        <div class="lg:col-span-2 space-y-6">
                             <div class="glass-effect p-6">
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Ubah Latar Belakang</h3>
                                 <div class="space-y-4">
@@ -1700,8 +1468,8 @@
                                 <h3 class="text-xl font-semibold mb-4 text-pink-400">Informasi Aplikasi</h3>
                                 <div class="space-y-2 text-sm">
                                     <p><strong>Nama:</strong> LifeHub v5 (Uranus Space)</p>
-                                    <p><strong>Versi:</strong> 5.6.0-FeatureUpdate</p>
-                                    <p><strong>Fitur:</strong> File Manager Google Drive, Editor Teks Modern, Google Drive Backup & Restore, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Portal Tautan, Custom BG (Persisten), Preview Mode, Kunci Catatan, Keamanan Lanjutan, Laporan PDF Komprehensif dengan Tema Custom, Unggah Font Kustom.</p>
+                                    <p><strong>Versi:</strong> 5.7.0-DriveRefactor</p>
+                                    <p><strong>Fitur:</strong> Penyimpanan Cloud Sederhana (Upload, Backup, Restore), Editor Teks Modern, Analisis Data, Keuangan, Tugas, Pomodoro, Split Bill, Portal Tautan, Custom BG (Persisten), Preview Mode, Kunci Catatan, Keamanan Lanjutan, Laporan PDF Komprehensif dengan Tema Custom, Unggah Font Kustom.</p>
                                     <p><strong>Storage:</strong> LocalStorage, IndexedDB & Google Drive (Data terenkripsi di terminal Anda)</p>
                                 </div>
                             </div>
@@ -2461,7 +2229,7 @@ class NotesApp {
     truncateContent(html, length) { const text = html.replace(/<[^>]*>/g, ''); if (text.length <= length) return text; return text.substring(0, length) + '...'; }
 }
 
-// ===================================================================================
+    // ===================================================================================
 // ========================== BAGIAN 2: LOGIKA APLIKASI UTAMA ========================
 // ===================================================================================
 
@@ -2511,7 +2279,8 @@ const storage = {
 // Konfigurasi Google Drive API
 const GOOGLE_CLIENT_ID = "175269804015-7agb1gr0nd6ah66co5qen34dd2mvtm68.apps.googleusercontent.com"; 
 const GOOGLE_SCOPES = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
-const DRIVE_FOLDER_NAME = "Uranuspace_App_Backups"; 
+const DRIVE_BACKUP_FOLDER_NAME = "Uranuspace_App_Backups"; // Folder untuk backup
+const DRIVE_UPLOAD_FOLDER_NAME = "uranuspace_storage"; // Folder untuk upload file
 let googleTokenClient; 
 let googleAccessToken = null;
 
@@ -2616,6 +2385,10 @@ function setupEventListeners() {
     // [PERUBAHAN] Menambahkan event listener untuk ikon mata
     document.getElementById('toggle-email-visibility').addEventListener('click', toggleEmailVisibility);
     
+    // [BARU] Event listener untuk tombol upload file yang baru
+    document.getElementById('smart-upload-button').addEventListener('click', () => document.getElementById('smart-upload-input').click());
+    document.getElementById('smart-upload-input').addEventListener('change', handleSmartUpload);
+
     // [PERBAIKAN] Menambahkan event listener untuk mematikan suara saat tab tidak aktif
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
@@ -2958,8 +2731,8 @@ function applyDateRange() { const startDate = document.getElementById('startDate
 function setupMasterRangeSelector() { document.querySelectorAll('#master-range-selector .range-btn').forEach(btn => { btn.addEventListener('click', (e) => { const range = e.currentTarget.dataset.range; if (range === 'custom') { showDateRangeModal('dashboard'); } else { updateActiveButton('master-range-selector', range); masterDateRange = range; refreshDashboardData(); } }); }); } function updateActiveButton(selectorId, activeRange) { document.querySelectorAll(`#${selectorId} .range-btn`).forEach(b => b.classList.remove('active')); document.querySelector(`#${selectorId} .range-btn[data-range="${activeRange}"]`).classList.add('active'); } function filterDataByRange(data, range, dateKey) { if (range === 'all') return data.filter(item => item[dateKey] || item.lastModified); let startDate, endDate = new Date(); if (typeof range === 'object' && range.type === 'custom') { startDate = new Date(range.start + 'T00:00:00Z'); endDate = new Date(range.end + 'T23:59:59Z'); } else { startDate = new Date(); if (range === '7d') startDate.setDate(endDate.getDate() - 6); else if (range === '1m') startDate.setDate(endDate.getDate() - 29); else if (range === '3m') startDate.setMonth(endDate.getMonth() - 3); else if (range === '1y') startDate.setFullYear(endDate.getFullYear() - 1); startDate.setHours(0, 0, 0, 0); } return data.filter(item => { const itemDateStr = item[dateKey] || item.lastModified; if (!itemDateStr) return false; const itemDate = new Date(itemDateStr); return itemDate >= startDate && itemDate <= endDate; }); }
 function saveToken(tokenResponse) { const expiresAt = Date.now() + (tokenResponse.expires_in * 1000); const tokenData = { access_token: tokenResponse.access_token, expires_at: expiresAt }; localStorage.setItem('googleAuthToken', JSON.stringify(tokenData)); } function loadToken() { const tokenStr = localStorage.getItem('googleAuthToken'); if (!tokenStr) return null; try { return JSON.parse(tokenStr); } catch (e) { return null; } } function clearToken() { localStorage.removeItem('googleAuthToken'); localStorage.removeItem('googleAuthLoggedIn'); } function initGisClient() { try { if (typeof google === 'undefined' || typeof google.accounts === 'undefined') { console.error("Google Identity Services script not loaded yet."); showMessage("Gagal memuat API Google. Coba refresh halaman.", "error"); return; } googleTokenClient = google.accounts.oauth2.initTokenClient({ client_id: GOOGLE_CLIENT_ID, scope: GOOGLE_SCOPES, callback: (tokenResponse) => { if (tokenResponse && tokenResponse.access_token) { googleAccessToken = tokenResponse.access_token; saveToken(tokenResponse); localStorage.setItem('googleAuthLoggedIn', 'true'); updateSigninStatus(true); } else { console.error("Gagal mendapatkan access token:", tokenResponse); showMessage("Gagal melakukan otentikasi.", "error"); clearToken(); } }, }); const savedToken = loadToken(); if (savedToken) { if (Date.now() < savedToken.expires_at) { googleAccessToken = savedToken.access_token; updateSigninStatus(true); verifyToken(googleAccessToken).then(valid => { if (!valid) { console.warn("Token invalid, refreshing..."); googleTokenClient.requestAccessToken({ prompt: '' }); } }); } else { console.log("Token expired, requesting new one..."); googleTokenClient.requestAccessToken({ prompt: '' }); } } else if (localStorage.getItem('googleAuthLoggedIn') === 'true') { googleTokenClient.requestAccessToken({ prompt: '' }); } } catch (error) { console.error("Google Identity Services client gagal dimuat.", error); showMessage("Gagal memuat API Google. Coba refresh halaman.", "error"); } } function handleAuthClick() { if (googleAccessToken) { google.accounts.oauth2.revoke(googleAccessToken, () => { googleAccessToken = null; clearToken(); updateSigninStatus(false); showMessage("Berhasil keluar dari akun Google.", "success"); }); } else { if (googleTokenClient) { googleTokenClient.requestAccessToken({ prompt: 'consent' }); } else { showMessage("Client otentikasi belum siap.", "error"); } } } async function verifyToken(token) { try { const res = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`); return res.ok; } catch (e) { console.error("Verifikasi token gagal:", e); return false; } }
 
-// ===================================================================================
-// =================== BAGIAN 3: FUNGSI GOOGLE DRIVE (BACKUP & RESTORE) ==============
+    // ===================================================================================
+// =================== BAGIAN 3: FUNGSI GOOGLE DRIVE (BACKUP, RESTORE, & UPLOAD) ==============
 // ===================================================================================
 
 /**
@@ -2993,10 +2766,157 @@ function blobToDataURL(blob) {
     });
 }
 
+// --- FUNGSI BARU UNTUK UPLOAD FILE ---
 
 /**
- * [PERUBAHAN BESAR] Fungsi utama untuk menangani klik tombol backup.
- * Sekarang akan membuat file ZIP terstruktur.
+ * [BARU] Menangani pemilihan file dari input dan memulai proses upload.
+ * @param {Event} event - Event 'change' dari input file.
+ */
+async function handleSmartUpload(event) {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    if (!googleAccessToken) {
+        showMessage("Otentikasi diperlukan untuk mengunggah file.", "error");
+        return;
+    }
+
+    showMessage(`Memulai upload ${files.length} file...`, "info");
+
+    try {
+        const rootFolderId = await findOrCreateFolder(DRIVE_UPLOAD_FOLDER_NAME, 'root');
+        if (!rootFolderId) {
+            throw new Error(`Gagal membuat folder utama '${DRIVE_UPLOAD_FOLDER_NAME}'.`);
+        }
+
+        for (const file of files) {
+            const subfolderName = getUploadSubfolder(file);
+            const subfolderId = await findOrCreateFolder(subfolderName, rootFolderId);
+            if (!subfolderId) {
+                showMessage(`Gagal membuat subfolder '${subfolderName}' untuk file '${file.name}'. Melanjutkan...`, "error");
+                continue; // Lanjut ke file berikutnya jika subfolder gagal dibuat
+            }
+            // Upload file ke subfolder yang sesuai
+            uploadSingleFileWithProgress(file, subfolderId);
+        }
+
+    } catch (error) {
+        console.error("Error pada proses smart upload:", error);
+        showMessage(`Terjadi kesalahan: ${error.message}`, "error");
+    } finally {
+        // Reset input file agar bisa memilih file yang sama lagi
+        event.target.value = '';
+    }
+}
+
+/**
+ * [BARU] Menentukan nama subfolder berdasarkan tipe file.
+ * @param {File} file - Objek file.
+ * @returns {string} Nama subfolder.
+ */
+function getUploadSubfolder(file) {
+    const type = file.type;
+    const name = file.name.toLowerCase();
+
+    if (type.startsWith('image/')) return 'Gambar';
+    if (type.startsWith('video/')) return 'Video';
+    if (type.startsWith('audio/')) return 'Audio';
+    if (type.startsWith('application/pdf') || type.includes('document') || name.endsWith('.doc') || name.endsWith('.docx') || name.endsWith('.txt')) return 'Dokumen';
+    if (type.includes('spreadsheet') || type.includes('excel') || name.endsWith('.xls') || name.endsWith('.xlsx') || name.endsWith('.csv')) return 'Spreadsheet';
+    if (type.includes('presentation') || type.includes('powerpoint') || name.endsWith('.ppt') || name.endsWith('.pptx')) return 'Presentasi';
+    
+    return 'Lainnya';
+}
+
+/**
+ * [BARU] Mengunggah satu file dengan progress bar.
+ * @param {File} file - File yang akan diunggah.
+ * @param {string} parentId - ID folder tujuan di Google Drive.
+ */
+function uploadSingleFileWithProgress(file, parentId) {
+    const uploadId = `upload-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    addUploadProgressUI(uploadId, file.name);
+
+    const metadata = {
+        name: file.name,
+        parents: [parentId]
+    };
+
+    const uploader = new MediaUploader({
+        file: file,
+        token: googleAccessToken,
+        metadata: metadata,
+        onProgress: (progress) => {
+            const percentage = progress.total > 0 ? Math.round((progress.loaded / progress.total) * 100) : 0;
+            const statusText = `${formatSize(progress.loaded)} / ${formatSize(progress.total)} (${formatSize(progress.speed || 0)}/s)`;
+            updateUploadProgressUI(uploadId, percentage, statusText);
+        },
+        onComplete: () => {
+            updateUploadProgressUI(uploadId, 100, 'Selesai!');
+            removeUploadProgressUI(uploadId, true);
+        },
+        onError: (error) => {
+            console.error('Upload error:', error);
+            updateUploadProgressUI(uploadId, 100, 'Gagal!');
+            removeUploadProgressUI(uploadId, false);
+        }
+    });
+    uploader.upload();
+}
+
+/**
+ * [BARU] Menambahkan UI progress bar untuk upload.
+ */
+function addUploadProgressUI(id, fileName) {
+    const container = document.getElementById('upload-progress-container');
+    const item = document.createElement('div');
+    item.id = id;
+    item.className = 'upload-progress-item';
+    item.innerHTML = `
+        <div class="flex items-center justify-between gap-2">
+            <div class="flex-1 overflow-hidden">
+                <p class="text-sm font-medium truncate">${fileName}</p>
+                <div class="text-xs text-gray-400 upload-status">Mempersiapkan...</div>
+            </div>
+            <span class="upload-percentage font-mono text-sm">0%</span>
+        </div>
+        <div class="upload-progress-bar-bg mt-2">
+            <div class="upload-progress-bar-fg w-0"></div>
+        </div>
+    `;
+    container.prepend(item);
+}
+
+/**
+ * [BARU] Memperbarui UI progress bar.
+ */
+function updateUploadProgressUI(id, percentage, statusText) {
+    const item = document.getElementById(id);
+    if (!item) return;
+    item.querySelector('.upload-progress-bar-fg').style.width = `${percentage}%`;
+    item.querySelector('.upload-percentage').textContent = `${percentage}%`;
+    item.querySelector('.upload-status').textContent = statusText;
+}
+
+/**
+ * [BARU] Menghapus UI progress bar setelah selesai atau gagal.
+ */
+function removeUploadProgressUI(id, success) {
+    const item = document.getElementById(id);
+    if (!item) return;
+    const progressBar = item.querySelector('.upload-progress-bar-fg');
+    progressBar.style.backgroundColor = success ? '#4ade80' : '#f472b6';
+    setTimeout(() => {
+        item.style.opacity = '0';
+        setTimeout(() => item.remove(), 500);
+    }, 4000);
+}
+
+
+// --- FUNGSI BACKUP & RESTORE (YANG SUDAH ADA & CANGGIH) ---
+
+/**
+ * [MODIFIKASI] Fungsi utama untuk menangani klik tombol backup.
+ * Sekarang menggunakan nama folder yang benar.
  */
 async function handleBackupClick() {
     if (!googleAccessToken) {
@@ -3013,53 +2933,33 @@ async function handleBackupClick() {
         const mediaFolder = zip.folder("catatan_media");
         const bgFolder = zip.folder("backgrounds");
 
-        // 1. Kumpulkan data dasar
         let lifeHubData = storage.getAppData();
         let notesData = JSON.parse(localStorage.getItem('notes_v5.5.0') || '[]');
         let finalNotes = [];
         let finalBackgrounds = [];
 
-        // 2. Proses media dari catatan
         authStatus.innerText = "Memproses media catatan...";
         for (const note of notesData) {
             let newContent = note.content;
             let noteMediaArray = [];
-            
-            // Regex untuk menemukan semua src Data URL
             const regex = /src="(data:(image|video)\/[^;]+;base64,[^"]+)"/g;
             let match;
             let mediaIndex = 0;
 
             while ((match = regex.exec(note.content)) !== null) {
                 const dataUrl = match[1];
-                const mimeType = match[2]; // 'image' or 'video'
+                const mimeType = match[2];
                 const extension = dataUrl.split('/')[1].split(';')[0];
-                
                 const filename = `note_${note.id}_media_${mediaIndex}.${extension}`;
                 const fileBlob = dataURLtoBlob(dataUrl);
-
-                // Tambahkan file ke ZIP
                 mediaFolder.file(filename, fileBlob);
-
-                // Ganti Data URL dengan path relatif di konten
                 newContent = newContent.replace(dataUrl, `catatan_media/${filename}`);
-                
-                // Tambahkan metadata ke array media catatan
-                noteMediaArray.push({
-                    type: mimeType === 'image' ? 'photo' : 'video',
-                    filename: filename
-                });
+                noteMediaArray.push({ type: mimeType === 'image' ? 'photo' : 'video', filename: filename });
                 mediaIndex++;
             }
-
-            finalNotes.push({
-                ...note,
-                content: newContent,
-                media: noteMediaArray
-            });
+            finalNotes.push({ ...note, content: newContent, media: noteMediaArray });
         }
 
-        // 3. Proses media background dari IndexedDB
         authStatus.innerText = "Memproses media background...";
         const bgBlob = await getFileFromDB('customBackground');
         const bgType = localStorage.getItem('customBackgroundType');
@@ -3067,36 +2967,24 @@ async function handleBackupClick() {
         if (bgBlob && bgType) {
             const extension = bgType.split('/')[1];
             const filename = `background_1.${extension}`;
-            
             bgFolder.file(filename, bgBlob);
-            
-            finalBackgrounds.push({
-                type: bgType.startsWith('image') ? 'image' : 'video',
-                filename: filename
-            });
+            finalBackgrounds.push({ type: bgType.startsWith('image') ? 'image' : 'video', filename: filename });
         }
 
-        // 4. Buat file data.json
         const finalJsonData = {
-            backupInfo: {
-                version: "5.5.1",
-                timestamp: new Date().toISOString()
-            },
+            backupInfo: { version: "5.7.0", timestamp: new Date().toISOString() },
             lifeHubData: lifeHubData,
             notes: finalNotes,
             backgrounds: finalBackgrounds
         };
-
         zip.file("data.json", JSON.stringify(finalJsonData, null, 2));
 
-        // 5. Generate ZIP dan unggah
         authStatus.innerText = "Membuat file ZIP...";
         const zipBlob = await zip.generateAsync({ type: "blob", compression: "DEFLATE" });
-        
         const fileName = `Uranuspace_Backup_${new Date().toISOString().replace(/:/g, '-')}.zip`;
         
         authStatus.innerText = `Mengunggah ${fileName}...`;
-        const folderId = await findOrCreateFolder(DRIVE_FOLDER_NAME);
+        const folderId = await findOrCreateFolder(DRIVE_BACKUP_FOLDER_NAME, 'root');
         await createFileInFolder(folderId, fileName, 'application/zip', zipBlob);
 
         authStatus.innerText = `Backup berhasil! File: ${fileName}`;
@@ -3112,7 +3000,7 @@ async function handleBackupClick() {
 
 
 /**
- * [PERUBAHAN BESAR] Fungsi untuk menangani restore dari file ZIP.
+ * [MODIFIKASI] Fungsi untuk menangani restore dari file ZIP.
  */
 async function restoreFromZip(fileId) {
     showMessage("Memulai restore... Mengunduh file ZIP.", "info");
@@ -3120,7 +3008,6 @@ async function restoreFromZip(fileId) {
     authStatus.innerText = "Mengunduh file ZIP...";
 
     try {
-        // 1. Unduh dan muat file ZIP
         const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
             headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken })
         });
@@ -3130,22 +3017,17 @@ async function restoreFromZip(fileId) {
         const zip = await JSZip.loadAsync(zipBlob);
         authStatus.innerText = "Membaca data.json...";
 
-        // 2. Baca dan parse data.json
         const jsonDataFile = zip.file("data.json");
         if (!jsonDataFile) throw new Error("File data.json tidak ditemukan di dalam ZIP.");
         const jsonContent = await jsonDataFile.async("string");
         const restoredData = JSON.parse(jsonContent);
 
-        // 3. Tampilkan konfirmasi sebelum menimpa
         showConfirm('Timpa Data Lokal?', 'Data dari backup ZIP akan menimpa data lokal Anda. Operasi ini tidak dapat diurungkan. Lanjutkan?', async () => {
             try {
                 showMessage("Memulihkan data... Proses ini mungkin memakan waktu.", "info");
                 authStatus.innerText = "Memulihkan data...";
-
-                // Hapus semua media lama dari IndexedDB
                 await clearAllDataConfirmed();
 
-                // 4. Pulihkan backgrounds
                 if (restoredData.backgrounds && restoredData.backgrounds.length > 0) {
                     authStatus.innerText = "Memulihkan background...";
                     const bgInfo = restoredData.backgrounds[0];
@@ -3157,7 +3039,6 @@ async function restoreFromZip(fileId) {
                     }
                 }
 
-                // 5. Pulihkan catatan dan media-nya
                 let finalNotes = [];
                 if (restoredData.notes) {
                     authStatus.innerText = "Memulihkan catatan dan media...";
@@ -3169,7 +3050,6 @@ async function restoreFromZip(fileId) {
                                 if (mediaFile) {
                                     const mediaBlob = await mediaFile.async("blob");
                                     const dataUrl = await blobToDataURL(mediaBlob);
-                                    // Ganti path relatif dengan Data URL
                                     newContent = newContent.replace(`catatan_media/${mediaInfo.filename}`, dataUrl);
                                 }
                             }
@@ -3178,7 +3058,6 @@ async function restoreFromZip(fileId) {
                     }
                 }
 
-                // 6. Simpan data utama ke localStorage
                 if (restoredData.lifeHubData) {
                     storage.saveAppData(restoredData.lifeHubData);
                 }
@@ -3201,20 +3080,17 @@ async function restoreFromZip(fileId) {
         showMessage(`Restore dari ZIP gagal: ${error.message}`, "error");
     }
 }
-async function findFolderId(folderName) { const query = `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id, name)`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mencari folder."); const data = await response.json(); return data.files.length > 0 ? data.files[0].id : null; } 
-async function findOrCreateFolder(folderName) { let folderId = await findFolderId(folderName); if (folderId) return folderId; const fileMetadata = { 'name': folderName, 'mimeType': 'application/vnd.google-apps.folder' }; const response = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' }), body: JSON.stringify(fileMetadata) }); if (!response.ok) throw new Error("Gagal membuat folder."); const folder = await response.json(); return folder.id; } 
+async function findFolderId(folderName, parentId = 'root') { const query = `mimeType='application/vnd.google-apps.folder' and name='${folderName}' and '${parentId}' in parents and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id, name)`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mencari folder."); const data = await response.json(); return data.files.length > 0 ? data.files[0].id : null; } 
+async function findOrCreateFolder(folderName, parentId = 'root') { let folderId = await findFolderId(folderName, parentId); if (folderId) return folderId; const fileMetadata = { 'name': folderName, 'mimeType': 'application/vnd.google-apps.folder', 'parents': [parentId] }; const response = await fetch('https://www.googleapis.com/drive/v3/files', { method: 'POST', headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken, 'Content-Type': 'application/json' }), body: JSON.stringify(fileMetadata) }); if (!response.ok) throw new Error("Gagal membuat folder."); const folder = await response.json(); return folder.id; } 
 async function createFileInFolder(folderId, fileName, mimeType, content) { const metadata = { 'name': fileName, 'mimeType': mimeType, 'parents': [folderId] }; const form = new FormData(); form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' })); form.append('file', new Blob([content], { type: mimeType })); const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', { method: 'POST', headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }), body: form }); if (!response.ok) throw new Error("Gagal mengunggah file."); return await response.json(); } 
 async function findLatestBackupFile(folderId) { const query = `'${folderId}' in parents and (mimeType='application/zip' or mimeType='text/plain') and name contains 'Uranuspace_Backup_' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime,mimeType)&orderBy=createdTime desc&pageSize=1`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mencari file backup."); const data = await response.json(); return data.files.length > 0 ? data.files[0] : null; } 
 async function getFileContent(fileId) { const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error("Gagal mengunduh konten file."); return await response.text(); } 
-async function listFiles() { if (!googleAccessToken) return; const fileListDiv = document.getElementById('file-list'); fileListDiv.innerHTML = '<p class="text-gray-400">Memuat daftar file...</p>'; try { const folderId = await findFolderId(DRIVE_FOLDER_NAME); if (!folderId) { fileListDiv.innerHTML = '<p class="text-gray-500">Folder backup belum dibuat.</p>'; return; } const query = `'${folderId}' in parents and (mimeType='application/zip' or mimeType='text/plain') and name contains 'Uranuspace_Backup_' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime,mimeType)&pageSize=5&orderBy=createdTime desc`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error(`Gagal memuat daftar file: ${response.statusText}`); const data = await response.json(); if (data.files && data.files.length > 0) { fileListDiv.innerHTML = "<strong class='block mb-1 text-purple-300'>Backup Terbaru:</strong>" + data.files.map(file => `<div class="p-1"><i class="fas ${file.mimeType === 'application/zip' ? 'fa-file-archive' : 'fa-file-alt'} mr-2 text-purple-400"></i><span>${file.name.substring(0, 35)}...</span><span class="block text-gray-500 text-xs">${new Date(file.createdTime).toLocaleString('id-ID')}</span></div>`).join(''); } else { fileListDiv.innerHTML = '<p class="text-gray-500">Belum ada file backup di Google Drive.</p>'; } } catch (error) { console.error('Error listing files:', error); fileListDiv.innerHTML = `<p class="text-red-500">Gagal memuat daftar file.</p>`; } }
+async function listFiles() { if (!googleAccessToken) return; const fileListDiv = document.getElementById('file-list'); fileListDiv.innerHTML = '<p class="text-gray-400">Memuat daftar file...</p>'; try { const folderId = await findFolderId(DRIVE_BACKUP_FOLDER_NAME, 'root'); if (!folderId) { fileListDiv.innerHTML = '<p class="text-gray-500">Folder backup belum dibuat.</p>'; return; } const query = `'${folderId}' in parents and (mimeType='application/zip' or mimeType='text/plain') and name contains 'Uranuspace_Backup_' and trashed=false`; const response = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name,createdTime,mimeType)&pageSize=5&orderBy=createdTime desc`, { headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken }) }); if (!response.ok) throw new Error(`Gagal memuat daftar file: ${response.statusText}`); const data = await response.json(); if (data.files && data.files.length > 0) { fileListDiv.innerHTML = "<strong class='block mb-1 text-purple-300'>Backup Terbaru:</strong>" + data.files.map(file => `<div class="p-1"><i class="fas ${file.mimeType === 'application/zip' ? 'fa-file-archive' : 'fa-file-alt'} mr-2 text-purple-400"></i><span>${file.name.substring(0, 35)}...</span><span class="block text-gray-500 text-xs">${new Date(file.createdTime).toLocaleString('id-ID')}</span></div>`).join(''); } else { fileListDiv.innerHTML = '<p class="text-gray-500">Belum ada file backup di Google Drive.</p>'; } } catch (error) { console.error('Error listing files:', error); fileListDiv.innerHTML = `<p class="text-red-500">Gagal memuat daftar file.</p>`; } }
 
-/**
- * [PERUBAHAN] Mengambil semua file backup, memprioritaskan ZIP.
- */
 async function listAllBackupFiles() {
     if (!googleAccessToken) return null;
     try {
-        const folderId = await findFolderId(DRIVE_FOLDER_NAME);
+        const folderId = await findFolderId(DRIVE_BACKUP_FOLDER_NAME, 'root');
         if (!folderId) return [];
 
         const query = `'${folderId}' in parents and (mimeType='application/zip' or mimeType='text/plain') and name contains 'Uranuspace_Backup_' and trashed=false`;
@@ -3231,9 +3107,6 @@ async function listAllBackupFiles() {
     }
 }
 
-/**
- * [PERUBAHAN] Menampilkan modal untuk memilih mode restore.
- */
 function showRestoreOptionsModal() {
     if (!googleAccessToken) {
         showMessage("Otentikasi diperlukan untuk restore.", "error");
@@ -3269,9 +3142,6 @@ function showRestoreOptionsModal() {
     document.getElementById('manualRestoreBtn').addEventListener('click', handleManualRestore);
 }
 
-/**
- * [PERUBAHAN] Menangani logika restore otomatis, sekarang mendukung ZIP.
- */
 async function handleAutoRestore() {
     closeModal();
     const authStatus = document.getElementById('auth-status');
@@ -3279,8 +3149,8 @@ async function handleAutoRestore() {
     showMessage("Mencari file backup terbaru...", "info");
 
     try {
-        const folderId = await findFolderId(DRIVE_FOLDER_NAME);
-        if (!folderId) throw new Error(`Folder '${DRIVE_FOLDER_NAME}' tidak ditemukan.`);
+        const folderId = await findFolderId(DRIVE_BACKUP_FOLDER_NAME, 'root');
+        if (!folderId) throw new Error(`Folder '${DRIVE_BACKUP_FOLDER_NAME}' tidak ditemukan.`);
 
         const latestFile = await findLatestBackupFile(folderId);
         if (!latestFile) throw new Error("Tidak ada file backup yang ditemukan.");
@@ -3304,9 +3174,6 @@ async function handleAutoRestore() {
     }
 }
 
-/**
- * [PERUBAHAN] Menangani logika restore manual, sekarang mendukung ZIP.
- */
 async function handleManualRestore() {
     closeModal();
     showMessage("Memuat daftar file dari Google Drive...", "info");
@@ -3363,9 +3230,6 @@ async function handleManualRestore() {
     }
 }
 
-/**
- * [MODIFIKASI] Fungsi konfirmasi untuk restore data TXT lama.
- */
 function confirmAndApplyRestore(restoredData) {
     showConfirm('Timpa Data Lokal?', 'Data dari Google Drive akan menimpa data lokal Anda. Operasi ini tidak dapat diurungkan. Lanjutkan?', () => {
         if (restoredData.lifeHubData) {
@@ -3380,11 +3244,12 @@ function confirmAndApplyRestore(restoredData) {
 }
 
 
-// === [PERUBAHAN UTAMA] Fungsi untuk menampilkan status login, profil, dan avatar dinamis ===
+// === [PERUBAHAN UTAMA] Fungsi untuk menampilkan status login, profil, dan tombol-tombol baru ===
 async function updateSigninStatus(isSignedIn) {
     const authButton = document.getElementById('auth-button');
     const backupButton = document.getElementById('backup-button');
     const restoreButton = document.getElementById('restore-button');
+    const smartUploadButton = document.getElementById('smart-upload-button'); // Tombol baru
     const authStatus = document.getElementById('auth-status');
     const fileListDiv = document.getElementById('file-list');
     const authButtonText = authButton.querySelector('span');
@@ -3395,8 +3260,12 @@ async function updateSigninStatus(isSignedIn) {
     if (isSignedIn && googleAccessToken) {
         authButtonText.innerText = 'Putuskan Hubungan Google';
         authButton.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
-        backupButton.disabled = false;
-        restoreButton.disabled = false;
+        
+        // Tampilkan semua tombol aksi
+        backupButton.classList.remove('hidden');
+        restoreButton.classList.remove('hidden');
+        smartUploadButton.classList.remove('hidden');
+
         authStatus.innerText = "Terhubung ke Google Drive";
         listFiles();
 
@@ -3416,7 +3285,6 @@ async function updateSigninStatus(isSignedIn) {
             document.getElementById('user-name').textContent = profile.name;
             userEmailEl.textContent = profile.email;
             
-            // Atur status awal email menjadi blur
             userEmailEl.classList.add('email-blur');
             toggleEmailIcon.classList.remove('fa-eye-slash');
             toggleEmailIcon.classList.add('fa-eye');
@@ -3432,8 +3300,12 @@ async function updateSigninStatus(isSignedIn) {
     } else {
         authButtonText.innerText = 'Hubungkan ke Google';
         authButton.style.background = 'linear-gradient(90deg, #3b82f6, #2563eb)';
-        backupButton.disabled = true;
-        restoreButton.disabled = true;
+        
+        // Sembunyikan semua tombol aksi
+        backupButton.classList.add('hidden');
+        restoreButton.classList.add('hidden');
+        smartUploadButton.classList.add('hidden');
+
         authStatus.innerText = "Belum terhubung.";
         fileListDiv.innerHTML = '';
         userProfileDiv.classList.add('hidden');
@@ -4056,717 +3928,6 @@ async function exportAllToImages(timeRange = 'all', customStartDate = null, cust
     }
 }
 
-// =================================================================== //
-// ============ START: LOGIKA INTI UNTUK FILE MANAGER DRIVE ============ //
-// =================================================================== //
-
-class GoogleDriveFileManager {
-    constructor() {
-        // --- KONFIGURASI PENTING ---
-        // Anda HARUS mendapatkan kredensial ini dari Google Cloud Console
-        // Lihat: https://developers.google.com/drive/api/quickstart/js
-        this.CLIENT_ID = "175269804015-7agb1gr0nd6ah66co5qen34dd2mvtm68.apps.googleusercontent.com"; // Sudah ada di kode Anda
-        this.API_KEY = "MASUKKAN_API_KEY_ANDA_DI_SINI"; // <-- PENTING: Ganti dengan API Key Anda
-        this.SCOPES = "https://www.googleapis.com/auth/drive";
-
-        // --- State Management ---
-        this.tokenClient = null;
-        this.accessToken = null;
-        this.currentFolderId = 'root';
-        this.pathStack = [{ id: 'root', name: 'My Drive' }];
-        this.currentView = 'list'; // 'list' atau 'grid'
-        this.currentSort = { by: 'name', order: 'asc' };
-        this.activeUploads = {}; // Menyimpan status upload
-    }
-
-    /**
-     * Inisialisasi utama, dipanggil saat section Pengaturan dibuka.
-     */
-    init() {
-        this.cacheDOMElements();
-        // Cek jika Google API sudah dimuat
-        if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
-            this.gapiLoaded();
-        } else {
-            console.error("Google API script belum dimuat. Pastikan GAPI dimuat sebelum memanggil init ini.");
-            showMessage("Gagal memuat API Google Drive.", "error");
-        }
-    }
-
-    /**
-     * Cache semua elemen DOM yang dibutuhkan oleh file manager.
-     */
-    cacheDOMElements() {
-        this.dom = {
-            container: document.getElementById('gdrive-manager-ui'),
-            fileList: document.getElementById('gdrive-file-list'),
-            fileListContainer: document.getElementById('gdrive-file-list-container'),
-            dropOverlay: document.getElementById('gdrive-drop-overlay'),
-            loadingIndicator: document.getElementById('gdrive-loading-indicator'),
-            backBtn: document.getElementById('gdrive-back-btn'),
-            breadcrumbs: document.getElementById('gdrive-breadcrumbs'),
-            viewListBtn: document.getElementById('gdrive-view-list-btn'),
-            viewGridBtn: document.getElementById('gdrive-view-grid-btn'),
-            sortBtn: document.getElementById('gdrive-sort-btn'),
-            sortLabel: document.getElementById('gdrive-sort-label'),
-            createFolderBtn: document.getElementById('gdrive-create-folder-btn'),
-            fileUploadInput: document.getElementById('gdrive-file-upload'),
-            folderUploadInput: document.getElementById('gdrive-folder-upload'),
-            uploadProgressArea: document.getElementById('gdrive-upload-progress-area'),
-            contextMenu: document.getElementById('gdrive-context-menu'),
-        };
-    }
-
-    /**
-     * Mengikat semua event listener ke elemen DOM.
-     */
-    bindEvents() {
-        // Cek jika elemen ada sebelum binding
-        if (!this.dom.container) return;
-
-        this.dom.backBtn.addEventListener('click', () => this.navigateBack());
-        this.dom.viewListBtn.addEventListener('click', () => this.toggleView('list'));
-        this.dom.viewGridBtn.addEventListener('click', () => this.toggleView('grid'));
-        this.dom.sortBtn.addEventListener('click', () => this.showSortOptions());
-        this.dom.createFolderBtn.addEventListener('click', () => this.promptCreateFolder());
-        this.dom.fileUploadInput.addEventListener('change', (e) => this.handleFilesSelected(e.target.files));
-        this.dom.folderUploadInput.addEventListener('change', (e) => this.handleFolderSelected(e.target.files));
-
-        // Event listener untuk Drag and Drop
-        this.dom.fileListContainer.addEventListener('dragenter', (e) => this.handleDragEnter(e));
-        this.dom.fileListContainer.addEventListener('dragover', (e) => this.handleDragOver(e));
-        this.dom.fileListContainer.addEventListener('dragleave', (e) => this.handleDragLeave(e));
-        this.dom.fileListContainer.addEventListener('drop', (e) => this.handleDrop(e));
-
-        // Sembunyikan context menu jika klik di luar
-        document.addEventListener('click', () => this.hideContextMenu());
-    }
-
-    // --- LOGIKA AUTENTIKASI ---
-
-    gapiLoaded() {
-        gapi.load('client', async () => {
-            await gapi.client.init({
-                apiKey: this.API_KEY,
-                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-            });
-            this.gisLoaded();
-        });
-    }
-
-    gisLoaded() {
-        this.tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: this.CLIENT_ID,
-            scope: this.SCOPES,
-            callback: (tokenResponse) => {
-                if (tokenResponse && tokenResponse.access_token) {
-                    this.accessToken = tokenResponse.access_token;
-                    this.onAuthenticated();
-                } else {
-                    console.error("Gagal mendapatkan access token:", tokenResponse);
-                    showMessage("Gagal melakukan otentikasi Google Drive.", "error");
-                }
-            },
-        });
-        // Coba autentikasi secara diam-diam jika pengguna sudah login sebelumnya
-        this.tokenClient.requestAccessToken({ prompt: '' });
-    }
-
-    /**
-     * Dipanggil saat pengguna berhasil login ke Google.
-     */
-    onAuthenticated() {
-        // Tampilkan UI File Manager, sembunyikan tombol login utama
-        this.dom.container.classList.remove('hidden');
-        document.getElementById('google-drive-ui').classList.add('hidden'); // Sembunyikan UI backup/restore lama
-        
-        this.bindEvents();
-        this.loadFolderContents(this.currentFolderId);
-    }
-    
-    /**
-     * Memulai alur otentikasi jika token tidak valid.
-     */
-    authenticate() {
-        if (this.tokenClient) {
-            this.tokenClient.requestAccessToken({ prompt: 'consent' });
-        }
-    }
-
-    // --- LOGIKA API GOOGLE DRIVE ---
-
-    /**
-     * Mengambil daftar file dan folder dari folder tertentu.
-     */
-    async listFolderContents(folderId) {
-        if (!this.accessToken) { this.authenticate(); return; }
-        this.showLoading(true);
-        try {
-            const response = await gapi.client.drive.files.list({
-                q: `'${folderId}' in parents and trashed = false`,
-                fields: 'files(id, name, mimeType, size, modifiedTime, webViewLink, webContentLink, iconLink)',
-                pageSize: 200,
-                orderBy: this.getSortOrderString()
-            });
-            this.renderFiles(response.result.files);
-        } catch (error) {
-            console.error("Error listing files:", error);
-            showMessage("Gagal memuat file dari Drive. Coba lagi.", "error");
-        } finally {
-            this.showLoading(false);
-        }
-    }
-    
-    /**
-     * Menghapus file atau folder.
-     */
-    async deleteItem(fileId, fileName) {
-        showConfirm('Hapus Item?', `Anda yakin ingin menghapus "${fileName}" secara permanen?`, async () => {
-            if (!this.accessToken) { this.authenticate(); return; }
-            this.showLoading(true);
-            try {
-                await gapi.client.drive.files.delete({ fileId: fileId });
-                showMessage(`"${fileName}" berhasil dihapus.`, 'success');
-                this.refreshCurrentFolder();
-            } catch (error) {
-                console.error("Error deleting item:", error);
-                showMessage("Gagal menghapus item.", "error");
-            } finally {
-                this.showLoading(false);
-            }
-        });
-    }
-
-    /**
-     * Mengganti nama file atau folder.
-     */
-    async renameItem(fileId, currentName) {
-        const newName = prompt(`Masukkan nama baru untuk "${currentName}":`, currentName);
-        if (newName && newName !== currentName) {
-            if (!this.accessToken) { this.authenticate(); return; }
-            this.showLoading(true);
-            try {
-                await gapi.client.drive.files.update({
-                    fileId: fileId,
-                    resource: { name: newName }
-                });
-                showMessage('Nama berhasil diubah.', 'success');
-                this.refreshCurrentFolder();
-            } catch (error) {
-                console.error("Error renaming item:", error);
-                showMessage("Gagal mengganti nama.", "error");
-            } finally {
-                this.showLoading(false);
-            }
-        }
-    }
-    
-    /**
-     * Membuat folder baru.
-     */
-    async createFolder(folderName) {
-        if (!this.accessToken) { this.authenticate(); return; }
-        this.showLoading(true);
-        try {
-            await gapi.client.drive.files.create({
-                resource: {
-                    name: folderName,
-                    mimeType: 'application/vnd.google-apps.folder',
-                    parents: [this.currentFolderId]
-                }
-            });
-            showMessage(`Folder "${folderName}" berhasil dibuat.`, 'success');
-            this.refreshCurrentFolder();
-        } catch (error) {
-            console.error("Error creating folder:", error);
-            showMessage("Gagal membuat folder.", "error");
-        } finally {
-            this.showLoading(false);
-        }
-    }
-    
-    // --- LOGIKA NAVIGASI & TAMPILAN ---
-
-    loadFolderContents(folderId, folderName = 'Folder') {
-        if (this.pathStack[this.pathStack.length - 1].id !== folderId) {
-            this.pathStack.push({ id: folderId, name: folderName });
-        }
-        this.currentFolderId = folderId;
-        this.updateBreadcrumbs();
-        this.listFolderContents(folderId);
-    }
-    
-    navigateBack() {
-        if (this.pathStack.length > 1) {
-            this.pathStack.pop();
-            const previousFolder = this.pathStack[this.pathStack.length - 1];
-            this.loadFolderContents(previousFolder.id, previousFolder.name);
-        }
-    }
-
-    refreshCurrentFolder() {
-        this.loadFolderContents(this.currentFolderId, this.pathStack[this.pathStack.length-1].name);
-    }
-
-    toggleView(view) {
-        this.currentView = view;
-        this.dom.viewListBtn.classList.toggle('active', view === 'list');
-        this.dom.viewGridBtn.classList.toggle('active', view === 'grid');
-        this.dom.fileList.className = `view-${view}`;
-        this.refreshCurrentFolder();
-    }
-    
-    updateBreadcrumbs() {
-        this.dom.breadcrumbs.innerHTML = this.pathStack.map((folder, index) => {
-            if (index === this.pathStack.length - 1) {
-                return `<span class="font-semibold text-purple-300">${folder.name}</span>`;
-            }
-            return `<span class="gdrive-breadcrumb-item" data-id="${folder.id}" data-name="${folder.name}">${folder.name}</span> <span class="gdrive-breadcrumb-separator">/</span>`;
-        }).join('');
-        
-        this.dom.breadcrumbs.querySelectorAll('.gdrive-breadcrumb-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const id = e.currentTarget.dataset.id;
-                const name = e.currentTarget.dataset.name;
-                // Hapus semua setelah folder yang diklik
-                const clickedIndex = this.pathStack.findIndex(f => f.id === id);
-                this.pathStack.splice(clickedIndex + 1);
-                this.loadFolderContents(id, name);
-            });
-        });
-
-        this.dom.backBtn.disabled = this.pathStack.length <= 1;
-    }
-
-    renderFiles(files) {
-        this.dom.fileList.innerHTML = '';
-        if (files.length === 0) {
-            this.dom.fileList.innerHTML = `<div class="text-center text-gray-500 py-10 col-span-full">Folder ini kosong.</div>`;
-            return;
-        }
-
-        const isGridView = this.currentView === 'grid';
-        this.dom.fileList.className = `grid gap-2 ${isGridView ? 'view-grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6' : 'view-list'}`;
-
-        files.forEach(file => {
-            const isFolder = file.mimeType === 'application/vnd.google-apps.folder';
-            const item = document.createElement('div');
-            item.className = `gdrive-item ${isGridView ? 'grid-view' : 'list-view'}`;
-            item.dataset.id = file.id;
-            item.dataset.name = file.name;
-            item.dataset.isFolder = isFolder;
-
-            const iconClass = isFolder ? 'fas fa-folder' : this.getFileIcon(file.mimeType);
-            
-            let htmlContent = '';
-            if (isGridView) {
-                htmlContent = `
-                    <div class="gdrive-item-icon ${isFolder ? 'folder' : ''}"><i class="${iconClass}"></i></div>
-                    <div class="gdrive-item-name">${file.name}</div>
-                `;
-            } else { // List View
-                htmlContent = `
-                    <div class="gdrive-item-icon ${isFolder ? 'folder' : ''}"><i class="${iconClass}"></i></div>
-                    <div class="gdrive-item-name">${file.name}</div>
-                    <div class="gdrive-item-details">${isFolder ? '-' : this.formatSize(file.size)}</div>
-                    <div class="gdrive-item-details">${this.formatDate(file.modifiedTime)}</div>
-                `;
-            }
-            htmlContent += `<button class="gdrive-context-toggle"><i class="fas fa-ellipsis-v"></i></button>`;
-            
-            item.innerHTML = htmlContent;
-            
-            // Event listener untuk klik item (masuk folder atau preview)
-            item.addEventListener('click', (e) => {
-                if (e.target.closest('.gdrive-context-toggle')) return; // Jangan trigger jika klik menu
-                if (isFolder) {
-                    this.loadFolderContents(file.id, file.name);
-                } else {
-                    // Di masa depan bisa ditambahkan preview
-                    window.open(file.webViewLink, '_blank');
-                }
-            });
-
-            // Event listener untuk context menu
-            item.querySelector('.gdrive-context-toggle').addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.showContextMenu(e, file);
-            });
-            
-            this.dom.fileList.appendChild(item);
-        });
-    }
-
-    // --- LOGIKA UPLOAD ---
-
-    handleFilesSelected(files) {
-        Array.from(files).forEach(file => this.uploadFile(file, this.currentFolderId));
-        this.dom.fileUploadInput.value = ''; // Reset input
-    }
-    
-    async handleFolderSelected(files) {
-        if (files.length > 0) {
-            const rootFolderName = files[0].webkitRelativePath.split('/')[0];
-            const parentFolderId = await this.findOrCreateDriveFolder(rootFolderName, this.currentFolderId);
-            
-            if(!parentFolderId) {
-                showMessage(`Gagal membuat folder utama ${rootFolderName}`, "error");
-                return;
-            }
-
-            for (const file of files) {
-                const pathParts = file.webkitRelativePath.split('/').slice(1, -1);
-                let currentParentId = parentFolderId;
-                
-                for (const part of pathParts) {
-                    currentParentId = await this.findOrCreateDriveFolder(part, currentParentId);
-                }
-                
-                this.uploadFile(file, currentParentId);
-            }
-        }
-        this.dom.folderUploadInput.value = '';
-    }
-
-    async findOrCreateDriveFolder(name, parentId) {
-        try {
-            const q = `mimeType='application/vnd.google-apps.folder' and name='${name}' and '${parentId}' in parents and trashed=false`;
-            const response = await gapi.client.drive.files.list({ q, fields: 'files(id)' });
-            
-            if (response.result.files && response.result.files.length > 0) {
-                return response.result.files[0].id;
-            } else {
-                const createResponse = await gapi.client.drive.files.create({
-                    resource: { name, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] },
-                    fields: 'id'
-                });
-                return createResponse.result.id;
-            }
-        } catch (error) {
-            console.error(`Gagal mencari/membuat folder ${name}:`, error);
-            return null;
-        }
-    }
-
-
-    /**
-     * Logika utama untuk mengunggah satu file dengan metode resumable & chunk.
-     */
-    uploadFile(file, parentFolderId) {
-        const uploadId = `upload-${Date.now()}-${Math.random()}`;
-        const metadata = {
-            name: file.name,
-            parents: [parentFolderId]
-        };
-
-        this.addUploadProgressUI(uploadId, file.name);
-
-        const uploader = new MediaUploader({
-            file: file,
-            token: this.accessToken,
-            metadata: metadata,
-            chunkSize: 5 * 1024 * 1024, // 5MB chunks
-            onProgress: (progress) => {
-                this.updateUploadProgress(uploadId, progress.loaded, progress.total, progress.speed);
-            },
-            onComplete: () => {
-                this.completeUploadProgress(uploadId, true);
-                this.refreshCurrentFolder();
-            },
-            onError: (error) => {
-                console.error('Upload error:', error);
-                this.completeUploadProgress(uploadId, false);
-            }
-        });
-        
-        this.activeUploads[uploadId] = uploader;
-        uploader.upload();
-    }
-
-    // --- UI HELPER ---
-    
-    showLoading(isLoading) {
-        this.dom.loadingIndicator.style.display = isLoading ? 'flex' : 'none';
-    }
-
-    showContextMenu(event, file) {
-        this.hideContextMenu(); // Sembunyikan yang lain dulu
-        event.preventDefault();
-
-        this.dom.contextMenu.style.top = `${event.clientY}px`;
-        this.dom.contextMenu.style.left = `${event.clientX}px`;
-        this.dom.contextMenu.classList.remove('hidden');
-
-        // Set actions
-        this.dom.contextMenu.querySelector('[data-action="download"]').onclick = () => this.handleDownload(file);
-        this.dom.contextMenu.querySelector('[data-action="rename"]').onclick = () => this.renameItem(file.id, file.name);
-        this.dom.contextMenu.querySelector('[data-action="delete"]').onclick = () => this.deleteItem(file.id, file.name);
-    }
-    
-    hideContextMenu() {
-        if(this.dom.contextMenu) this.dom.contextMenu.classList.add('hidden');
-    }
-
-    promptCreateFolder() {
-        const folderName = prompt("Masukkan nama folder baru:");
-        if (folderName) {
-            this.createFolder(folderName);
-        }
-    }
-
-    handleDownload(file) {
-        if (file.mimeType === 'application/vnd.google-apps.folder') {
-            // Untuk folder, buka web view link karena Google tidak menyediakan API download ZIP langsung
-            showMessage("Membuka Google Drive untuk mengunduh folder sebagai ZIP...", "info");
-            window.open(file.webViewLink, '_blank');
-        } else {
-            if (file.webContentLink) {
-                 // Google-hosted files (Docs, Sheets) tidak punya direct download, gunakan webViewLink
-                const downloadUrl = file.webContentLink.replace('&export=download', '') + '&export=download';
-                const link = document.createElement('a');
-                link.href = downloadUrl;
-                link.target = '_blank';
-                // Kita tidak bisa set nama file langsung dari sini karena CORS, browser akan menanganinya.
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            } else {
-                 window.open(file.webViewLink, '_blank');
-                 showMessage("File ini tidak memiliki tautan unduhan langsung, membuka halaman pratinjau.", "info");
-            }
-        }
-    }
-    
-    showSortOptions() {
-        const options = [
-            { by: 'name', order: 'asc', label: 'Nama (A-Z)' },
-            { by: 'name', order: 'desc', label: 'Nama (Z-A)' },
-            { by: 'modifiedTime', order: 'desc', label: 'Tanggal (Terbaru)' },
-            { by: 'modifiedTime', order: 'asc', label: 'Tanggal (Terlama)' },
-            { by: 'size', order: 'desc', label: 'Ukuran (Terbesar)' },
-            { by: 'size', order: 'asc', label: 'Ukuran (Terkecil)' },
-        ];
-
-        // Buat modal sederhana untuk memilih
-        let modalContent = `<h3 class="text-lg font-bold mb-4">Urutkan Berdasarkan</h3>`;
-        modalContent += options.map(opt => 
-            `<button class="block w-full text-left p-2 rounded hover:bg-purple-500/20" data-by="${opt.by}" data-order="${opt.order}">${opt.label}</button>`
-        ).join('');
-        
-        showModal(modalContent);
-
-        document.querySelectorAll('#mainModal button[data-by]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.currentSort.by = e.currentTarget.dataset.by;
-                this.currentSort.order = e.currentTarget.dataset.order;
-                this.dom.sortLabel.textContent = e.currentTarget.textContent;
-                closeModal();
-                this.refreshCurrentFolder();
-            });
-        });
-    }
-
-    getSortOrderString() {
-        let order = `${this.currentSort.by} ${this.currentSort.order}`;
-        // Folder selalu di atas
-        return `folder, ${order}`;
-    }
-
-    // --- HELPER LAINNYA ---
-
-    formatSize(bytes) {
-        if (!bytes || bytes === 0) return '0 B';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-
-    formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('id-ID', {
-            day: '2-digit', month: 'short', year: 'numeric'
-        });
-    }
-    
-    getFileIcon(mimeType) {
-        if (mimeType.includes('image')) return 'fas fa-file-image';
-        if (mimeType.includes('pdf')) return 'fas fa-file-pdf';
-        if (mimeType.includes('video')) return 'fas fa-file-video';
-        if (mimeType.includes('audio')) return 'fas fa-file-audio';
-        if (mimeType.includes('zip') || mimeType.includes('archive')) return 'fas fa-file-archive';
-        if (mimeType.includes('spreadsheet') || mimeType.includes('excel')) return 'fas fa-file-excel';
-        if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return 'fas fa-file-powerpoint';
-        if (mimeType.includes('document') || mimeType.includes('word')) return 'fas fa-file-word';
-        return 'fas fa-file-alt'; // Default
-    }
-    
-    // --- Drag & Drop Handlers ---
-    handleDragEnter(e) { e.preventDefault(); e.stopPropagation(); this.dom.fileListContainer.classList.add('drag-over'); }
-    handleDragOver(e) { e.preventDefault(); e.stopPropagation(); } // Perlu untuk event drop
-    handleDragLeave(e) { e.preventDefault(); e.stopPropagation(); this.dom.fileListContainer.classList.remove('drag-over'); }
-    handleDrop(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.dom.fileListContainer.classList.remove('drag-over');
-        
-        const items = e.dataTransfer.items;
-        if (items) {
-            for (let i = 0; i < items.length; i++) {
-                const entry = items[i].webkitGetAsEntry();
-                if (entry) {
-                    this.traverseFileTree(entry, this.currentFolderId);
-                }
-            }
-        }
-    }
-    
-    traverseFileTree(item, parentId) {
-        if (item.isFile) {
-            item.file(file => this.uploadFile(file, parentId));
-        } else if (item.isDirectory) {
-            item.createReader().readEntries(async (entries) => {
-                 const newFolderId = await this.findOrCreateDriveFolder(item.name, parentId);
-                 if (newFolderId) {
-                    entries.forEach(entry => this.traverseFileTree(entry, newFolderId));
-                 }
-            });
-        }
-    }
-
-    // --- UI Progress Upload ---
-    addUploadProgressUI(id, fileName) {
-        const item = document.createElement('div');
-        item.id = id;
-        item.className = 'gdrive-upload-item';
-        item.innerHTML = `
-            <div class="flex items-center justify-between gap-4">
-                <i class="fas fa-file-alt text-lg text-purple-300"></i>
-                <div class="flex-1 overflow-hidden">
-                    <p class="text-sm font-medium truncate">${fileName}</p>
-                    <div class="text-xs text-gray-400 flex items-center gap-4">
-                        <span class="upload-status">Mempersiapkan...</span>
-                        <span class="upload-speed"></span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="upload-percentage font-mono text-sm">0%</span>
-                    <button class="gdrive-progress-action-btn pause-resume-btn" data-action="pause"><i class="fas fa-pause"></i></button>
-                    <button class="gdrive-progress-action-btn cancel-btn"><i class="fas fa-times"></i></button>
-                </div>
-            </div>
-            <div class="gdrive-progress-bar-bg mt-2">
-                <div class="gdrive-progress-bar-fg w-0"></div>
-            </div>
-        `;
-        this.dom.uploadProgressArea.prepend(item);
-
-        item.querySelector('.pause-resume-btn').addEventListener('click', (e) => this.toggleUploadPause(id, e.currentTarget));
-        item.querySelector('.cancel-btn').addEventListener('click', () => this.cancelUpload(id));
-    }
-
-    updateUploadProgress(id, loaded, total, speed) {
-        const item = document.getElementById(id);
-        if (!item) return;
-
-        const percentage = total > 0 ? Math.round((loaded / total) * 100) : 0;
-        item.querySelector('.gdrive-progress-bar-fg').style.width = `${percentage}%`;
-        item.querySelector('.upload-percentage').textContent = `${percentage}%`;
-        item.querySelector('.upload-status').textContent = `${this.formatSize(loaded)} / ${this.formatSize(total)}`;
-        item.querySelector('.upload-speed').textContent = `${this.formatSize(speed)}/s`;
-    }
-
-    completeUploadProgress(id, success) {
-        const item = document.getElementById(id);
-        if (!item) return;
-
-        if (success) {
-            item.querySelector('.upload-status').textContent = 'Selesai!';
-            item.querySelector('.gdrive-progress-bar-fg').style.backgroundColor = '#4ade80';
-        } else {
-            item.querySelector('.upload-status').textContent = 'Gagal!';
-            item.querySelector('.gdrive-progress-bar-fg').style.backgroundColor = '#f472b6';
-        }
-        item.querySelector('.pause-resume-btn').remove();
-        item.querySelector('.cancel-btn').remove();
-        delete this.activeUploads[id];
-
-        // Hapus dari UI setelah beberapa detik
-        setTimeout(() => item.remove(), 5000);
-    }
-
-    toggleUploadPause(id, button) {
-        const uploader = this.activeUploads[id];
-        if (!uploader) return;
-
-        const icon = button.querySelector('i');
-        if (uploader.isPaused()) {
-            uploader.resume();
-            icon.className = 'fas fa-pause';
-            button.dataset.action = 'pause';
-        } else {
-            uploader.pause();
-            icon.className = 'fas fa-play';
-            button.dataset.action = 'resume';
-        }
-    }
-
-    cancelUpload(id) {
-        const uploader = this.activeUploads[id];
-        if (uploader) {
-            uploader.cancel();
-        }
-        const item = document.getElementById(id);
-        if (item) item.remove();
-        delete this.activeUploads[id];
-    }
-}
-
-
-// --- INJEKSI & INISIALISASI ---
-
-// Buat instance global untuk file manager
-const driveFileManager = new GoogleDriveFileManager();
-
-// Modifikasi fungsi `switchSection` yang sudah ada untuk memicu inisialisasi
-const originalSwitchSection = window.switchSection;
-let isDriveManagerInitialized = false;
-
-window.switchSection = function(section) {
-    // Panggil fungsi asli
-    originalSwitchSection.apply(this, arguments);
-    
-    // Jika masuk ke section pengaturan dan belum diinisialisasi, inisialisasi sekarang
-    if (section === 'settings' && !isDriveManagerInitialized) {
-        // Cek jika pengguna sudah login ke Google melalui fitur backup/restore lama
-        if (googleAccessToken) { 
-             driveFileManager.accessToken = googleAccessToken;
-             driveFileManager.init();
-             driveFileManager.onAuthenticated();
-             isDriveManagerInitialized = true;
-        } else {
-             // Jika belum login sama sekali, tampilkan tombol login Google Drive yang asli
-             // dan tambahkan event listener untuk memulai file manager setelah login berhasil.
-             const authButton = document.getElementById('auth-button');
-             if (authButton) {
-                 const authHandler = () => {
-                     // Tunggu sebentar hingga accessToken terisi
-                     setTimeout(() => {
-                         if (googleAccessToken && !isDriveManagerInitialized) {
-                             driveFileManager.accessToken = googleAccessToken;
-                             driveFileManager.init();
-                             driveFileManager.onAuthenticated();
-                             isDriveManagerInitialized = true;
-                             // Hapus listener agar tidak terpanggil lagi
-                             authButton.removeEventListener('click', authHandler);
-                         }
-                     }, 1000);
-                 };
-                 authButton.addEventListener('click', authHandler);
-             }
-        }
-    }
-};
-
 /**
  * Class MediaUploader untuk menangani resumable upload secara terenkapsulasi.
  * Dikutip dan dimodifikasi dari dokumentasi resmi Google Drive API.
@@ -4852,38 +4013,7 @@ class MediaUploader {
         xhr.send(chunk);
         this.xhr = xhr;
     }
-    
-    pause() { this.paused = true; if (this.xhr) this.xhr.abort(); }
-    resume() { this.paused = false; this.resumeUpload(); }
-    cancel() { this.cancelled = true; if (this.xhr) this.xhr.abort(); }
-    isPaused() { return this.paused; }
-    
-    async resumeUpload() {
-        try {
-            const response = await fetch(this.uploadUrl, {
-                method: 'PUT',
-                headers: { 'Content-Range': `bytes */${this.file.size}` }
-            });
-
-            if (response.status === 308) { // Incomplete, get offset
-                const range = response.headers.get('Range');
-                this.offset = range ? parseInt(range.split('-')[1]) + 1 : 0;
-            } else if (response.status !== 200 && response.status !== 201) { // Error
-                this.offset = 0; // Restart if cannot determine offset
-            }
-            // if 200/201, it's already complete
-            
-            this.sendNextChunk();
-
-        } catch (error) {
-            this.onError(error);
-        }
-    }
 }
-// =================================================================== //
-// ============== END: LOGIKA INTI UNTUK FILE MANAGER DRIVE ============ //
-// =================================================================== //
-
 </script>
 </body>
 </html>
