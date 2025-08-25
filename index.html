@@ -3252,6 +3252,707 @@ function confirmAndApplyRestore(restoredData) {
     });
 }
 
+
+// === [PERUBAHAN UTAMA] Fungsi untuk menampilkan status login, profil, dan avatar dinamis ===
+async function updateSigninStatus(isSignedIn) {
+    const authButton = document.getElementById('auth-button');
+    const backupButton = document.getElementById('backup-button');
+    const restoreButton = document.getElementById('restore-button');
+    const authStatus = document.getElementById('auth-status');
+    const fileListDiv = document.getElementById('file-list');
+    const authButtonText = authButton.querySelector('span');
+    const userProfileDiv = document.getElementById('user-profile');
+    const userEmailEl = document.getElementById('user-email');
+    const toggleEmailIcon = document.getElementById('toggle-email-visibility');
+
+    if (isSignedIn && googleAccessToken) {
+        authButtonText.innerText = 'Putuskan Hubungan Google';
+        authButton.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+        backupButton.disabled = false;
+        restoreButton.disabled = false;
+        authStatus.innerText = "Terhubung ke Google Drive";
+        listFiles();
+
+        try {
+            const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: new Headers({ 'Authorization': 'Bearer ' + googleAccessToken })
+            });
+            if (!response.ok) {
+                throw new Error('Gagal mengambil info profil.');
+            }
+            const profile = await response.json();
+
+            const dynamicSeed = Date.now() + Math.random();
+            const avatarUrl = `https://api.dicebear.com/8.x/lorelei/svg?seed=${dynamicSeed}&backgroundColor=transparent&hairColor=6a0dad,0d94ea,c084fc&clothingColor=1e1b4b,3b0764&glassesProbability=50`;
+
+            document.getElementById('user-picture').src = avatarUrl;
+            document.getElementById('user-name').textContent = profile.name;
+            userEmailEl.textContent = profile.email;
+            
+            // Atur status awal email menjadi blur
+            userEmailEl.classList.add('email-blur');
+            toggleEmailIcon.classList.remove('fa-eye-slash');
+            toggleEmailIcon.classList.add('fa-eye');
+
+            userProfileDiv.classList.remove('hidden');
+
+            // [FIX & PENGGABUNGAN] Inisialisasi Uranuspace Drive Manager setelah login berhasil.
+            if (!UranuspaceDrive.isInitialized) {
+                UranuspaceDrive.init();
+            }
+
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+            showMessage("Gagal memuat profil pengguna.", "error");
+            userProfileDiv.classList.add('hidden');
+        }
+
+    } else {
+        authButtonText.innerText = 'Hubungkan ke Google';
+        authButton.style.background = 'linear-gradient(90deg, #3b82f6, #2563eb)';
+        backupButton.disabled = true;
+        restoreButton.disabled = true;
+        authStatus.innerText = "Belum terhubung.";
+        fileListDiv.innerHTML = '';
+        userProfileDiv.classList.add('hidden');
+
+        // [PENGGABUNGAN] Sembunyikan dan reset Uranuspace Drive Manager saat logout
+        if (UranuspaceDrive.dom && UranuspaceDrive.dom.driveInterface) {
+             UranuspaceDrive.dom.driveInterface.classList.add('hidden');
+        }
+        UranuspaceDrive.isInitialized = false;
+    }
+}
+
+// === [PERBAIKAN] Fungsi untuk toggle visibilitas email ===
+function toggleEmailVisibility() {
+    const userEmailEl = document.getElementById('user-email');
+    const toggleIcon = document.getElementById('toggle-email-visibility');
+
+    const isNowBlurred = userEmailEl.classList.toggle('email-blur');
+
+    if (isNowBlurred) {
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+        toggleIcon.title = "Tampilkan Email";
+    } else {
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+        toggleIcon.title = "Sembunyikan Email";
+    }
+}
+
+
+// === [BARU] FUNGSI-FUNGSI UNTUK FITUR PORTAL DI SIDEBAR ===
+
+const defaultPortalIcons = [ { label: "Ikon Universal", icons: [ { value: "fas fa-shopping-cart", text: "Belanja: Keranjang" }, { value: "fas fa-shopping-bag", text: "Belanja: Tas" }, { value: "fas fa-store", text: "Belanja: Toko" }, { value: "fas fa-tags", text: "Belanja: Tag Harga" }, { value: "fas fa-car", text: "Transportasi: Mobil" }, { value: "fas fa-motorcycle", text: "Transportasi: Motor" }, { value: "fas fa-plane-departure", text: "Perjalanan: Pesawat" }, { value: "fas fa-ticket-alt", text: "Perjalanan: Tiket" }, { value: "fas fa-bed", text: "Perjalanan: Akomodasi" }, { value: "fas fa-wallet", text: "Keuangan: Dompet" }, { value: "fas fa-credit-card", text: "Keuangan: Kartu Kredit" }, { value: "fas fa-landmark", text: "Keuangan: Bank" }, { value: "fas fa-coins", text: "Keuangan: Koin" }, { value: "fas fa-utensils", text: "Makanan: Peralatan Makan" }, { value: "fas fa-hamburger", text: "Makanan: Burger" }, { value: "fas fa-feather-alt", text: "Produktivitas: Tulis/Catatan" }, { value: "fas fa-check-double", text: "Produktivitas: Tugas Selesai" }, { value: "fas fa-chart-pie", text: "Produktivitas: Laporan" }, { value: "fas fa-film", text: "Hiburan: Film" }, { value: "fas fa-tv", text: "Hiburan: TV" }, { value: "fas fa-headphones", text: "Hiburan: Musik" }, ] }, { label: "Media Sosial (Logo Resmi)", icons: [ { value: "fab fa-facebook", text: "Facebook" }, { value: "fab fa-instagram", text: "Instagram" }, { value: "fab fa-whatsapp", text: "WhatsApp" }, { value: "fab fa-x-twitter", text: "Twitter / X" }, { value: "fab fa-tiktok", text: "TikTok" }, { value: "fab fa-youtube", text: "YouTube" }, { value: "fab fa-telegram", text: "Telegram" }, { value: "fab fa-discord", text: "Discord" }, { value: "fab fa-linkedin", text: "LinkedIn" }, { value: "fab fa-pinterest", text: "Pinterest" }, { value: "fab fa-reddit", text: "Reddit" }, { value: "fab fa-snapchat", text: "Snapchat" }, { value: "fab fa-threads", text: "Threads" }, { value: "fab fa-line", text: "Line" }, { value: "fab fa-weixin", text: "WeChat" }, { value: "fab fa-tumblr", text: "Tumblr" }, { value: "fab fa-vk", text: "VK" }, { value: "fab fa-quora", text: "Quora" }, { value: "fab fa-medium", text: "Medium" }, { value: "fab fa-blogger", text: "Blogger" }, { value: "fab fa-wordpress", text: "WordPress" }, { value: "fab fa-deviantart", text: "DeviantArt" }, { value: "fab fa-dribbble", text: "Dribbble" }, { value: "fab fa-behance", text: "Behance" }, { value: "fab fa-flickr", text: "Flickr" }, { value: "fab fa-meetup", text: "Meetup" }, { value: "fab fa-mastodon", text: "Mastodon" }, { value: "fab fa-vimeo", text: "Vimeo" }, { value: "fab fa-mix", text: "Mix" }, { value: "fab fa-xing", text: "Xing" }, { value: "fab fa-goodreads", text: "GoodReads" }, ] }, { label: "Produktivitas & Kerja (Logo Resmi)", icons: [ { value: "fab fa-google-drive", text: "Google Drive" }, { value: "fab fa-slack", text: "Slack" }, { value: "fab fa-trello", text: "Trello" }, { value: "fab fa-asana", text: "Asana" }, { value: "fab fa-evernote", text: "Evernote" }, { value: "fab fa-microsoft", text: "Microsoft" }, { value: "fab fa-skype", text: "Skype" }, { value: "fab fa-dropbox", text: "Dropbox" }, { value: "fab fa-confluence", text: "Confluence" }, { value: "fab fa-jira", text: "Jira" }, { value: "fab fa-figma", text: "Figma" }, ] }, { label: "E-commerce & Keuangan (Logo Resmi)", icons: [ { value: "fab fa-amazon", text: "Amazon" }, { value: "fab fa-ebay", text: "eBay" }, { value: "fab fa-alibaba", text: "Alibaba" }, { value: "fab fa-etsy", text: "Etsy" }, { value: "fab fa-paypal", text: "PayPal" }, { value: "fab fa-stripe", text: "Stripe" }, { value: "fab fa-cc-wise", text: "Wise" }, { value: "fab fa-google-pay", text: "Google Pay" }, { value: "fab fa-apple-pay", text: "Apple Pay" }, { value: "fab fa-samsung-pay", text: "Samsung Pay" }, { value: "fab fa-bitcoin", text: "Bitcoin" }, ] }, { label: "Hiburan & Streaming (Logo Resmi)", icons: [ { value: "fab fa-spotify", text: "Spotify" }, { value: "fab fa-soundcloud", text: "SoundCloud" }, { value: "fab fa-apple", text: "Apple" }, { value: "fab fa-deezer", text: "Deezer" }, { value: "fab fa-pandora", text: "Pandora" }, { value: "fab fa-bandcamp", text: "Bandcamp" }, { value: "fab fa-mixcloud", text: "Mixcloud" }, { value: "fab fa-twitch", text: "Twitch" }, { value: "fab fa-steam", text: "Steam" }, ] }, { label: "Teknologi & Tools (Logo Resmi)", icons: [ { value: "fab fa-github", text: "GitHub" }, { value: "fab fa-gitlab", text: "GitLab" }, { value: "fab fa-bitbucket", text: "Bitbucket" }, { value: "fab fa-aws", text: "AWS" }, { value: "fab fa-google", text: "Google" }, { value: "fab fa-digital-ocean", text: "DigitalOcean" }, { value: "fab fa-linode", text: "Linode" }, { value: "fab fa-docker", text: "Docker" }, { value: "fab fa-npm", text: "NPM" }, { value: "fab fa-yarn", text: "Yarn" }, { value: "fab fa-android", text: "Android" }, { value: "fab fa-jenkins", text: "Jenkins" }, ] }, { label: "Utility / Umum (Lanjutan)", icons: [ { value: "fas fa-home", text: "Home" }, { value: "fas fa-user", text: "User / Profile" }, { value: "fas fa-cog", text: "Settings" }, { value: "fas fa-phone", text: "Phone" }, { value: "fas fa-globe", text: "Globe / Website" }, { value: "fas fa-link", text: "Link (Default)" }, { value: "fas fa-envelope", text: "Email" }, { value: "fas fa-camera", text: "Camera" }, { value: "fas fa-image", text: "Gallery / Image" }, { value: "fas fa-file", text: "File" }, { value: "fas fa-folder", text: "Folder" }, { value: "fas fa-search", text: "Search" }, { value: "fas fa-map-marker-alt", text: "Location" }, { value: "fas fa-bookmark", text: "Bookmark" }, { value: "fas fa-star", text: "Star / Favorite" }, { value: "fas fa-heart", text: "Heart / Like" }, { value: "fas fa-bell", text: "Bell / Notification" }, { value: "fas fa-lock", text: "Lock / Private" }, { value: "fas fa-upload", text: "Upload" }, { value: "fas fa-download", text: "Download" }, { value: "fas fa-qrcode", text: "QR Code" }, ] } ];
+
+function showPortalModal() {
+    const iconOptionsHTML = defaultPortalIcons.map(group => `
+        <optgroup label="--- ${group.label} ---">
+            ${group.icons.map(icon => `<option value="${icon.value}">${icon.text}</option>`).join('')}
+        </optgroup>
+    `).join('');
+    const finalIconOptions = iconOptionsHTML + `<optgroup label="--- Kustomisasi ---"><option value="custom-icon">Ikon Kustom (URL/Unggah)</option></optgroup>`;
+
+    const colorOptions = [
+        '#ff2a6d', '#05d9e8', '#d300c5', '#00ff9d', '#ffcc00', '#ffffff', '#1DA1F2', '#FF5700'
+    ].map((color, index) => `<div class="portal-color-option ${index === 1 ? 'selected' : ''}" style="background-color: ${color};" onclick="selectPortalColor(this)"></div>`).join('');
+
+    const content = `
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-2xl text-purple-300" style="font-family: 'Orbitron', sans-serif;">Buat Portal Baru</h3>
+            <button class="closeModal text-gray-400 hover:text-purple-300"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="portalForm" class="space-y-4">
+            <div>
+                <label class="block mb-2 portal-modal-label uppercase text-sm tracking-wider">Nama Portal</label>
+                <input type="text" id="portal-name" class="custom-input" required>
+            </div>
+            <div>
+                <label class="block mb-2 portal-modal-label uppercase text-sm tracking-wider">URL Tujuan</label>
+                <input type="url" id="portal-url" class="custom-input" placeholder="https://" required>
+            </div>
+            <div>
+                <label class="block mb-2 portal-modal-label uppercase text-sm tracking-wider">Ikon</label>
+                <select id="portal-icon" class="custom-select">${finalIconOptions}</select>
+                <div id="custom-icon-options" class="mt-3 hidden">
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <div class="flex-1">
+                            <label class="block mb-2 text-xs uppercase tracking-wider">Unggah Ikon</label>
+                            <input type="file" id="icon-upload" class="custom-input text-xs p-2" accept="image/*">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block mb-2 text-xs uppercase tracking-wider">atau URL Ikon</label>
+                            <input type="url" id="icon-url" class="custom-input" placeholder="https://.../icon.png">
+                        </div>
+                    </div>
+                    <div class="mt-4 text-center">
+                       <img id="icon-preview" class="hidden w-16 h-16 object-cover mx-auto rounded-lg border-2 border-dashed p-1" src="#" alt="Icon Preview" style="border-color: var(--input-border);">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label class="block mb-2 portal-modal-label uppercase text-sm tracking-wider">Warna Ikon (jika bukan kustom)</label>
+                <div class="text-center border rounded-lg p-2" style="border-color: var(--input-border);">
+                    ${colorOptions}
+                    <input type="color" id="portal-custom-color" class="portal-custom-color-input" value="#05d9e8">
+                </div>
+                <input type="hidden" id="portal-color" value="#05d9e8">
+            </div>
+            <div class="flex justify-end space-x-3 pt-4">
+                <button type="button" class="closeModal custom-button custom-button-danger">Batal</button>
+                <button type="submit" class="custom-button">Buat Portal</button>
+            </div>
+        </form>
+    `;
+    showModal(content);
+
+    document.getElementById('portalForm').addEventListener('submit', handlePortalFormSubmit);
+    document.getElementById('portal-icon').addEventListener('change', toggleCustomIconOptions);
+    document.getElementById('icon-upload').addEventListener('change', (e) => handleImageUpload(e, document.getElementById('icon-preview')));
+    document.getElementById('portal-custom-color').addEventListener('input', (e) => applyCustomPortalColor(e.target.value));
+}
+
+function handlePortalFormSubmit(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('portal-name').value;
+    const url = document.getElementById('portal-url').value;
+    let icon = document.getElementById('portal-icon').value;
+    const color = document.getElementById('portal-color').value;
+    
+    if (icon === 'custom-icon') {
+        const iconUrlInput = document.getElementById('icon-url');
+        const iconPreview = document.getElementById('icon-preview');
+
+        if (iconPreview.src && iconPreview.src !== '#' && iconPreview.src.startsWith('data:image')) {
+            addPortalToArray(name, url, iconPreview.src, color);
+        } else if (iconUrlInput.value) {
+            addPortalToArray(name, url, iconUrlInput.value, color);
+        } else {
+            showMessage('Harap unggah gambar atau masukkan URL untuk ikon kustom.', 'error');
+        }
+    } else {
+        addPortalToArray(name, url, icon, color);
+    }
+}
+
+function addPortalToArray(name, url, icon, color) {
+    let appData = storage.getAppData();
+    const newPortal = { id: generateId(), name, url, icon, color };
+    appData[currentMode].portals.push(newPortal);
+    storage.saveAppData(appData);
+    renderPortals();
+    closeModal();
+    showMessage('Portal berhasil dibuat!', 'success');
+}
+
+function renderPortals() {
+    const portalsContainer = document.getElementById('sidebar-portals-container');
+    const appData = storage.getAppData();
+    const portals = appData[currentMode].portals || [];
+
+    portalsContainer.innerHTML = '';
+    if (portals.length === 0) {
+        portalsContainer.innerHTML = `<p class="text-sm text-center text-gray-500 px-2 py-4">Belum ada portal.</p>`;
+        return;
+    }
+
+    portals.forEach(portal => {
+        const portalColor = portal.color || 'var(--primary-brand)';
+        
+        const iconHtml = portal.icon.startsWith('data:image') || portal.icon.startsWith('http')
+            ? `<img src="${portal.icon}" alt="${portal.name} icon">`
+            : `<i class="${portal.icon}" style="color: ${portalColor};"></i>`;
+
+        const linkElement = document.createElement('a');
+        linkElement.href = portal.url;
+        linkElement.target = '_blank';
+        linkElement.className = 'sidebar-portal-item';
+        linkElement.title = portal.name;
+
+        linkElement.innerHTML = `
+            <div class="portal-icon">${iconHtml}</div>
+            <span class="portal-name">${portal.name}</span>
+            <button data-id="${portal.id}" class="delete-portal-btn text-xs">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        portalsContainer.appendChild(linkElement);
+
+        linkElement.querySelector('.delete-portal-btn').addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const portalId = e.currentTarget.dataset.id;
+            showConfirm('Hapus Portal?', `Yakin ingin menghapus portal "${portal.name}"?`, () => deletePortal(portalId));
+        });
+    });
+}
+
+function deletePortal(portalId) {
+    let appData = storage.getAppData();
+    appData[currentMode].portals = appData[currentMode].portals.filter(p => p.id !== portalId);
+    storage.saveAppData(appData);
+    renderPortals();
+    showMessage('Portal dihapus.', 'success');
+}
+
+
+// --- Helper Functions untuk Modal Portal ---
+function toggleCustomIconOptions() {
+    const portalIconSelect = document.getElementById('portal-icon');
+    const customIconOptions = document.getElementById('custom-icon-options');
+    customIconOptions.classList.toggle('hidden', portalIconSelect.value !== 'custom-icon');
+}
+
+function handleImageUpload(event, previewElement) {
+    const file = event.target.files[0];
+    if (file) {
+        document.getElementById('icon-url').value = ''; 
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewElement.src = e.target.result;
+            previewElement.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function selectPortalColor(element) {
+    const container = element.closest('.text-center');
+    container.querySelectorAll('.portal-color-option').forEach(el => el.classList.remove('selected'));
+    element.classList.add('selected');
+    const colorValue = element.style.backgroundColor;
+    document.getElementById('portal-color').value = colorValue;
+    document.getElementById('portal-custom-color').value = rgbToHex(colorValue);
+}
+
+function applyCustomPortalColor(color) {
+    document.getElementById('portal-color').value = color;
+    document.querySelectorAll('.portal-color-option').forEach(el => el.classList.remove('selected'));
+}
+
+function rgbToHex(rgb) {
+    if (rgb.startsWith('#')) return rgb;
+    let sep = rgb.indexOf(",") > -1 ? "," : " ";
+    rgb = rgb.substr(4).split(")")[0].split(sep);
+    let r = (+rgb[0]).toString(16),
+        g = (+rgb[1]).toString(16),
+        b = (+rgb[2]).toString(16);
+    if (r.length == 1) r = "0" + r;
+    if (g.length == 1) g = "0" + g;
+    if (b.length == 1) b = "0" + b;
+    return "#" + r + g + b;
+}
+// === AKHIR DARI FUNGSI-FUNGSI PORTAL ===
+
+
+// ===================================================================================
+// =================== BAGIAN 4: FUNGSI EKSPOR PDF & GAMBAR BARU =====================
+// ===================================================================================
+
+/**
+ * [MODIFIKASI] Fungsi inti untuk mengekspor semua data ke PDF.
+ * Kini dapat mengembalikan Blob untuk diproses lebih lanjut atau langsung mengunduh.
+ * @param {string} timeRange - Rentang waktu yang dipilih ('all', 'last7days', dll.).
+ * @param {string|null} customStartDate - Tanggal mulai kustom.
+ * @param {string|null} customEndDate - Tanggal selesai kustom.
+ * @param {string} outputType - 'download' (default) atau 'blob'.
+ * @returns {Promise<Blob|void>} Mengembalikan Blob jika outputType adalah 'blob'.
+ */
+async function exportAllToPdf(timeRange = 'all', customStartDate = null, customEndDate = null, outputType = 'download') {
+    if (outputType === 'download') {
+        showMessage('Memulai pembuatan laporan PDF komprehensif...', 'info');
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: [210, 330] // Ukuran F4
+    });
+
+    const bgMediaBlob = await getFileFromDB('customBackground');
+    const bgType = localStorage.getItem('customBackgroundType');
+    let customBgDataUrl = null;
+    if (bgMediaBlob && bgType && bgType.startsWith('image/')) {
+        customBgDataUrl = await blobToDataURL(bgMediaBlob);
+    }
+
+    let startDate, endDate;
+    const now = new Date();
+    const endOfToday = new Date(now.getTime());
+    endOfToday.setHours(23, 59, 59, 999);
+    let dateRangeLabel = "Selamanya";
+
+    switch (timeRange) {
+        case 'last7days': startDate = new Date(); startDate.setDate(now.getDate() - 7); startDate.setHours(0, 0, 0, 0); endDate = endOfToday; dateRangeLabel = "7 Hari Terakhir"; break;
+        case 'last1month': startDate = new Date(); startDate.setMonth(now.getMonth() - 1); startDate.setHours(0, 0, 0, 0); endDate = endOfToday; dateRangeLabel = "1 Bulan Terakhir"; break;
+        case 'last3months': startDate = new Date(); startDate.setMonth(now.getMonth() - 3); startDate.setHours(0, 0, 0, 0); endDate = endOfToday; dateRangeLabel = "3 Bulan Terakhir"; break;
+        case 'last1year': startDate = new Date(); startDate.setFullYear(now.getFullYear() - 1); startDate.setHours(0, 0, 0, 0); endDate = endOfToday; dateRangeLabel = "1 Tahun Terakhir"; break;
+        case 'custom':
+            startDate = customStartDate ? new Date(customStartDate) : null;
+            if (startDate) startDate.setHours(0, 0, 0, 0);
+            endDate = customEndDate ? new Date(customEndDate) : null;
+            if (endDate) endDate.setHours(23, 59, 59, 999);
+            if (!startDate || !endDate || startDate > endDate) { showMessage('Rentang tanggal kustom tidak valid.', 'error'); return; }
+            dateRangeLabel = `${formatDate(startDate.toISOString())} - ${formatDate(endDate.toISOString())}`;
+            break;
+        case 'all':
+        default: startDate = null; endDate = null; break;
+    }
+
+    const isLight = document.body.classList.contains('light-mode');
+    const isBlack = document.body.classList.contains('black-mode');
+    let pdfTheme;
+    if (isLight) { pdfTheme = { bgColor: '#FFFFFF', textColor: '#1f2937', headerColor: '#9333ea', subtleTextColor: '#6b7280', lineColor: '#e5e7eb', tableHeaderBg: '#f3e8ff' }; } 
+    else if (isBlack) { pdfTheme = { bgColor: '#111827', textColor: '#FFFFFF', headerColor: '#00f0ff', subtleTextColor: '#9ca3af', lineColor: '#4b5563', tableHeaderBg: '#1f2937' }; } 
+    else { pdfTheme = { bgColor: '#1A1033', textColor: '#FFFFFF', headerColor: '#c084fc', subtleTextColor: '#9ca3af', lineColor: '#4A148C', tableHeaderBg: '#2E0B4D' }; }
+    
+    const margin = 15;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let yPos = margin;
+
+    const addBackground = () => {
+        if (customBgDataUrl) {
+            try {
+                const imageType = bgType.split('/')[1].toUpperCase();
+                doc.addImage(customBgDataUrl, imageType, 0, 0, pageWidth, pageHeight, '', 'FAST');
+            } catch (e) {
+                console.error("Gagal menambahkan gambar latar belakang kustom ke PDF:", e);
+                doc.setFillColor(pdfTheme.bgColor);
+                doc.rect(0, 0, pageWidth, pageHeight, 'F');
+            }
+        } else {
+            doc.setFillColor(pdfTheme.bgColor);
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+        }
+    };
+
+    const addHeader = (pageTitle) => { doc.setFontSize(10); doc.setTextColor(pdfTheme.headerColor); doc.text('Laporan Lengkap Uranuspace', margin, margin); doc.text(pageTitle, pageWidth / 2, margin, { align: 'center' }); doc.text(new Date().toLocaleDateString('id-ID'), pageWidth - margin, margin, { align: 'right' }); doc.setDrawColor(pdfTheme.lineColor); doc.line(margin, margin + 5, pageWidth - margin, margin + 5); yPos = margin + 15; };
+    const addSectionTitle = (title, size = 16) => { if (checkPageEnd(size / 2 + 10)) { addHeader('Lanjutan...'); } doc.setFontSize(size); doc.setTextColor(pdfTheme.headerColor); doc.text(title, margin, yPos); yPos += (size / 2) + 5; };
+    const addPageTitle = (title) => { doc.setFontSize(22); doc.setTextColor(pdfTheme.textColor); doc.text(title, margin, yPos); yPos += 15; };
+    const checkPageEnd = (neededHeight = 20) => { if (yPos + neededHeight > pageHeight - margin) { doc.addPage(); addBackground(); yPos = margin; return true; } return false; };
+    const addChartToPdf = async (canvasId) => {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return null;
+        const chartInstance = window[canvasId + 'Instance'];
+        if (!chartInstance) return canvas.toDataURL('image/png', 1.0);
+        return canvas.toDataURL('image/png', 1.0);
+    };
+
+    addBackground();
+
+    // Halaman 1: Ringkasan Dashboard
+    addHeader('Ringkasan Dashboard');
+    addPageTitle('Ringkasan Eksekutif');
+    
+    const appData = storage.getAppData();
+    const modeData = appData[currentMode];
+
+    const filterByDate = (item) => {
+        if (!startDate || !endDate) return true;
+        const itemDateStr = item.date || item.datetime || item.lastModified;
+        if (!itemDateStr) return false;
+        const itemDate = new Date(itemDateStr);
+        return itemDate >= startDate && itemDate <= endDate;
+    };
+
+    const filteredTransactions = modeData.transactions.filter(filterByDate);
+    const filteredTasks = modeData.tasks.filter(filterByDate);
+    const filteredSplitBills = modeData.splitBills.filter(filterByDate);
+    const allNotes = storage.get('notes_v5.5.0', []);
+    const filteredNotes = allNotes.filter(note => !note.isLocked && filterByDate(note));
+
+    const balance = filteredTransactions.reduce((sum, t) => sum + (t.type === 'income' ? t.amount : -t.amount), 0);
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayTasks = modeData.tasks.filter(p => p.datetime && p.datetime.startsWith(todayStr) && !p.completed).length;
+    const pendingTasks = filteredTasks.filter(t => !t.completed).length;
+
+    doc.setFontSize(12);
+    doc.setTextColor(pdfTheme.textColor);
+    doc.text(`Mode Aktif: ${currentMode === 'personal' ? 'Pribadi' : 'Bisnis'}`, margin, yPos); yPos += 8;
+    doc.text(`Rentang Waktu Laporan: ${dateRangeLabel}`, margin, yPos); yPos += 8;
+    doc.text(`Saldo Total (Selama Periode): ${formatCurrency(balance)}`, margin, yPos); yPos += 8;
+    doc.text(`Tugas Hari Ini (Total): ${todayTasks} tugas`, margin, yPos); yPos += 8;
+    doc.text(`Tugas Tertunda (Selama Periode): ${pendingTasks} tugas`, margin, yPos); yPos += 15;
+
+    addSectionTitle('Visualisasi Data Dashboard');
+    doc.setFontSize(10);
+    doc.setTextColor(pdfTheme.subtleTextColor);
+    const warningText = doc.splitTextToSize('PENTING: Grafik di bawah ini diambil dari tampilan dashboard saat ini. Pastikan Anda telah memilih rentang waktu yang sama di filter dashboard sebelum mengekspor agar visualisasi data sesuai dengan data tabel dalam laporan ini.', pageWidth - (margin * 2));
+    doc.text(warningText, margin, yPos);
+    yPos += (warningText.length * 4) + 10;
+    
+    const chartWidth = (pageWidth - (margin * 3)) / 2;
+    const chartHeight = chartWidth * 0.75;
+
+    if (checkPageEnd(chartHeight + 10)) { addHeader('Ringkasan Dashboard'); }
+    let chartX = margin;
+    
+    let cashFlowImg = await addChartToPdf('cashFlowChart');
+    if(cashFlowImg) doc.addImage(cashFlowImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    chartX += chartWidth + margin;
+
+    let productivityImg = await addChartToPdf('productivityChart');
+    if(productivityImg) doc.addImage(productivityImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    yPos += chartHeight + 10;
+
+    if (checkPageEnd(chartHeight + 10)) { addHeader('Ringkasan Dashboard'); }
+    addSectionTitle('Analisis Gabungan');
+    
+    let combinedImg = await addChartToPdf('combinedAnalysisChart');
+    const combinedHeight = (pageWidth - margin*2) * 0.7;
+    if(combinedImg) doc.addImage(combinedImg, 'PNG', margin, yPos, pageWidth - margin*2, combinedHeight);
+    yPos += combinedHeight + 10;
+
+    // Halaman 2: Analisis Grafik Mendalam
+    doc.addPage(); addBackground(); addHeader('Analisis Mendalam'); addPageTitle('Detail Analisis Grafik');
+    chartX = margin;
+    addSectionTitle('Analisis Keuangan');
+    let incomeVsExpenseImg = await addChartToPdf('incomeVsExpenseChart');
+    if(incomeVsExpenseImg) doc.addImage(incomeVsExpenseImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    chartX += chartWidth + margin;
+    let spendingByCategoryImg = await addChartToPdf('spendingByCategoryChart');
+    if(spendingByCategoryImg) doc.addImage(spendingByCategoryImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    yPos += chartHeight + 15;
+    chartX = margin;
+
+    if (checkPageEnd(chartHeight + 20)) { addHeader('Analisis Mendalam'); }
+    addSectionTitle('Analisis Produktivitas');
+    let taskCompletionTrendImg = await addChartToPdf('taskCompletionTrendChart');
+    if(taskCompletionTrendImg) doc.addImage(taskCompletionTrendImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    chartX += chartWidth + margin;
+    let taskPriorityDistributionImg = await addChartToPdf('taskPriorityDistributionChart');
+    if(taskPriorityDistributionImg) doc.addImage(taskPriorityDistributionImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    yPos += chartHeight + 15;
+    chartX = margin;
+
+    if (checkPageEnd(chartHeight + 20)) { addHeader('Analisis Mendalam'); }
+    addSectionTitle('Analisis Split Bill');
+    let splitBillByUserImg = await addChartToPdf('splitBillByUserChart');
+    if(splitBillByUserImg) doc.addImage(splitBillByUserImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    chartX += chartWidth + margin;
+    let splitBillFrequencyImg = await addChartToPdf('splitBillFrequencyChart');
+    if(splitBillFrequencyImg) doc.addImage(splitBillFrequencyImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    yPos += chartHeight + 15;
+    chartX = margin;
+
+    // [PERUBAHAN] Menambahkan dua grafik catatan berdampingan ke PDF
+    if (checkPageEnd(chartHeight + 20)) { addHeader('Analisis Mendalam'); }
+    addSectionTitle('Analisis Catatan');
+    let diaryEntryFrequencyImg = await addChartToPdf('diaryEntryFrequencyChart');
+    if(diaryEntryFrequencyImg) doc.addImage(diaryEntryFrequencyImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    chartX += chartWidth + margin;
+    let noteMoodAnalysisImg = await addChartToPdf('noteMoodAnalysisChart');
+    if(noteMoodAnalysisImg) doc.addImage(noteMoodAnalysisImg, 'PNG', chartX, yPos, chartWidth, chartHeight);
+    yPos += chartHeight + 10;
+
+
+    // Halaman 3: Keuangan
+    doc.addPage(); addBackground(); addHeader('Keuangan'); addPageTitle('Laporan Keuangan');
+    if (filteredTransactions.length > 0) {
+        const head = [['Tanggal', 'Deskripsi', 'Kategori', 'Pemasukan', 'Pengeluaran']];
+        const body = filteredTransactions.map(t => [formatDate(t.date), t.description, getCategoryName(t.category), t.type === 'income' ? formatCurrency(t.amount) : '', t.type === 'expense' ? formatCurrency(t.amount) : '']);
+        doc.autoTable({ head, body, startY: yPos, theme: 'grid', headStyles: { fillColor: pdfTheme.tableHeaderBg, textColor: pdfTheme.textColor }, styles: { textColor: pdfTheme.textColor, cellPadding: 2, fontSize: 9, fillColor: pdfTheme.bgColor }, alternateRowStyles: { fillColor: isLight ? '#fafafa' : isBlack ? '#374151' : '#2E0B4D' } });
+        yPos = doc.autoTable.previous.finalY;
+        
+        const totalIncome = filteredTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+        const totalExpense = filteredTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+        const netResult = totalIncome - totalExpense;
+
+        if (checkPageEnd(40)) { 
+            addHeader('Keuangan'); 
+        }
+
+        yPos += 15;
+        addSectionTitle('Ringkasan Keuangan', 14);
+
+        doc.setFontSize(11);
+        doc.setTextColor(pdfTheme.textColor);
+        
+        const summaryX = margin + 5;
+        const valueX = pageWidth - margin - 5;
+
+        doc.text('Total Pemasukan:', summaryX, yPos);
+        doc.text(formatCurrency(totalIncome), valueX, yPos, { align: 'right' });
+        yPos += 8;
+
+        doc.text('Total Pengeluaran:', summaryX, yPos);
+        doc.text(formatCurrency(totalExpense), valueX, yPos, { align: 'right' });
+        yPos += 8;
+
+        doc.setDrawColor(pdfTheme.lineColor);
+        doc.line(summaryX, yPos, valueX, yPos);
+        yPos += 8;
+
+        doc.setFont('helvetica', 'bold');
+        doc.text(netResult >= 0 ? 'Laba Bersih:' : 'Rugi Bersih:', summaryX, yPos);
+        doc.text(formatCurrency(netResult), valueX, yPos, { align: 'right' });
+        doc.setFont('helvetica', 'normal');
+
+    } else { 
+        doc.setTextColor(pdfTheme.textColor); 
+        doc.text('Tidak ada data transaksi pada rentang waktu yang dipilih.', margin, yPos); 
+    }
+
+    // Halaman 4: Rencana & Tugas
+    doc.addPage(); addBackground(); addHeader('Manajemen Waktu'); addPageTitle('Daftar Tugas');
+    const activeTasks = filteredTasks.filter(t => !t.completed);
+    const completedTasks = filteredTasks.filter(t => t.completed);
+    if (activeTasks.length > 0) {
+        addSectionTitle('Tugas Aktif', 14);
+        doc.autoTable({ head: [['Tugas', 'Waktu', 'Prioritas']], body: activeTasks.map(t => [t.title, formatDateTime(t.datetime), t.priority]), startY: yPos, theme: 'grid', headStyles: { fillColor: pdfTheme.tableHeaderBg, textColor: pdfTheme.textColor }, styles: { textColor: pdfTheme.textColor, cellPadding: 2, fontSize: 9, fillColor: pdfTheme.bgColor }, alternateRowStyles: { fillColor: isLight ? '#fafafa' : isBlack ? '#374151' : '#2E0B4D' } });
+        yPos = doc.autoTable.previous.finalY + 15;
+    } else { doc.setTextColor(pdfTheme.textColor); doc.text('Tidak ada tugas aktif pada rentang waktu yang dipilih.', margin, yPos); yPos += 15; }
+    if (completedTasks.length > 0) {
+        if(checkPageEnd(30)) { addHeader('Manajemen Waktu'); }
+        addSectionTitle('Tugas Selesai', 14);
+        doc.autoTable({ head: [['Tugas', 'Waktu', 'Prioritas']], body: completedTasks.map(t => [t.title, formatDateTime(t.datetime), t.priority]), startY: yPos, theme: 'grid', headStyles: { fillColor: pdfTheme.tableHeaderBg, textColor: pdfTheme.textColor }, styles: { textColor: pdfTheme.textColor, cellPadding: 2, fontSize: 9, fillColor: pdfTheme.bgColor }, alternateRowStyles: { fillColor: isLight ? '#fafafa' : isBlack ? '#374151' : '#2E0B4D' } });
+    }
+
+    // Halaman 5: Split Bill
+    doc.addPage(); addBackground(); addHeader('Split Bill'); addPageTitle('Riwayat Split Bill');
+    if (filteredSplitBills.length > 0) {
+        filteredSplitBills.forEach(bill => {
+            if (checkPageEnd(40)) { addHeader('Split Bill'); }
+            doc.setFontSize(12); doc.setTextColor(pdfTheme.textColor); doc.text(`Tanggal: ${formatDate(bill.date)} - Total: ${formatCurrency(bill.totalBill)}`, margin, yPos); yPos += 8;
+            doc.autoTable({ head: [['Nama', 'Jumlah Bayar']], body: bill.results.map(r => [r.name, formatCurrency(r.amount)]), startY: yPos, theme: 'striped', headStyles: { fillColor: pdfTheme.tableHeaderBg, textColor: pdfTheme.textColor }, styles: { textColor: pdfTheme.textColor, cellPadding: 2, fontSize: 9, fillColor: pdfTheme.bgColor }, alternateRowStyles: { fillColor: isLight ? '#fafafa' : isBlack ? '#374151' : '#2E0B4D' } });
+            yPos = doc.autoTable.previous.finalY + 10;
+            doc.setDrawColor(pdfTheme.lineColor); doc.line(margin, yPos, pageWidth - margin, yPos); yPos += 5;
+        });
+    } else { doc.setTextColor(pdfTheme.textColor); doc.text('Tidak ada riwayat split bill pada rentang waktu yang dipilih.', margin, yPos); }
+
+    // Halaman 6: Catatan
+    doc.addPage(); addBackground(); addHeader('Catatan'); addPageTitle('Daftar Catatan');
+    if (filteredNotes.length > 0) {
+        filteredNotes.forEach(note => {
+            if (checkPageEnd(30)) { addHeader('Catatan'); }
+            doc.setFontSize(14); doc.setTextColor(pdfTheme.headerColor); doc.text(note.title || 'Tanpa Judul', margin, yPos); yPos += 6;
+            doc.setFontSize(9); doc.setTextColor(pdfTheme.subtleTextColor); doc.text(`Tanggal: ${formatDate(note.lastModified)} | Mood: ${note.mood}`, margin, yPos); yPos += 8;
+            doc.setFontSize(11); doc.setTextColor(pdfTheme.textColor);
+            const tempDiv = document.createElement('div'); tempDiv.innerHTML = note.content;
+            const contentText = tempDiv.innerText || tempDiv.textContent || '';
+            const splitText = doc.splitTextToSize(contentText, pageWidth - (margin * 2));
+            doc.text(splitText, margin, yPos);
+            yPos += (splitText.length * 4) + 10;
+            doc.setDrawColor(pdfTheme.lineColor); doc.line(margin, yPos, pageWidth - margin, yPos); yPos += 5;
+        });
+    } else { doc.setTextColor(pdfTheme.textColor); doc.text('Tidak ada catatan pada rentang waktu yang dipilih.', margin, yPos); }
+
+    // [MODIFIKASI] Bagian akhir fungsi
+    if (outputType === 'blob') {
+        return doc.output('blob');
+    } else {
+        // Simpan PDF
+        const fileName = `Laporan_Uranuspace_${dateRangeLabel.replace(/ /g, '_')}.pdf`;
+        doc.save(fileName);
+        showMessage('Laporan PDF berhasil dibuat dan diunduh!', 'success');
+    }
+}
+
+/**
+ * [BARU] Fungsi untuk mengekspor laporan sebagai serangkaian gambar 4K dalam file ZIP.
+ * @param {string} timeRange - Rentang waktu yang dipilih.
+ * @param {string|null} customStartDate - Tanggal mulai kustom.
+ * @param {string|null} customEndDate - Tanggal selesai kustom.
+ */
+async function exportAllToImages(timeRange = 'all', customStartDate = null, customEndDate = null) {
+    const exportPdfBtn = document.getElementById('export-pdf-btn');
+    const exportImagesBtn = document.getElementById('export-images-btn');
+    
+    // Nonaktifkan tombol selama proses
+    exportPdfBtn.disabled = true;
+    exportImagesBtn.disabled = true;
+
+    try {
+        showMessage('Memulai ekspor gambar... Menyiapkan PDF di memori.', 'info');
+
+        // 1. Hasilkan PDF di memori sebagai Blob
+        const pdfBlob = await exportAllToPdf(timeRange, customStartDate, customEndDate, 'blob');
+        if (!pdfBlob) {
+            throw new Error("Gagal menghasilkan data PDF di memori.");
+        }
+
+        showMessage('PDF berhasil dibuat. Merender halaman menjadi gambar...', 'info');
+
+        // 2. Inisialisasi PDF.js dan JSZip
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;
+        const zip = new JSZip();
+
+        const pdfData = await pdfBlob.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+        const numPages = pdf.numPages;
+
+        // 3. Loop melalui setiap halaman untuk merendernya
+        for (let i = 1; i <= numPages; i++) {
+            showMessage(`Memproses halaman ${i} dari ${numPages}...`, 'info');
+            const page = await pdf.getPage(i);
+            
+            // Tentukan skala untuk resolusi 4K (lebar 3840px)
+            const viewport = page.getViewport({ scale: 1 });
+            const scale = 3840 / viewport.width;
+            const scaledViewport = page.getViewport({ scale: scale });
+
+            // Buat canvas dinamis
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = scaledViewport.width;
+            canvas.height = scaledViewport.height;
+
+            // Render halaman ke canvas
+            const renderContext = {
+                canvasContext: context,
+                viewport: scaledViewport
+            };
+            await page.render(renderContext).promise;
+
+            // 4. Konversi canvas ke Blob gambar dan tambahkan ke ZIP
+            const imageBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
+            zip.file(`Halaman_${i}.png`, imageBlob);
+        }
+
+        // 5. Hasilkan file ZIP dan picu unduhan
+        showMessage('Semua halaman diproses. Membuat file ZIP...', 'success');
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        const dateRangeLabel = timeRange === 'custom' ? `${customStartDate}_to_${customEndDate}` : timeRange;
+        link.download = `Laporan_Gambar_Uranuspace_${dateRangeLabel}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+
+        showMessage('File ZIP berhasil dibuat dan diunduh!', 'success');
+
+    } catch (error) {
+        console.error("Gagal mengekspor gambar:", error);
+        showMessage(`Terjadi kesalahan saat mengekspor gambar: ${error.message}`, 'error');
+    } finally {
+        // Aktifkan kembali tombol
+        exportPdfBtn.disabled = false;
+        exportImagesBtn.disabled = false;
+    }
+}
+
+// =================================================================================== //
+// ============ [PENGGABUNGAN] LOGIKA BARU UNTUK URANUSPACE DRIVE STORAGE ============ //
+// =================================================================================== //
+
+const UranuspaceDrive = {
+    // ... (kode dari file mentahan terpisah akan dimasukkan di sini)
+    isInitialized: false, // Tambahkan flag ini
+    // ...
+};
+
+// [PENGGABUNGAN] Panggil initGisClient saat DOM siap
+document.addEventListener('DOMContentLoaded', initGisClient);
+
 </script>
 </body>
 </html>
